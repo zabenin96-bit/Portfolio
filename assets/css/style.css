@@ -337,3 +337,7 @@ img, video { display: block; max-width: 100%; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .marquee { overflow-x: auto; }
 }
+
+/* preview loops fade in over the poster once playback has started */
+.cat__btn video { opacity: 0; transition: opacity 0.5s var(--ease); }
+.cat__btn video.is-ready { opacity: 1; }

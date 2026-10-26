@@ -105,18 +105,36 @@
   }
 
   // ---------- category tiles ----------
-  var previewObserver = "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
+  // Preview loops: every tile on screen plays at once; tiles that scroll away
+  // pause (and resume where they were), so only visible videos use the decoder.
+  // Files load shortly before a tile reaches the viewport and stay cached.
+  var saveData = !!(navigator.connection && navigator.connection.saveData);
+  var stillsOnly = reduceMotion || saveData;
+  var visible = new Set();
+
+  function playSafe(v) {
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {}); // autoplay blocked (e.g. iOS Low Power): poster stays
+  }
+
+  var previewObserver = !stillsOnly && "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       var v = entry.target;
       if (entry.isIntersecting) {
-        if (!v.src && v.dataset.src) v.src = v.dataset.src;
-        var p = v.play();
-        if (p && p.catch) p.catch(function () {});
+        if (!v.getAttribute("src")) { v.src = v.dataset.src; v.preload = "auto"; }
+        visible.add(v);
+        if (!document.hidden) playSafe(v);
       } else {
+        visible.delete(v);
         v.pause();
       }
     });
-  }, { rootMargin: "200px 0px" }) : null;
+  }, { rootMargin: "400px 0px" }) : null;
+
+  // Stop decoding when the tab is in the background; resume on return.
+  document.addEventListener("visibilitychange", function () {
+    visible.forEach(function (v) { if (document.hidden) v.pause(); else playSafe(v); });
+  });
 
   function placeholder(note, withMeter) {
     var ph = el("div", { class: "placeholder", "aria-hidden": "true" });
@@ -132,25 +150,27 @@
   function renderCats() {
     var grid = document.getElementById("cats");
     if (previewObserver) previewObserver.disconnect();
+    visible.clear();
     grid.textContent = "";
     SITE.categories.forEach(function (cat) {
       var label = cat.title[lang];
       var btn = el("button", { type: "button", class: "cat__btn", "aria-label": label, "data-cursor": "arrow" });
       btn.style.background = cat.tint || "#141414";
-      if (cat.preview) {
-        var v = el("video", { muted: "", loop: "", playsinline: "", preload: "none", "aria-hidden": "true" });
+      if (cat.poster) {
+        // Poster sits under the video, so there is never a black frame while it loads.
+        btn.appendChild(el("img", { src: cat.poster, alt: "", decoding: "async" }));
+      }
+      if (cat.preview && previewObserver) {
+        var v = el("video", {
+          muted: "", loop: "", playsinline: "", autoplay: "", preload: "none",
+          disablepictureinpicture: "", disableremoteplayback: "", "aria-hidden": "true",
+        });
         v.muted = true;
-        if (cat.poster) v.setAttribute("poster", cat.poster);
-        if (reduceMotion || !previewObserver) {
-          v.src = cat.preview; // shows poster; no autoplay
-        } else {
-          v.dataset.src = cat.preview;
-          previewObserver.observe(v);
-        }
+        v.dataset.src = cat.preview;
+        v.addEventListener("playing", function () { v.classList.add("is-ready"); }, { once: true });
+        previewObserver.observe(v);
         btn.appendChild(v);
-      } else if (cat.poster) {
-        btn.appendChild(el("img", { src: cat.poster, alt: "", loading: "lazy", decoding: "async" }));
-      } else {
+      } else if (!cat.poster) {
         btn.appendChild(placeholder(t("previewNote"), true));
       }
       btn.appendChild(el("span", { class: "vignette" }));
