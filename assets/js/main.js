@@ -72,20 +72,6 @@
     });
   });
 
-  // ---------- theme ----------
-  var themeMeta = document.querySelector('meta[name="theme-color"]');
-  function setTheme(dark) {
-    if (dark) root.setAttribute("data-theme", "dark");
-    else root.removeAttribute("data-theme");
-    if (themeMeta) themeMeta.setAttribute("content", dark ? "#000000" : "#ffffff");
-  }
-  setTheme(root.getAttribute("data-theme") === "dark");
-  document.getElementById("theme").addEventListener("click", function () {
-    var dark = root.getAttribute("data-theme") !== "dark";
-    setTheme(dark);
-    store("theme", dark ? "dark" : "light");
-  });
-
   // ---------- marquee ----------
   function renderMarquee() {
     var track = document.getElementById("marquee");
@@ -187,6 +173,7 @@
   function renderSheet(cat) {
     document.getElementById("sheet-title").textContent = cat.title[lang];
     var cards = document.getElementById("cards");
+    cards.className = "cards" + (cat.format === "vertical" ? " cards--vertical" : "");
     cards.textContent = "";
     cat.projects.forEach(function (p) {
       var title = p.title[lang];

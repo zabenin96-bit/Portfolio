@@ -28,7 +28,6 @@ window.SITE = {
       navContact: "Контакты",
       navLabel: "Основная навигация",
       langLabel: "Язык",
-      themeLabel: "Сменить тему",
       close: "Закрыть",
       watch: "Смотреть",
       soon: "Видео скоро появится",
@@ -52,7 +51,6 @@ window.SITE = {
       navContact: "Contact",
       navLabel: "Main navigation",
       langLabel: "Language",
-      themeLabel: "Toggle theme",
       close: "Close",
       watch: "Watch",
       soon: "Video coming soon",
@@ -73,11 +71,24 @@ window.SITE = {
     ],
   },
 
+  // format: "vertical" shows 9:16 cards (2 per row on phones, 4 on desktop)
   categories: [
     {
-      id: "commercial",
-      title: { ru: "Реклама", en: "Commercial" },
-      preview: "", poster: "", tint: "#2a1714",
+      id: "vertical",
+      title: { ru: "Вертикальный контент", en: "Vertical content" },
+      format: "vertical",
+      preview: "", poster: "", tint: "#1d1528",
+      projects: [
+        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 4]", en: "[Project 4]" }, kinescope: "", poster: "" },
+      ],
+    },
+    {
+      id: "games",
+      title: { ru: "Игры", en: "Games" },
+      preview: "", poster: "", tint: "#121821",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -86,38 +97,32 @@ window.SITE = {
     },
     {
       id: "film",
-      title: { ru: "Кино", en: "Film" },
-      preview: "", poster: "", tint: "#121821",
-      projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-      ],
-    },
-    {
-      id: "streaming",
-      title: { ru: "Стриминг", en: "Streaming" },
-      preview: "", poster: "", tint: "#1d1528",
-      projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-      ],
-    },
-    {
-      id: "fashion",
-      title: { ru: "Fashion", en: "Fashion" },
-      preview: "", poster: "", tint: "#1a1a1a",
-      projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-      ],
-    },
-    {
-      id: "music",
-      title: { ru: "Музыка", en: "Music" },
+      title: { ru: "Постпродакшн кино", en: "Film postproduction" },
       preview: "", poster: "", tint: "#221c10",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
+      ],
+    },
+    {
+      id: "commercials",
+      title: { ru: "Реклама", en: "Commercials" },
+      preview: "", poster: "", tint: "#2a1714",
+      projects: [
+        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
+      ],
+    },
+    {
+      id: "animation",
+      title: { ru: "Анимация", en: "Animation" },
+      preview: "", poster: "", tint: "#14201a",
+      projects: [
+        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
+        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
       ],
     },
   ],
