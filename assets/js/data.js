@@ -1,9 +1,10 @@
 /*
  * Site content. Edit this file to change texts, categories, projects and brands.
  *
- * Category preview: put a short muted loop (3–5 s, ~1 MB, mp4/h264) into
- * assets/video/ and a poster image (webp/jpg) into assets/img/, then set
- * `preview` and `poster` below. Without them the tile shows a placeholder.
+ * Category preview: a short muted loop (4–8 s, mp4/h264) in assets/video/ in
+ * two sizes – 1280px (`preview`) and 640px for phones (`previewSmall`) – plus a
+ * poster image (webp) in assets/img/ (`poster`). The site picks the size that
+ * matches the tile on screen. Without them the tile shows a placeholder.
  *
  * Project video: upload the full video to Kinescope and paste its ID
  * (the part after kinescope.io/ in the share link) into `kinescope`.
@@ -79,7 +80,7 @@ window.SITE = {
       id: "vertical",
       title: { ru: "Вертикальный контент", en: "Vertical content" },
       format: "vertical",
-      preview: "assets/video/vertical.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
+      preview: "assets/video/vertical.mp4", previewSmall: "assets/video/vertical-640.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -90,7 +91,7 @@ window.SITE = {
     {
       id: "games",
       title: { ru: "Игры", en: "Games" },
-      preview: "assets/video/games.mp4", poster: "assets/img/games.webp", tint: "#121821",
+      preview: "assets/video/games.mp4", previewSmall: "assets/video/games-640.mp4", poster: "assets/img/games.webp", tint: "#121821",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -100,7 +101,7 @@ window.SITE = {
     {
       id: "film",
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
-      preview: "assets/video/film.mp4", poster: "assets/img/film.webp", tint: "#221c10",
+      preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", poster: "assets/img/film.webp", tint: "#221c10",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -110,7 +111,7 @@ window.SITE = {
     {
       id: "commercials",
       title: { ru: "Реклама", en: "Commercials" },
-      preview: "assets/video/commercials.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
+      preview: "assets/video/commercials.mp4", previewSmall: "assets/video/commercials-640.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -120,7 +121,7 @@ window.SITE = {
     {
       id: "animation",
       title: { ru: "Анимация", en: "Animation" },
-      preview: "assets/video/animation.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
+      preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },

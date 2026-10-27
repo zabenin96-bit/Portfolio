@@ -89,7 +89,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 /* fixed height: the strip is filled by JS, so reserve its line up front (no layout shift) */
 .marquee__track { display: flex; align-items: center; width: max-content; height: clamp(15px, 1.4vw, 19px); animation: marquee 45s linear infinite; }
-.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee:hover .marquee__track,
+.marquee.is-offscreen .marquee__track { animation-play-state: paused; }
 .marquee__group { display: flex; align-items: center; flex-shrink: 0; }
 .marquee__item { display: flex; align-items: baseline; gap: 32px; padding-inline: 40px; white-space: nowrap; }
 .marquee__name { font-family: var(--font-display); font-weight: 400; font-size: clamp(15px, 1.4vw, 19px); letter-spacing: 0.12em; text-transform: uppercase; line-height: 1; }
@@ -131,6 +132,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .lang button::after { content: ""; position: absolute; inset: -4px; } /* 48px touch target */
 .lang button:hover { color: #fff; }
 @keyframes lang-shimmer { to { --lang-angle: 360deg; } }
+/* no repaint work while the button is hidden */
+.lang:not(.is-visible):not(:focus-within) button { animation-play-state: paused; }
 
 /* ---------- Header ---------- */
 .masthead { text-align: center; padding: clamp(64px, 9vw, 120px) 0 clamp(40px, 5vw, 64px); }

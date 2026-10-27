@@ -122,13 +122,22 @@
     if (p && p.catch) p.catch(function () {}); // autoplay blocked (e.g. iOS Low Power): poster stays
   }
 
+  var previewsPaused = false; // true while the category sheet covers the page
+
+  // Pick the file that matches the tile's real pixel size: phones get the
+  // 640px loop (4x fewer pixels to decode), big/retina tiles the 1280px one.
+  function previewSrc(v) {
+    var px = v.parentNode.getBoundingClientRect().width * (window.devicePixelRatio || 1);
+    return px > 720 || !v.dataset.srcSmall ? v.dataset.src : v.dataset.srcSmall;
+  }
+
   var previewObserver = !stillsOnly && "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       var v = entry.target;
       if (entry.isIntersecting) {
-        if (!v.getAttribute("src")) { v.src = v.dataset.src; v.preload = "auto"; }
+        if (!v.getAttribute("src")) { v.src = previewSrc(v); v.preload = "auto"; }
         visible.add(v);
-        if (!document.hidden) playSafe(v);
+        if (!document.hidden && !previewsPaused) playSafe(v);
       } else {
         visible.delete(v);
         v.pause();
@@ -138,7 +147,7 @@
 
   // Stop decoding when the tab is in the background; resume on return.
   document.addEventListener("visibilitychange", function () {
-    visible.forEach(function (v) { if (document.hidden) v.pause(); else playSafe(v); });
+    visible.forEach(function (v) { if (document.hidden || previewsPaused) v.pause(); else playSafe(v); });
   });
 
   function placeholder(note, withMeter) {
@@ -176,6 +185,7 @@
         });
         v.muted = true;
         v.dataset.src = cat.preview;
+        if (cat.previewSmall) v.dataset.srcSmall = cat.previewSmall;
         v.addEventListener("playing", function () { v.classList.add("is-ready"); }, { once: true });
         previewObserver.observe(v);
         btn.appendChild(v);
@@ -241,6 +251,9 @@
     lastTrigger = document.activeElement;
     renderSheet(cat);
     root.classList.add("html-locked");
+    // nothing behind the sheet is visible – stop decoding those previews
+    previewsPaused = true;
+    visible.forEach(function (v) { v.pause(); });
     if (sheet.showModal) sheet.showModal(); else sheet.setAttribute("open", "");
     sheet.scrollTop = 0;
   }
@@ -259,6 +272,8 @@
   sheet.addEventListener("close", function () {
     openCat = null;
     root.classList.remove("html-locked");
+    previewsPaused = false;
+    if (!document.hidden) visible.forEach(playSafe);
     document.getElementById("cards").textContent = ""; // stops any playing video
     if (lastTrigger && lastTrigger.focus) lastTrigger.focus({ preventScroll: true });
   });
@@ -268,9 +283,18 @@
   var cursor = document.getElementById("cursor");
   if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
     root.classList.add("has-cursor");
-    var x = -100, y = -100, cx = -100, cy = -100, idle;
+    var x = -100, y = -100, cx = -100, cy = -100, idle, raf = null;
+    function follow() {
+      cx += (x - cx) * (reduceMotion ? 1 : 0.35);
+      cy += (y - cy) * (reduceMotion ? 1 : 0.35);
+      if (Math.abs(x - cx) < 0.1 && Math.abs(y - cy) < 0.1) { cx = x; cy = y; }
+      cursor.style.transform = "translate3d(" + cx + "px," + cy + "px,0)";
+      // stop the frame loop once the clover has caught up with the pointer
+      raf = cx === x && cy === y ? null : requestAnimationFrame(follow);
+    }
     window.addEventListener("pointermove", function (e) {
       x = e.clientX; y = e.clientY;
+      if (!raf) raf = requestAnimationFrame(follow);
       cursor.classList.add("is-visible");
       clearTimeout(idle);
       idle = setTimeout(function () { cursor.classList.remove("is-visible"); }, 3000);
@@ -280,12 +304,6 @@
       cursor.classList.toggle("is-arrow", mode === "arrow");
     }, { passive: true });
     document.addEventListener("pointerleave", function () { cursor.classList.remove("is-visible"); });
-    (function loop() {
-      cx += (x - cx) * (reduceMotion ? 1 : 0.35);
-      cy += (y - cy) * (reduceMotion ? 1 : 0.35);
-      cursor.style.transform = "translate3d(" + cx + "px," + cy + "px,0)";
-      requestAnimationFrame(loop);
-    })();
     // the cursor element must sit above the modal dialog's top layer
     sheet.addEventListener("close", function () { document.body.appendChild(cursor); });
     var origOpen = openSheet;
@@ -315,6 +333,7 @@
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(function (entries) {
       var docked = entries[0].isIntersecting;
+      marquee.classList.toggle("is-offscreen", !docked);
       langBox.classList.toggle("is-floating", !docked);
       if (docked) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); }
       else showLang();
