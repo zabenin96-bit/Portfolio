@@ -65,8 +65,8 @@ img, video { display: block; max-width: 100%; }
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   padding: 16px 0;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 calc(100% - 170px), transparent calc(100% - 110px));
-          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 calc(100% - 170px), transparent calc(100% - 110px));
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 .marquee__track { display: flex; width: max-content; animation: marquee 45s linear infinite; }
 .marquee:hover .marquee__track { animation-play-state: paused; }
@@ -77,18 +77,44 @@ img, video { display: block; max-width: 100%; }
 .marquee__sep { flex: none; width: 16px; height: 16px; color: var(--accent); }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
-/* ---------- Language switch ---------- */
+/* ---------- Language tab ----------
+   A black bevelled tab that slides out from the right edge under the marquee
+   while the page is at the very top, and tucks back in once you scroll. */
 .lang {
-  position: fixed; top: 10px; right: var(--gutter); z-index: 40;
+  position: fixed; z-index: 40; right: -14px; top: calc(var(--marquee-h, 52px) + 14px);
   display: flex; align-items: center; gap: 2px;
-  color: #fff; mix-blend-mode: difference; font-size: 16px;
+  padding: 4px 26px 4px 10px;
+  border: 1.5px solid transparent; border-right: 0; border-radius: 12px 0 0 12px;
+  background:
+    linear-gradient(180deg, #161616 0%, #050505 55%, #000 100%) padding-box,
+    linear-gradient(135deg, #f4f4f4 0%, #9a9a9a 22%, #2b2b2b 48%, #1a1a1a 62%, #8a8a8a 88%, #d9d9d9 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 1px 0 0 rgba(255, 255, 255, 0.16),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.85),
+    inset 0 10px 14px -10px rgba(255, 255, 255, 0.16),
+    -6px 10px 24px rgba(0, 0, 0, 0.7),
+    -1px 0 14px rgba(255, 255, 255, 0.06);
+  color: #fff; font-size: 13px; letter-spacing: 0.16em;
+  transform: translateX(0);
+  transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.2, 1.08), opacity 0.4s;
+}
+.lang.is-tucked { transform: translateX(calc(100% + 8px)); opacity: 0; pointer-events: none; }
+html:not(.lang-ready) .lang { transform: translateX(calc(100% + 8px)); }
+/* grip ridges on the leading edge – "grab me" */
+.lang__grip { display: flex; gap: 3px; margin-right: 8px; height: 18px; }
+.lang__grip i {
+  display: block; width: 2px; height: 100%; border-radius: 1px;
+  background: linear-gradient(180deg, #e9e9e9, #5a5a5a);
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.9);
 }
 .lang button {
-  min-width: 44px; height: 44px; border: 0; background: transparent; cursor: pointer;
-  opacity: 0.5; transition: opacity 0.2s;
+  min-width: 40px; height: 40px; border: 0; background: transparent; cursor: pointer;
+  color: #8c8c8c; letter-spacing: inherit; padding: 0 4px 0 calc(4px + 0.16em); transition: color 0.2s;
 }
-.lang button[aria-pressed="true"] { opacity: 1; text-decoration: underline; text-underline-offset: 6px; }
-.lang span { opacity: 0.5; }
+.lang button:hover { color: #d0d0d0; }
+.lang button[aria-pressed="true"] { color: #fff; }
+.lang span { color: #4a4a4a; }
 
 /* ---------- Header ---------- */
 .masthead { text-align: center; padding: clamp(64px, 9vw, 120px) 0 clamp(40px, 5vw, 64px); }

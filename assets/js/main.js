@@ -257,6 +257,18 @@
     openSheet = function (cat) { origOpen(cat); sheet.appendChild(cursor); };
   }
 
+  // ---------- language tab: out at the top, tucked away after scrolling ----------
+  var langTab = document.querySelector(".lang");
+  var marquee = document.querySelector(".marquee");
+  function placeLangTab() { root.style.setProperty("--marquee-h", marquee.offsetHeight + "px"); }
+  function updateLangTab() { langTab.classList.toggle("is-tucked", window.scrollY > 24); }
+  placeLangTab();
+  updateLangTab();
+  window.addEventListener("resize", placeLangTab);
+  window.addEventListener("scroll", updateLangTab, { passive: true });
+  // slide out shortly after load
+  setTimeout(function () { root.classList.add("lang-ready"); }, reduceMotion ? 0 : 450);
+
   // ---------- misc ----------
   document.getElementById("year").textContent = String(new Date().getFullYear());
   applyLang(initialLang());
