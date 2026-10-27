@@ -110,19 +110,25 @@
   }
 
   // ---------- category tiles ----------
-  // Preview loops: every tile on screen plays at once; tiles that scroll away
-  // pause (and resume where they were), so only visible videos use the decoder.
-  // Files load shortly before a tile reaches the viewport and stay cached.
+  // Preview loops. Files load shortly before a tile reaches the screen; a loop
+  // plays once at least half of its tile is visible and pauses (keeping its
+  // place) otherwise. Starts are staggered so several tiles never begin
+  // decoding in the same frame, and weak devices play at most two at a time.
   var saveData = !!(navigator.connection && navigator.connection.saveData);
   var stillsOnly = reduceMotion || saveData;
-  var visible = new Set();
+  var lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  var MAX_PLAYING = lowEnd ? 2 : Infinity;
+  var PLAY_RATIO = 0.5;  // share of the tile that must be on screen
+  var START_GAP = 150;   // ms between consecutive starts
+  var ratios = new Map(); // video -> visible share of its tile
+  var previewsPaused = false; // true while the category sheet covers the page
+  var nextStart = 0;
 
   function playSafe(v) {
     var p = v.play();
     if (p && p.catch) p.catch(function () {}); // autoplay blocked (e.g. iOS Low Power): poster stays
   }
-
-  var previewsPaused = false; // true while the category sheet covers the page
 
   // Pick the file that matches the tile's real pixel size: phones get the
   // 640px loop (4x fewer pixels to decode), big/retina tiles the 1280px one.
@@ -130,25 +136,57 @@
     var px = v.parentNode.getBoundingClientRect().width * (window.devicePixelRatio || 1);
     return px > 720 || !v.dataset.srcSmall ? v.dataset.src : v.dataset.srcSmall;
   }
+  function ensureSrc(v) {
+    if (!v.getAttribute("src")) { v.src = previewSrc(v); v.preload = "auto"; }
+  }
 
-  var previewObserver = !stillsOnly && "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      var v = entry.target;
-      if (entry.isIntersecting) {
-        if (!v.getAttribute("src")) { v.src = previewSrc(v); v.preload = "auto"; }
-        visible.add(v);
-        if (!document.hidden && !previewsPaused) playSafe(v);
-      } else {
-        visible.delete(v);
-        v.pause();
-      }
-    });
-  }, { rootMargin: "400px 0px" }) : null;
+  function startStaggered(v) {
+    v._wantPlay = true;
+    if (v._startTimer || !v.paused) return;
+    var now = performance.now();
+    var at = Math.max(now, nextStart);
+    nextStart = at + START_GAP;
+    v._startTimer = setTimeout(function () {
+      v._startTimer = null;
+      if (v._wantPlay) { ensureSrc(v); playSafe(v); }
+    }, at - now);
+  }
+  function stopPreview(v) {
+    v._wantPlay = false;
+    if (v._startTimer) { clearTimeout(v._startTimer); v._startTimer = null; }
+    if (!v.paused) v.pause();
+  }
+  function reconcilePreviews() {
+    var candidates = [];
+    ratios.forEach(function (r, v) { if (r >= PLAY_RATIO) candidates.push(v); else stopPreview(v); });
+    if (document.hidden || previewsPaused) { candidates.forEach(stopPreview); return; }
+    candidates.sort(function (a, b) { return ratios.get(b) - ratios.get(a); });
+    candidates.forEach(function (v, i) { if (i < MAX_PLAYING) startStaggered(v); else stopPreview(v); });
+  }
+
+  var previewObserver = null;
+  if (!stillsOnly && "IntersectionObserver" in window) {
+    var loadObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { ensureSrc(e.target); loadObserver.unobserve(e.target); }
+      });
+    }, { rootMargin: "400px 0px" });
+    var playObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { ratios.set(e.target, e.isIntersecting ? e.intersectionRatio : 0); });
+      reconcilePreviews();
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    previewObserver = {
+      observe: function (v) { loadObserver.observe(v); playObserver.observe(v); },
+      disconnect: function () {
+        loadObserver.disconnect(); playObserver.disconnect();
+        ratios.forEach(function (r, v) { stopPreview(v); });
+        ratios.clear();
+      },
+    };
+  }
 
   // Stop decoding when the tab is in the background; resume on return.
-  document.addEventListener("visibilitychange", function () {
-    visible.forEach(function (v) { if (document.hidden || previewsPaused) v.pause(); else playSafe(v); });
-  });
+  document.addEventListener("visibilitychange", reconcilePreviews);
 
   function placeholder(note, withMeter) {
     var ph = el("div", { class: "placeholder", "aria-hidden": "true" });
@@ -166,7 +204,6 @@
   function renderCats() {
     var grid = document.getElementById("cats");
     if (previewObserver) previewObserver.disconnect();
-    visible.clear();
     grid.textContent = "";
     SITE.categories.forEach(function (cat) {
       var btn = el("button", {
@@ -180,7 +217,7 @@
       }
       if (cat.preview && previewObserver) {
         var v = el("video", {
-          muted: "", loop: "", playsinline: "", autoplay: "", preload: "none",
+          muted: "", loop: "", playsinline: "", preload: "none", // started by the scheduler, not autoplay
           disablepictureinpicture: "", disableremoteplayback: "", "aria-hidden": "true",
         });
         v.muted = true;
@@ -253,7 +290,7 @@
     root.classList.add("html-locked");
     // nothing behind the sheet is visible – stop decoding those previews
     previewsPaused = true;
-    visible.forEach(function (v) { v.pause(); });
+    reconcilePreviews();
     if (sheet.showModal) sheet.showModal(); else sheet.setAttribute("open", "");
     sheet.scrollTop = 0;
   }
@@ -273,7 +310,7 @@
     openCat = null;
     root.classList.remove("html-locked");
     previewsPaused = false;
-    if (!document.hidden) visible.forEach(playSafe);
+    reconcilePreviews();
     document.getElementById("cards").textContent = ""; // stops any playing video
     if (lastTrigger && lastTrigger.focus) lastTrigger.focus({ preventScroll: true });
   });
