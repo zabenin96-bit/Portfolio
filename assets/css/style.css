@@ -23,7 +23,7 @@
   --fg: #ffffff;
   --muted: #8c8c8c;
   --line: #262626;
-  --nav-bg: rgba(150, 150, 150, 0.55);
+  --nav-bg: rgba(205, 205, 205, 0.82);
   --cta-bg: var(--accent);
   --cta-fg: #000000;
   --tile-glow: rgba(255, 255, 255, 0.22);
@@ -87,7 +87,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
           mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
-.marquee__track { display: flex; width: max-content; animation: marquee 45s linear infinite; }
+/* fixed height: the strip is filled by JS, so reserve its line up front (no layout shift) */
+.marquee__track { display: flex; align-items: center; width: max-content; height: clamp(15px, 1.4vw, 19px); animation: marquee 45s linear infinite; }
 .marquee:hover .marquee__track { animation-play-state: paused; }
 .marquee__group { display: flex; align-items: center; flex-shrink: 0; }
 .marquee__item { display: flex; align-items: baseline; gap: 32px; padding-inline: 40px; white-space: nowrap; }
