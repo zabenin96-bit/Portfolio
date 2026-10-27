@@ -354,11 +354,13 @@
   }
 
   // ---------- language button ----------
-  // Hidden while the brand strip is visible; once the strip is off screen it
-  // shows top-right while scrolling and fades 1.5 s after scrolling stops.
+  // Hidden at the top of the page. It first appears once the first work
+  // video has reached the top of the screen; from there on it shows
+  // top-right while scrolling and fades 1.5 s after scrolling stops.
   var marquee = document.querySelector(".marquee");
   var langBox = document.querySelector(".lang");
   var LANG_HIDE_DELAY = 1500;
+  var LANG_FROM = 12; // px: first tile's top must be at least this close to the screen top
   var langHideTimer = null;
   function hideLangLater() {
     clearTimeout(langHideTimer);
@@ -368,23 +370,25 @@
       langBox.classList.remove("is-visible");
     }, LANG_HIDE_DELAY);
   }
-  function showLang() {
-    if (!langBox.classList.contains("is-floating")) return;
+  function langZoneReached() {
+    var first = document.querySelector(".cat__btn");
+    return first ? first.getBoundingClientRect().top <= LANG_FROM : window.scrollY > window.innerHeight;
+  }
+  function onScrollLang() {
+    var active = langZoneReached();
+    langBox.classList.toggle("is-floating", active);
+    if (!active) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); return; }
     langBox.classList.add("is-visible");
     hideLangLater();
   }
+  window.addEventListener("scroll", onScrollLang, { passive: true });
+  langBox.addEventListener("click", function () { if (langBox.classList.contains("is-floating")) hideLangLater(); });
+
+  // the brand strip stops animating while it is off screen
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(function (entries) {
-      var docked = entries[0].isIntersecting;
-      marquee.classList.toggle("is-offscreen", !docked);
-      langBox.classList.toggle("is-floating", !docked);
-      if (docked) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); }
-      else showLang();
+      marquee.classList.toggle("is-offscreen", !entries[0].isIntersecting);
     }).observe(marquee);
-    window.addEventListener("scroll", showLang, { passive: true });
-    langBox.addEventListener("click", showLang);
-  } else {
-    langBox.classList.add("is-floating", "is-visible"); // old browsers: always shown
   }
 
   // ---------- smooth in-page scrolling ----------
