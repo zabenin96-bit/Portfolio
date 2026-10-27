@@ -234,10 +234,12 @@ img, video { display: block; max-width: 100%; }
 /* ---------- About ---------- */
 .about { padding: clamp(80px, 10vw, 140px) 0; border-top: 1px solid var(--line); }
 .eyebrow { font-size: 18px; color: var(--muted); margin: 0 0 20px; }
+.about__text > span { display: block; }
+.about__text > span + span { margin-top: 0.35em; }
 .about__text {
   margin: 0; max-width: 1180px;
   font-family: var(--font-display); font-style: italic; font-weight: 500;
-  font-size: clamp(32px, 4.4vw, 68px); line-height: 1.08; letter-spacing: -0.015em;
+  font-size: clamp(28px, 3.4vw, 52px); line-height: 1.12; letter-spacing: -0.01em;
 }
 
 /* line reveal on scroll (progressive enhancement) */
@@ -248,9 +250,6 @@ img, video { display: block; max-width: 100%; }
     animation: rise linear both; animation-timeline: view(); animation-range: entry 10% entry 90%;
   }
   .spinner { animation: spin linear both; animation-timeline: view(); }
-}
-@media (max-width: 760px) {
-  .reveal > span, .reveal > span > span { display: inline; animation: none; }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(70%) rotateX(20deg); } to { opacity: 1; transform: none; } }
 @keyframes spin { to { transform: rotate(360deg); } }
