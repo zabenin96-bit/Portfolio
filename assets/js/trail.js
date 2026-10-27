@@ -32,9 +32,9 @@
   var TAIL_MS = 1700;      // how long a point of the tail stays visible
   var LEAD = 0.58;         // where the head heads for, as a share of the viewport height
   var CLEAR = 12;          // px the line keeps away from any element
-  var SPRING = 0.024;      // 1/ms – how tightly the head follows the guide
-  var MAX_FALL = 0.8;      // px/ms – fastest the line travels down/up the page
-  var MAX_SIDE = 0.42;     // px/ms – fastest sideways move (0.22 during a fast scroll)
+  var SPRING = 0.017;      // 1/ms – how tightly the head follows the guide (lower = softer)
+  var MAX_FALL = 0.6;      // px/ms – fastest the line travels down/up the page
+  var MAX_SIDE = 0.3;      // px/ms – fastest sideways move (0.16 during a fast scroll)
   var MAX_SPEED = 1.0;     // px/ms – speed cap for the visible head
   var FAST = 1.4;          // px/ms of scrolling that counts as a fast flick
   var SETTLE = 280;        // ms after a fast scroll before the line re-plans its route
@@ -62,7 +62,8 @@
 
   var ph = [Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3];
   function wander(t) {
-    return Math.sin(t * 0.00031 + ph[0]) * 0.55 + Math.sin(t * 0.00073 + ph[1]) * 0.3 + Math.sin(t * 0.0017 + ph[2]) * 0.15;
+    // only slow components: a long, calm drift without jitter
+    return Math.sin(t * 0.00027 + ph[0]) * 0.65 + Math.sin(t * 0.00061 + ph[1]) * 0.35;
   }
   function pace(t) { // 0.45 .. 1.5: moments of rushing and of lingering
     var s = Math.sin(t * 0.0009 + ph[3]) * 0.5 + Math.sin(t * 0.0023 + ph[1]) * 0.5;
@@ -89,13 +90,20 @@
   // everything the line must not touch, in viewport coordinates
   function obstacles() {
     var list = [];
-    qa(".cat__btn").forEach(function (el) { list.push(box(el)); });
+    qa(".cat__btn").forEach(function (el) { var b = box(el); b.round = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 12; list.push(b); });
     qa(".cat__label").forEach(function (el) { var r = textRect(el); if (r) list.push(r); });
     [".masthead__title", ".masthead__sub", ".about__photo", ".about__lead", ".about__head .eyebrow", ".cta"].forEach(function (s) {
       var el = q(s); if (!el) return;
-      var r = s === ".about__photo" || s === ".cta" ? box(el) : textRect(el); if (r) list.push(r);
+      var r = s === ".about__photo" || s === ".cta" ? box(el) : textRect(el);
+      if (!r) return;
+      if (s === ".cta") r.circle = true;
+      if (s === ".about__photo") r.round = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 10;
+      list.push(r);
     });
     qa(".about__body > span").forEach(function (el) { var r = textRect(el); if (r) list.push(r); });
+    // footer: links, address, mail, copyright and the big wordmark; the rings
+    qa(".footer__grid > *, .footer__links a, .footer__word").forEach(function (el) { var r = textRect(el); if (r) list.push(r); });
+    var sp = q(".spinner"); if (sp) { var c = box(sp); c.circle = true; list.push(c); }
     return list.filter(function (r) { return r.bottom > -60 && r.top < H + 60; });
   }
 
@@ -272,7 +280,7 @@
       guide.y += Math.max(-maxDy, Math.min(maxDy, dy));
       // drift slowly while the way is clear, sidestep sooner when something is ahead
       var dx = (tx - guide.x) * Math.min(1, k * (Math.abs(tx - hereX) > 1 || Math.abs(tx - guide.x) > 40 ? 6 : 1.6));
-      var maxDx = (calm ? MAX_SIDE : MAX_SIDE * 0.52) * dt;
+      var maxDx = (calm ? MAX_SIDE : MAX_SIDE * 0.55) * dt;
       guide.x += Math.max(-maxDx, Math.min(maxDx, dx));
       if (scrolling && calm) maybeTrick(now);
     } else if (mode === "orbit") {
@@ -316,7 +324,7 @@
     if (!lp || lp.brk || Math.hypot(lp.x - head.x, lp.y - hy) > 2) points.push({ x: head.x, y: hy, t: now });
     while (points.length && now - points[0].t > TAIL_MS) points.shift();
 
-    draw(now, sy);
+    draw(now, sy, obs);
 
     var settled = mode === "follow" && !scrolling && calm && Math.hypot(guide.x - head.x, guide.y - head.y) < 2 && Math.abs(sy + H * LEAD - guide.y) < H * 0.1;
     if (settled && points.length < 2) { raf = null; last = 0; ctx.clearRect(0, 0, W, H); return; }
@@ -328,7 +336,7 @@
   // continuous smoothed path with flat ends – no overlapping round caps,
   // so there are no brighter dots along the line.
   var BANDS = 14;
-  function draw(now, sy) {
+  function draw(now, sy, obs) {
     ctx.clearRect(0, 0, W, H);
     ctx.lineWidth = LINE; ctx.lineJoin = "round"; ctx.lineCap = "butt";
     // a break (after a long flick) splits the tail into separate pieces
@@ -337,6 +345,30 @@
       var pt = points[i];
       if (!pt || pt.brk) { drawRun(run, now, sy); run = []; } else run.push(pt);
     }
+    // The line passes *behind* videos and text: erase it over every element,
+    // so it can never be drawn on top of them, even while the page moves.
+    if (obs && obs.length) {
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "#000";
+      obs.forEach(function (r) {
+        var g = 3, x = r.left - g, y = r.top - g, w = r.right - r.left + 2 * g, h = r.bottom - r.top + 2 * g;
+        ctx.beginPath();
+        if (r.circle) ctx.arc(x + w / 2, y + h / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
+        else roundRect(x, y, w, h, (r.round || 3) + g);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+  }
+  function roundRect(x, y, w, h, rad) {
+    rad = Math.min(rad, w / 2, h / 2);
+    ctx.moveTo(x + rad, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rad);
+    ctx.arcTo(x + w, y + h, x, y + h, rad);
+    ctx.arcTo(x, y + h, x, y, rad);
+    ctx.arcTo(x, y, x + w, y, rad);
+    ctx.closePath();
   }
   function drawRun(pts, now, sy) {
     var n = pts.length;
