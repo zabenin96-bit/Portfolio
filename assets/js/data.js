@@ -79,7 +79,7 @@ window.SITE = {
       id: "vertical",
       title: { ru: "Вертикальный контент", en: "Vertical content" },
       format: "vertical",
-      preview: "", poster: "", tint: "#1d1528",
+      preview: "assets/video/vertical.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
