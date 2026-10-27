@@ -228,22 +228,40 @@ html:not(.lang-ready) .lang { transform: translateX(calc(100% + 8px)); }
 
 /* ---------- About ---------- */
 .about { padding: clamp(80px, 10vw, 140px) 0; border-top: 1px solid var(--line); }
-.eyebrow { font-size: 18px; color: var(--muted); margin: 0 0 20px; }
-.about__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.eyebrow {
+  margin: 0 0 10px; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
+}
+/* phone: small photo beside the name, text below */
+.about__inner {
+  display: grid; grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-areas: "photo head" "body body"; column-gap: 20px; row-gap: 28px; align-items: center;
+}
 .about__photo {
-  width: 160px; height: auto; aspect-ratio: 1; object-fit: cover;
+  grid-area: photo; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover;
   border-radius: 10px; background: #1a1a1a;
 }
-@media (min-width: 760px) {
-  .about__inner { grid-template-columns: 300px minmax(0, 1fr); gap: clamp(40px, 5vw, 80px); align-items: start; }
-  .about__photo { width: 100%; border-radius: 14px; }
+.about__head { grid-area: head; }
+.about__lead {
+  margin: 0; font-family: var(--font-display); font-weight: 300;
+  font-size: clamp(20px, 2.2vw, 30px); line-height: 1.25;
 }
-.about__text > span { display: block; }
-.about__text > span + span { margin-top: 0.35em; }
-.about__text {
-  margin: 0; max-width: 1180px;
-  font-family: var(--font-display); font-weight: 300;
-  font-size: clamp(22px, 2.8vw, 40px); line-height: 1.3; letter-spacing: 0;
+.about__body {
+  grid-area: body; max-width: 560px;
+  font-weight: 400; font-size: clamp(16px, 1.2vw, 18px); line-height: 1.65; color: #c9c9c9;
+}
+.about__body > span { display: block; }
+.about__body > span + span { margin-top: 0.9em; }
+/* desktop: photo left, name and text to the right, centred against the photo */
+@media (min-width: 760px) {
+  .about__inner {
+    max-width: 1080px; grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-areas: "photo head" "photo body"; grid-template-rows: auto auto;
+    column-gap: clamp(48px, 6vw, 96px); row-gap: 24px; align-content: center;
+  }
+  .about__photo { border-radius: 14px; align-self: center; }
+  .about__head { align-self: end; }
+  .about__body { align-self: start; }
+  .eyebrow { font-size: 12px; margin-bottom: 14px; }
 }
 
 /* line reveal on scroll (progressive enhancement) */
