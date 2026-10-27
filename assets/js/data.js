@@ -12,7 +12,7 @@ window.SITE = {
   i18n: {
     ru: {
       metaTitle: "whereisyoursound – звук для кино, рекламы, анимации и игр",
-      sub: "Музыка · Саунд-дизайн",
+      sub: "Sound design studio",
       brandsLabel: "Бренды и проекты",
       workLabel: "Работы",
       previewNote: "[превью-петля]",
@@ -36,7 +36,7 @@ window.SITE = {
     },
     en: {
       metaTitle: "whereisyoursound – sound for film, advertising, animation and games",
-      sub: "Music · Sound design",
+      sub: "Sound design studio",
       brandsLabel: "Brands and projects",
       workLabel: "Work",
       previewNote: "[preview loop]",
