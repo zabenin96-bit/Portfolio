@@ -292,13 +292,42 @@
     openSheet = function (cat) { origOpen(cat); sheet.appendChild(cursor); };
   }
 
-  // ---------- language capsule: vertically centred on the brand strip ----------
+  // ---------- language button ----------
+  // Docked at the end of the brand strip; once the strip is off screen it
+  // floats top-right, shows while scrolling and fades 1.5 s after it stops.
   var marquee = document.querySelector(".marquee");
+  var langBox = document.querySelector(".lang");
+  var LANG_HIDE_DELAY = 1500;
+  var langHideTimer = null;
   function placeLang() { root.style.setProperty("--marquee-h", marquee.offsetHeight + "px"); }
   placeLang();
   // the strip grows once its font has loaded
   if ("ResizeObserver" in window) new ResizeObserver(placeLang).observe(marquee);
   else window.addEventListener("resize", placeLang);
+
+  function hideLangLater() {
+    clearTimeout(langHideTimer);
+    langHideTimer = setTimeout(function () {
+      // keep it while the pointer is on it or it has keyboard focus
+      if (langBox.matches(":hover") || langBox.contains(document.activeElement)) { hideLangLater(); return; }
+      langBox.classList.remove("is-visible");
+    }, LANG_HIDE_DELAY);
+  }
+  function showLang() {
+    if (!langBox.classList.contains("is-floating")) return;
+    langBox.classList.add("is-visible");
+    hideLangLater();
+  }
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (entries) {
+      var docked = entries[0].isIntersecting;
+      langBox.classList.toggle("is-floating", !docked);
+      if (docked) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); }
+      else showLang();
+    }).observe(marquee);
+    window.addEventListener("scroll", showLang, { passive: true });
+    langBox.addEventListener("click", showLang);
+  }
 
   // ---------- smooth in-page scrolling ----------
   // Eased like native iOS/Android scrolling: quick start, long soft landing.

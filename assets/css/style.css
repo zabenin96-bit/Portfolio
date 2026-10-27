@@ -98,19 +98,32 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- Language switch ----------
-   One small capsule at the end of the brand strip. It shows only the language
-   you can switch to; its thin dark edge slowly shimmers. */
+   A small rounded square showing only the language you can switch to.
+   At the top it sits at the end of the brand strip. Once the strip has
+   scrolled away it follows you in the top-right corner: it shows while you
+   scroll and slowly fades out 1.5 s after scrolling stops. */
 @property --lang-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 .lang {
-  position: absolute; z-index: 5; top: 0; right: var(--gutter);
+  position: absolute; z-index: 40; top: 0; right: var(--gutter);
   height: var(--marquee-h, 52px); display: flex; align-items: center;
 }
+.lang.is-floating {
+  position: fixed; top: 12px; height: auto;
+  opacity: 0; pointer-events: none; transform: translateY(-4px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.lang.is-floating.is-visible,
+.lang.is-floating:focus-within {
+  opacity: 1; pointer-events: auto; transform: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.lang.is-floating button { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65); }
 .lang button[aria-pressed="true"] { display: none; }
 .lang button {
-  position: relative; height: 30px; min-width: 48px; cursor: pointer;
-  padding: 0 12px 0 calc(12px + 0.22em); border-radius: 999px; border: 1px solid transparent;
+  position: relative; width: 40px; height: 40px; padding: 0 0 0 0.22em; cursor: pointer;
+  border-radius: 11px; border: 1px solid transparent;
   background:
-    linear-gradient(180deg, #0d0d0d, #000) padding-box,
+    linear-gradient(180deg, #0f0f0f, #000) padding-box,
     conic-gradient(from var(--lang-angle),
       #1c1c1c 0deg, #444 60deg, #6b6b6b 90deg, #2a2a2a 140deg, #161616 210deg,
       #383838 290deg, #1c1c1c 360deg) border-box;
@@ -118,8 +131,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   animation: lang-shimmer 8s linear infinite;
   transition: color 0.25s, box-shadow 0.35s, transform 0.15s ease;
 }
-.lang button::after { content: ""; position: absolute; inset: -8px -6px; } /* 44px+ touch target */
-.lang button:hover { color: #fff; box-shadow: 0 0 18px rgba(255, 255, 255, 0.07); }
+.lang button::after { content: ""; position: absolute; inset: -4px; } /* 48px touch target */
+.lang button:hover { color: #fff; }
 @keyframes lang-shimmer { to { --lang-angle: 360deg; } }
 
 /* ---------- Header ---------- */
