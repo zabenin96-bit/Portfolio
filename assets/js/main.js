@@ -257,20 +257,13 @@
     openSheet = function (cat) { origOpen(cat); sheet.appendChild(cursor); };
   }
 
-  // ---------- language tab: out at the top, tucked away after scrolling ----------
-  var langTab = document.querySelector(".lang");
+  // ---------- language capsule: vertically centred on the brand strip ----------
   var marquee = document.querySelector(".marquee");
-  function placeLangTab() { root.style.setProperty("--marquee-h", marquee.offsetHeight + "px"); }
-  function updateLangTab() { langTab.classList.toggle("is-tucked", window.scrollY > 4); }
-  placeLangTab();
-  updateLangTab();
-  // the strip grows once its font has loaded – keep the tab just below it
-  if ("ResizeObserver" in window) new ResizeObserver(placeLangTab).observe(marquee);
-  else window.addEventListener("resize", placeLangTab);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeLangTab);
-  window.addEventListener("scroll", updateLangTab, { passive: true });
-  // slide out shortly after load
-  setTimeout(function () { root.classList.add("lang-ready"); }, reduceMotion ? 0 : 450);
+  function placeLang() { root.style.setProperty("--marquee-h", marquee.offsetHeight + "px"); }
+  placeLang();
+  // the strip grows once its font has loaded
+  if ("ResizeObserver" in window) new ResizeObserver(placeLang).observe(marquee);
+  else window.addEventListener("resize", placeLang);
 
   // ---------- misc ----------
   document.getElementById("year").textContent = String(new Date().getFullYear());
