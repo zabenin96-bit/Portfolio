@@ -90,7 +90,7 @@ window.SITE = {
     {
       id: "games",
       title: { ru: "Игры", en: "Games" },
-      preview: "", poster: "", tint: "#121821",
+      preview: "assets/video/games.mp4", poster: "assets/img/games.webp", tint: "#121821",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -100,7 +100,7 @@ window.SITE = {
     {
       id: "film",
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
-      preview: "", poster: "", tint: "#221c10",
+      preview: "assets/video/film.mp4", poster: "assets/img/film.webp", tint: "#221c10",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -110,7 +110,7 @@ window.SITE = {
     {
       id: "commercials",
       title: { ru: "Реклама", en: "Commercials" },
-      preview: "", poster: "", tint: "#2a1714",
+      preview: "assets/video/commercials.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
@@ -120,7 +120,7 @@ window.SITE = {
     {
       id: "animation",
       title: { ru: "Анимация", en: "Animation" },
-      preview: "", poster: "", tint: "#14201a",
+      preview: "assets/video/animation.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
         { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
         { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
