@@ -261,10 +261,13 @@
   var langTab = document.querySelector(".lang");
   var marquee = document.querySelector(".marquee");
   function placeLangTab() { root.style.setProperty("--marquee-h", marquee.offsetHeight + "px"); }
-  function updateLangTab() { langTab.classList.toggle("is-tucked", window.scrollY > 24); }
+  function updateLangTab() { langTab.classList.toggle("is-tucked", window.scrollY > 4); }
   placeLangTab();
   updateLangTab();
-  window.addEventListener("resize", placeLangTab);
+  // the strip grows once its font has loaded – keep the tab just below it
+  if ("ResizeObserver" in window) new ResizeObserver(placeLangTab).observe(marquee);
+  else window.addEventListener("resize", placeLangTab);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeLangTab);
   window.addEventListener("scroll", updateLangTab, { passive: true });
   // slide out shortly after load
   setTimeout(function () { root.classList.add("lang-ready"); }, reduceMotion ? 0 : 450);
