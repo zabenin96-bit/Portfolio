@@ -203,6 +203,15 @@ img, video { display: block; max-width: 100%; }
 /* ---------- About ---------- */
 .about { padding: clamp(80px, 10vw, 140px) 0; border-top: 1px solid var(--line); }
 .eyebrow { font-size: 18px; color: var(--muted); margin: 0 0 20px; }
+.about__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.about__photo {
+  width: 160px; height: auto; aspect-ratio: 1; object-fit: cover;
+  border-radius: 10px; background: #1a1a1a;
+}
+@media (min-width: 760px) {
+  .about__inner { grid-template-columns: 300px minmax(0, 1fr); gap: clamp(40px, 5vw, 80px); align-items: start; }
+  .about__photo { width: 100%; border-radius: 14px; }
+}
 .about__text > span { display: block; }
 .about__text > span + span { margin-top: 0.35em; }
 .about__text {
