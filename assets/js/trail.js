@@ -1,16 +1,22 @@
 /*
- * Scroll trail: a thin white line that travels down the page as you scroll.
+ * Scroll trail: one fixed, planned route through the page that a thin white
+ * line travels along as you scroll – like a bead on a thread.
  *
- * A guide point plans the route: it keeps clear of page elements (videos,
- * their captions, the title, the photo, text blocks), stays on its side of a
- * video instead of jumping across it, and traces ovals around accents. The
- * visible head follows the guide on a critically damped spring, so every
- * turn is rounded off – the path never has sharp corners. Once per visit it circles the studio
- * name and Nata's name, circles one video twice, sometimes circles a video
- * caption, and now and then curls in open space.
+ * The route is built from the live layout (so it fits phones and desktops):
+ *   1. a loop around the studio name,
+ *   2. down a side lane next to the work videos, crossing to the other side
+ *      in the free gap below each row,
+ *   3. two loops around one video (with its caption),
+ *   4. a flat loop around one caption while crossing between rows,
+ *   5. a loop around Nata's photo and name,
+ *   6. a loop around the "Have an idea?" circle, where it ends.
+ * Corners are rounded and loops are entered and left along their tangent, so
+ * the path is one smooth curve. The scroll position picks the place on the
+ * route; scrolling back moves the line back.
  *
- * Draws only while something is happening; skipped for reduced motion and
- * on low-end devices.
+ * As a safety net the line is erased wherever it would cross an element, so
+ * it reads as passing behind content. Skipped for reduced motion and on
+ * low-end devices; draws only while something is happening.
  */
 (function () {
   "use strict";
@@ -28,16 +34,12 @@
   if (!ctx) return;
 
   var COLOR = "255, 255, 255";
-  var LINE = 1.3;          // px – the same along the whole line
-  var TAIL_MS = 1700;      // how long a point of the tail stays visible
-  var LEAD = 0.58;         // where the head heads for, as a share of the viewport height
-  var CLEAR = 12;          // px the line keeps away from any element
-  var SPRING = 0.017;      // 1/ms – how tightly the head follows the guide (lower = softer)
-  var MAX_FALL = 0.6;      // px/ms – fastest the line travels down/up the page
-  var MAX_SIDE = 0.3;      // px/ms – fastest sideways move (0.16 during a fast scroll)
-  var MAX_SPEED = 1.0;     // px/ms – speed cap for the visible head
-  var FAST = 1.4;          // px/ms of scrolling that counts as a fast flick
-  var SETTLE = 280;        // ms after a fast scroll before the line re-plans its route
+  var LINE = 1.3;        // px, the same along the whole line
+  var TAIL = 460;        // px of route visible behind the head
+  var STEP = 3;          // px between route samples
+  var FILLET = 46;       // px, how much the route's corners are rounded
+  var LEAD = 0.55;       // where the head sits on screen on straight parts (share of height)
+  var IDLE_MS = 1600;    // after this long without movement the line fades out
   var W = 0, H = 0, dpr = 1;
 
   function resize() {
@@ -46,320 +48,343 @@
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  resize();
-  window.addEventListener("resize", resize);
 
-  // head in page coordinates, velocity in px/ms
-  var head = { x: W * 0.5, y: window.scrollY + H * 0.3 };
-  var vel = { x: 0, y: 0 };
-  var guide = { x: head.x, y: head.y };
-  var points = [];
-  var mode = "follow", m = null;
-  var nextCurl = 0, nextCaption = 0, captionsLeft = 2;
-  var lastScroll = 0, raf = null, last = 0;
-  var scrollSpeed = 0, lastFast = -1e9, lastSy = window.scrollY, lastSyT = 0;
-  var prevSy = window.scrollY; // scroll position at the previous frame
-
-  var ph = [Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3];
-  function wander(t) {
-    // only slow components: a long, calm drift without jitter
-    return Math.sin(t * 0.00027 + ph[0]) * 0.65 + Math.sin(t * 0.00061 + ph[1]) * 0.35;
-  }
-  function pace(t) { // 0.45 .. 1.5: moments of rushing and of lingering
-    var s = Math.sin(t * 0.0009 + ph[3]) * 0.5 + Math.sin(t * 0.0023 + ph[1]) * 0.5;
-    return 0.45 + (s + 1) * 0.52;
-  }
-
-  // ---------- page geometry ----------
-  function textRect(el) {
+  // ---------- page geometry (page coordinates) ----------
+  function q(sel) { return document.querySelector(sel); }
+  function qa(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+  function pageRect(b) { var sy = window.scrollY; return { left: b.left, right: b.right, top: b.top + sy, bottom: b.bottom + sy }; }
+  function boxOf(el) { return el ? pageRect(el.getBoundingClientRect()) : null; }
+  function textOf(el) {
     if (!el) return null;
     var r = document.createRange();
     r.selectNodeContents(el.querySelector(".i18n") || el);
     var b = r.getBoundingClientRect();
     if (!b.width) b = el.getBoundingClientRect();
-    return b.width ? { left: b.left, top: b.top, right: b.right, bottom: b.bottom } : null;
+    return b.width ? pageRect(b) : null;
   }
   function union(a, b) {
     if (!a) return b; if (!b) return a;
-    return { left: Math.min(a.left, b.left), top: Math.min(a.top, b.top), right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom) };
-  }
-  function q(sel) { return document.querySelector(sel); }
-  function qa(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-  function box(el) { var b = el.getBoundingClientRect(); return { left: b.left, top: b.top, right: b.right, bottom: b.bottom }; }
-
-  // everything the line must not touch, in viewport coordinates
-  function obstacles() {
-    var list = [];
-    qa(".cat__btn").forEach(function (el) { var b = box(el); b.round = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 12; list.push(b); });
-    qa(".cat__label").forEach(function (el) { var r = textRect(el); if (r) list.push(r); });
-    [".masthead__title", ".masthead__sub", ".about__photo", ".about__lead", ".about__head .eyebrow", ".cta"].forEach(function (s) {
-      var el = q(s); if (!el) return;
-      var r = s === ".about__photo" || s === ".cta" ? box(el) : textRect(el);
-      if (!r) return;
-      if (s === ".cta") r.circle = true;
-      if (s === ".about__photo") r.round = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 10;
-      list.push(r);
-    });
-    qa(".about__body > span").forEach(function (el) { var r = textRect(el); if (r) list.push(r); });
-    // footer: links, address, mail, copyright and the big wordmark; the rings
-    qa(".footer__grid > *, .footer__links a, .footer__word").forEach(function (el) { var r = textRect(el); if (r) list.push(r); });
-    var sp = q(".spinner"); if (sp) { var c = box(sp); c.circle = true; list.push(c); }
-    return list.filter(function (r) { return r.bottom > -60 && r.top < H + 60; });
+    return { left: Math.min(a.left, b.left), right: Math.max(a.right, b.right), top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom) };
   }
 
-  // accents circled once per visit
-  var accents = [
-    { rect: function () { return union(textRect(q(".masthead__title")), textRect(q(".masthead__sub"))); }, turns: 1, pad: 24, done: false },
-    // Nata's name together with her photo next to it
-    { rect: function () { var ph = q(".about__photo"); return union(ph && box(ph), union(textRect(q(".about__head .eyebrow")), textRect(q(".about__lead")))); }, turns: 1, pad: 20, done: false },
-  ];
-  var videoDone = false, videoPick = null;
-
-  function fullyOnScreen(r) { return r.top > H * 0.05 && r.bottom < H * 0.95; }
-  function nearLead(r) { var c = (r.top + r.bottom) / 2; return fullyOnScreen(r) && Math.abs(c - H * LEAD) < H * 0.3; }
-
-  // A point on the outline that keeps exactly `r` px around a box of half
-  // size hw x hh (a rounded rectangle). u runs 0..1 once around.
-  function ringPoint(hw, hh, r, u) {
-    var straightH = 2 * hw, straightV = 2 * hh, arc = Math.PI * r / 2;
-    var total = 2 * straightH + 2 * straightV + 4 * arc;
-    var d = ((u % 1) + 1) % 1 * total;
-    // top edge (left→right), top-right arc, right edge, bottom-right arc, ...
-    var segs = [
-      [straightH, function (t) { return { x: -hw + t, y: -hh - r }; }],
-      [arc, function (t) { var a = -Math.PI / 2 + t / r; return { x: hw + Math.cos(a) * r, y: -hh + Math.sin(a) * r }; }],
-      [straightV, function (t) { return { x: hw + r, y: -hh + t }; }],
-      [arc, function (t) { var a = t / r; return { x: hw + Math.cos(a) * r, y: hh + Math.sin(a) * r }; }],
-      [straightH, function (t) { return { x: hw - t, y: hh + r }; }],
-      [arc, function (t) { var a = Math.PI / 2 + t / r; return { x: -hw + Math.cos(a) * r, y: hh + Math.sin(a) * r }; }],
-      [straightV, function (t) { return { x: -hw - r, y: hh - t }; }],
-      [arc, function (t) { var a = Math.PI + t / r; return { x: -hw + Math.cos(a) * r, y: -hh + Math.sin(a) * r }; }],
-    ];
-    for (var k = 0; k < segs.length; k++) {
-      if (d <= segs[k][0] || k === segs.length - 1) return segs[k][1](Math.min(d, segs[k][0]));
-      d -= segs[k][0];
-    }
-  }
-
-  function startOrbit(r, turns, pad, padY) {
-    var sy = window.scrollY;
-    var cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2 + sy;
-    var hw = (r.right - r.left) / 2, hh = (r.bottom - r.top) / 2;
-    var rad = pad;
-    // never wider than the screen, and flatter vertically when asked (padY)
-    if (hw + rad > W / 2 - 3) { rad = Math.max(4, W / 2 - 3 - hw); }
-    var squash = padY === undefined ? 1 : Math.min(1, padY / rad);
-    // start at the outline point nearest to the guide, keep its current heading
-    var best = 0, bestD = Infinity;
-    for (var i = 0; i < 96; i++) {
-      var pnt = ringPoint(hw, hh, rad, i / 96);
-      var dd = Math.hypot(cx + pnt.x - guide.x, cy + pnt.y * (squash < 1 ? (hh + rad * squash) / (hh + rad) : 1) - guide.y);
-      if (dd < bestD) { bestD = dd; best = i / 96; }
-    }
-    var p1 = ringPoint(hw, hh, rad, best), p2 = ringPoint(hw, hh, rad, best + 0.01);
-    var dir = (p2.x - p1.x) * vel.x + (p2.y - p1.y) * vel.y >= 0 ? 1 : -1;
-    var perimeter = 4 * hw + 4 * hh + 2 * Math.PI * rad;
-    mode = "orbit";
-    m = {
-      cx: cx, cy: cy, hw: hw, hh: hh, rad: rad, squash: squash, u: best, dir: dir, turned: 0, total: turns,
-      // one lap takes ~1.7–2.6 s whatever the size of the object
-      lapMs: Math.max(1700, Math.min(2600, perimeter * 2.4)), blend: 0,
-      until: performance.now() + turns * 3200,
+  // ---------- rounded-rectangle ring ----------
+  // A ring keeps exactly r px around a box. u runs 0..1 once around
+  // clockwise, starting at the left end of the top edge.
+  function ringInfo(rect, r) {
+    var hw = (rect.right - rect.left) / 2, hh = (rect.bottom - rect.top) / 2;
+    var SH = 2 * hw, SV = 2 * hh, A = Math.PI * r / 2, T = 2 * SH + 2 * SV + 4 * A;
+    return {
+      cx: (rect.left + rect.right) / 2, cy: (rect.top + rect.bottom) / 2, hw: hw, hh: hh, r: r, T: T,
+      u: {
+        topStart: 0, topEnd: SH / T,
+        rightStart: (SH + A) / T, rightEnd: (SH + A + SV) / T,
+        bottomStart: (SH + 2 * A + SV) / T, bottomEnd: (2 * SH + 2 * A + SV) / T,
+        leftStart: (2 * SH + 3 * A + SV) / T, leftEnd: (2 * SH + 3 * A + 2 * SV) / T,
+      },
     };
   }
+  function ringAt(g, u) {
+    var hw = g.hw, hh = g.hh, r = Math.max(g.r, 0.001), SH = 2 * hw, SV = 2 * hh, A = Math.PI * g.r / 2;
+    var d = (((u % 1) + 1) % 1) * g.T, p;
+    if (d <= SH) p = { x: -hw + d, y: -hh - r };
+    else if ((d -= SH) <= A) { var a1 = -Math.PI / 2 + d / r; p = { x: hw + Math.cos(a1) * r, y: -hh + Math.sin(a1) * r }; }
+    else if ((d -= A) <= SV) p = { x: hw + r, y: -hh + d };
+    else if ((d -= SV) <= A) { var a2 = d / r; p = { x: hw + Math.cos(a2) * r, y: hh + Math.sin(a2) * r }; }
+    else if ((d -= A) <= SH) p = { x: hw - d, y: hh + r };
+    else if ((d -= SH) <= A) { var a3 = Math.PI / 2 + d / r; p = { x: -hw + Math.cos(a3) * r, y: hh + Math.sin(a3) * r }; }
+    else if ((d -= A) <= SV) p = { x: -hw - r, y: hh - d };
+    else { d -= SV; var a4 = Math.PI + d / r; p = { x: -hw + Math.cos(a4) * r, y: -hh + Math.sin(a4) * r }; }
+    return { x: g.cx + p.x, y: g.cy + p.y };
+  }
 
-  function maybeTrick(now) {
-    for (var i = 0; i < accents.length; i++) {
-      var ac = accents[i];
-      if (ac.done) continue;
-      var r = ac.rect();
-      if (r && fullyOnScreen(r)) { ac.done = true; startOrbit(r, ac.turns, ac.pad); return; }
+  // ---------- route builder ----------
+  // ctl: control points. Plain points get rounded off (corner: true); loop
+  // points are dense samples carrying the scroll range of their loop.
+  var ctl;
+  function pt(x, y, round) { ctl.push({ x: x, y: y, corner: true, round: round }); }
+  function loop(g, uFrom, uTo, keys) {
+    var n = Math.max(2, Math.ceil(Math.abs(uTo - uFrom) * g.T / STEP));
+    for (var i = 0; i <= n; i++) {
+      var p = ringAt(g, uFrom + (uTo - uFrom) * i / n);
+      ctl.push({ x: p.x, y: p.y, k: keys[0] + (keys[1] - keys[0]) * i / n });
     }
-    var tiles = qa(".cat__btn");
-    if (!videoDone && tiles.length) {
-      if (videoPick === null) videoPick = Math.floor(Math.random() * tiles.length);
-      var vt = tiles[videoPick];
-      // circle the video together with its caption, so the loop never cuts through it
-      var vr = vt && union(box(vt), textRect(vt.parentNode.querySelector(".cat__label")));
-      if (vr && fullyOnScreen(vr) && vr.top < H * 0.45) { videoDone = true; startOrbit(vr, 2, 18); return; }
+  }
+  // scroll range in which the object sits well on screen while it is circled
+  function loopKeys(rect, from, to) {
+    var c = (rect.top + rect.bottom) / 2;
+    return [Math.max(0, c - H * from), Math.max(0, c - H * to)];
+  }
+
+  // Go down a lane past `rect`, circling it `laps` times on the way. The
+  // ring is joined along the side it shares with the lane, so the joins are
+  // tangent; if the lane is further out, the line bends over to the ring first.
+  function ringOnLane(rect, r, side, laps, laneX, keys, exitLen) {
+    var g = ringInfo(rect, r);
+    var sideX = side === "L" ? rect.left - r : rect.right + r;
+    // bend over from the lane to the ring's side within the room that is
+    // left above it – always moving onward, never back up
+    var prevY = ctl.length ? ctl[ctl.length - 1].y : rect.top - 100;
+    var room = rect.top - prevY;
+    if (Math.abs(sideX - laneX) > 1 && room > 30) { pt(laneX, prevY + room * 0.3); pt(sideX, prevY + room * 0.75); }
+    if (side === "R") loop(g, g.u.rightStart, g.u.rightEnd + laps, keys);
+    else loop(g, g.u.leftEnd, g.u.leftStart - laps, keys);
+    // leave along the same side for a moment, so the turn after it is rounded
+    if (exitLen !== 0) pt(ctl[ctl.length - 1].x, rect.bottom + (exitLen || 24));
+  }
+
+  // Cross horizontally at `y` from fromX to toX; optionally make one flat loop
+  // around a caption whose ring's bottom edge lies on that crossing.
+  function crossing(y, fromX, toX, caption, keys, round) {
+    pt(fromX, y, round);
+    if (caption) {
+      var g = ringInfo(caption, caption.r);
+      if (toX > fromX) loop(g, g.u.bottomEnd, g.u.bottomStart - 1, keys);
+      else loop(g, g.u.bottomStart, g.u.bottomEnd + 1, keys);
     }
-    if (captionsLeft > 0 && now > nextCaption && Math.random() < 0.02) {
-      var labels = qa(".cat__label").map(textRect).filter(function (r) { return r && nearLead(r); });
-      if (labels.length) {
-        captionsLeft--; nextCaption = now + 5000;
-        // a flat oval: wide around the words, close above and below (the video is just above)
-        startOrbit(labels[Math.floor(Math.random() * labels.length)], 1, 18, 7);
-        return;
+    pt(toX, y, round);
+  }
+
+  function buildRoute() {
+    ctl = [];
+    var tiles = qa(".cat");
+    var title = union(textOf(q(".masthead__title")), textOf(q(".masthead__sub")));
+    if (!tiles.length || !title) return null;
+
+    // rows of tiles (a tile wrapper includes its caption)
+    var rows = [];
+    tiles.forEach(function (el) {
+      var b = boxOf(el), lastRow = rows[rows.length - 1];
+      if (lastRow && Math.abs(lastRow.top - b.top) < 6) { lastRow.items.push(b); lastRow.bottom = Math.max(lastRow.bottom, b.bottom); }
+      else rows.push({ top: b.top, bottom: b.bottom, items: [b] });
+    });
+    rows.forEach(function (row, i) {
+      row.items.sort(function (a, b) { return a.left - b.left; });
+      var free = [], x = 0;
+      row.items.forEach(function (it) { if (it.left - x >= 8) free.push((x + it.left) / 2); x = it.right; });
+      if (W - x >= 8) free.push((x + W) / 2);
+      // alternate sides row by row: left lane, right lane, left lane...
+      row.lane = free.length ? free[i % 2 === 0 ? 0 : free.length - 1] : 6;
+      row.laneOffset = Math.min.apply(null, row.items.map(function (it) {
+        return Math.min(Math.abs(row.lane - it.left), Math.abs(row.lane - it.right));
+      }));
+    });
+
+    // 1. start on a loop around the studio name, leave it along its bottom edge
+    var tg = ringInfo(title, 20);
+    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [0, Math.max(140, Math.min(260, tg.cy - H * 0.25))]);
+    pt(rows[0].lane, title.bottom + 20);
+
+    // 2–4. down the lanes, crossing between rows
+    var ringRow = Math.min(1, rows.length - 1);
+    var capRow = rows.length >= 4 ? 3 : 0;
+    rows.forEach(function (row, i) {
+      if (i === ringRow) {
+        // two loops around the video next to this row's lane
+        var dist = function (it) { return Math.min(Math.abs(row.lane - it.left), Math.abs(row.lane - it.right)); };
+        var near = row.items.reduce(function (a, b) { return dist(a) <= dist(b) ? a : b; });
+        var side = row.lane < (near.left + near.right) / 2 ? "L" : "R";
+        var r = Math.max(6, Math.min(row.laneOffset, 18));
+        // between rows the crossing right below rounds the exit itself
+        ringOnLane(near, r, side, 2, row.lane, loopKeys(near, 0.66, 0.36), rows[i + 1] ? 0 : 24);
+      }
+      var next = rows[i + 1];
+      if (!next) return;
+      var y = (row.bottom + next.top) / 2, cap = null;
+      if (i === capRow) {
+        // the caption this crossing passes under, between the two lanes
+        var lo = Math.min(row.lane, next.lane), hi = Math.max(row.lane, next.lane);
+        var labelEl = qa(".cat__label").filter(function (l) {
+          var b = textOf(l); return b && Math.abs(b.bottom - row.bottom) < 40 && b.left > lo && b.right < hi;
+        })[0];
+        var lb = textOf(labelEl), above = labelEl && boxOf(labelEl.parentNode.querySelector(".cat__btn"));
+        if (lb && above) {
+          var cr = Math.max(4, Math.min(8, lb.top - above.bottom - 5));
+          cap = { left: lb.left - 22 + cr, right: lb.right + 22 - cr, top: lb.top, bottom: y - cr, r: cr };
+        }
+      }
+      // corners on a crossing stay inside the gap between the rows
+      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap, 0.62, 0.42) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
+    });
+    var lastRow = rows[rows.length - 1], laneX = lastRow.lane;
+    // finish the work section on the lane before bending toward anything else
+    pt(laneX, lastRow.bottom + 24);
+
+    // 5. a loop around Nata's photo and name (or the photo alone if the
+    //    bigger loop would run into the text beside it)
+    var photo = boxOf(q(".about__photo"));
+    var name = union(textOf(q(".about__head .eyebrow")), textOf(q(".about__lead")));
+    var body = qa(".about__body > span").map(textOf).filter(Boolean);
+    var around = union(photo, name);
+    var clash = around && body.some(function (b) {
+      return b.top < around.bottom + 14 && b.bottom > around.top && b.right > around.left && b.left < around.right;
+    });
+    var about = clash ? photo : around;
+    var exitX = laneX;
+    if (about) {
+      var side2 = laneX < (about.left + about.right) / 2 ? "L" : "R";
+      var r2 = Math.max(8, Math.min(16, side2 === "L" ? about.left - 6 : W - about.right - 6));
+      ringOnLane(about, r2, side2, 1, laneX, loopKeys(about, 0.64, 0.4));
+      var bodyBottom = body.length ? Math.max.apply(null, body.map(function (b) { return b.bottom; })) : about.bottom;
+      // past the text, but leaving room to turn toward the circle below
+      var ctaEl = q(".cta"), ctaTop = ctaEl ? boxOf(ctaEl).top - 22 : Infinity;
+      var after = Math.max(bodyBottom + 20, about.bottom + 24);
+      if (after > ctaTop - 70) after = (Math.max(bodyBottom, about.bottom) + ctaTop) / 2;
+      // keep to the ring's own side, so the line runs on without a jog
+      laneX = exitX = ctl[ctl.length - 1].x;
+      pt(laneX, after);
+    }
+
+    // 6. around the "Have an idea?" circle, entered at its top along a level line
+    var cta = boxOf(q(".cta"));
+    if (cta) {
+      var R = (cta.right - cta.left) / 2 + 22;
+      var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
+      var cg = ringInfo({ left: cx, right: cx, top: cy, bottom: cy }, R);
+      pt(exitX, cy - R);
+      var keys = loopKeys(cta, 0.6, 0.36);
+      if (exitX < cx) loop(cg, 0, 1.25, keys); else loop(cg, 0, -1.25, keys);
+    }
+    return finish();
+  }
+
+  // round the corners, resample evenly, and give every sample its scroll key
+  function finish() {
+    var pts = [];
+    for (var i = 0; i < ctl.length; i++) {
+      var c = ctl[i];
+      if (!c.corner || i === 0 || i === ctl.length - 1) { pts.push(c); continue; }
+      var a = ctl[i - 1], b = ctl[i + 1];
+      var da = Math.hypot(c.x - a.x, c.y - a.y), db = Math.hypot(b.x - c.x, b.y - c.y);
+      if (da < 0.5 || db < 0.5) continue;
+      var t = Math.min(c.round || FILLET, da * 0.5, db * 0.5);
+      var p1 = { x: c.x + (a.x - c.x) * t / da, y: c.y + (a.y - c.y) * t / da };
+      var p2 = { x: c.x + (b.x - c.x) * t / db, y: c.y + (b.y - c.y) * t / db };
+      for (var s = 0; s <= 10; s++) {
+        var f = s / 10, mf = 1 - f;
+        pts.push({ x: mf * mf * p1.x + 2 * mf * f * c.x + f * f * p2.x, y: mf * mf * p1.y + 2 * mf * f * c.y + f * f * p2.y });
       }
     }
-    if (now > nextCurl && Math.random() < 0.012 && freeAround(head.x, head.y - window.scrollY, 48)) {
-      var r0 = 18 + Math.random() * 18, side = Math.random() < 0.5 ? 1 : -1;
-      mode = "curl";
-      m = { cx: head.x + r0 * side, cy: head.y, r: r0, a: side > 0 ? Math.PI : 0, dir: side, turned: 0, total: Math.PI * 2 * (1.2 + Math.random() * 0.5) };
-      nextCurl = now + 6000 + Math.random() * 6000;
+    // resample every STEP px; loop samples carry their keys
+    var out = [{ x: pts[0].x, y: pts[0].y, k: pts[0].k }], acc = 0;
+    for (var j = 1; j < pts.length; j++) {
+      var p = pts[j - 1], n = pts[j], d = Math.hypot(n.x - p.x, n.y - p.y);
+      acc += d;
+      while (acc >= STEP) {
+        acc -= STEP;
+        var f2 = d ? 1 - acc / d : 1;
+        var k = p.k !== undefined && n.k !== undefined ? p.k + (n.k - p.k) * f2 : undefined;
+        out.push({ x: p.x + (n.x - p.x) * f2, y: p.y + (n.y - p.y) * f2, k: k });
+      }
     }
+    // straight parts follow the scroll (head stays at LEAD on screen); keys
+    // never go back, and every px of route costs at least a little scroll
+    var maxScroll = Math.max(1, document.documentElement.scrollHeight - H);
+    var prev = 0;
+    for (var m = 0; m < out.length; m++) {
+      var key = out[m].k !== undefined ? out[m].k : out[m].y - H * LEAD;
+      key = Math.max(key, prev + (m ? STEP * 0.25 : 0));
+      out[m].k = prev = key;
+    }
+    // squeeze the end so the route finishes exactly at the bottom of the page
+    var lastK = out[out.length - 1].k;
+    if (lastK > maxScroll) {
+      var from = out.length - 1;
+      for (var z = 0; z < out.length; z++) if (out[z].k > maxScroll - H * 0.9) { from = z; break; }
+      var k0 = out[from].k, base = Math.min(k0, maxScroll - 1), span = lastK - k0 || 1;
+      for (var z2 = from; z2 < out.length; z2++) out[z2].k = base + (out[z2].k - k0) / span * (maxScroll - base);
+    }
+    return out;
   }
 
-  function freeAround(x, vy, rad) {
-    return obstacles().every(function (r) {
-      return x + rad < r.left - CLEAR || x - rad > r.right + CLEAR || vy + rad < r.top - CLEAR || vy - rad > r.bottom + CLEAR;
-    });
+  // ---------- following the route ----------
+  var route = null, sHead = 0, lastMove = 0, raf = null, last = 0, fade = 0;
+
+  function targetFor(scroll) {
+    if (scroll <= route[0].k) return 0;
+    if (scroll >= route[route.length - 1].k) return route.length - 1;
+    var lo = 0, hi = route.length - 1;
+    while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (route[mid].k <= scroll) lo = mid; else hi = mid; }
+    var a = route[lo].k, b = route[hi].k;
+    return lo + (b > a ? (scroll - a) / (b - a) : 0);
+  }
+  function at(s) {
+    var i = Math.max(0, Math.min(route.length - 1, Math.floor(s))), j = Math.min(route.length - 1, i + 1), f = s - i;
+    return { x: route[i].x + (route[j].x - route[i].x) * f, y: route[i].y + (route[j].y - route[i].y) * f };
   }
 
-  // In a horizontal band, pick the x in free space closest to where the
-  // line would like to wander.
-  function freeX(obs, vy, wantX, fromX) {
-    var blocks = [];
-    obs.forEach(function (r) {
-      if (vy > r.top - CLEAR - 6 && vy < r.bottom + CLEAR + 6) blocks.push([r.left - CLEAR, r.right + CLEAR]);
+  // elements the line must never be drawn over (viewport coordinates)
+  function obstacles() {
+    var list = [];
+    function add(b, extra) { if (b && b.width) list.push(Object.assign({ left: b.left, right: b.right, top: b.top, bottom: b.bottom }, extra || {})); }
+    qa(".cat__btn").forEach(function (el) { add(el.getBoundingClientRect(), { round: parseFloat(getComputedStyle(el).borderTopLeftRadius) || 12 }); });
+    qa(".about__photo").forEach(function (el) { add(el.getBoundingClientRect(), { round: 10 }); });
+    [".cat__label", ".masthead__title", ".masthead__sub", ".about__lead", ".about__head .eyebrow", ".about__body > span", ".footer__grid > *", ".footer__links a", ".footer__word"].forEach(function (s) {
+      qa(s).forEach(function (el) { var r = document.createRange(); r.selectNodeContents(el.querySelector(".i18n") || el); add(r.getBoundingClientRect()); });
     });
-    if (!blocks.length) return wantX;
-    blocks.sort(function (a, b) { return a[0] - b[0]; });
-    var free = [], x = 3;
-    blocks.forEach(function (b) { if (b[0] > x + 2) free.push([x, b[0]]); x = Math.max(x, b[1]); });
-    if (W - 3 > x + 2) free.push([x, W - 3]);
-    if (!free.length) return wantX < W / 2 ? 3 : W - 3;
-    // stay in the gap nearest to where the line already is (never jump
-    // across a video); inside that gap, wander toward wantX
-    var gap = null, gapD = Infinity;
-    free.forEach(function (f) {
-      var d = fromX < f[0] ? f[0] - fromX : fromX > f[1] ? fromX - f[1] : 0;
-      if (d < gapD) { gapD = d; gap = f; }
-    });
-    return Math.max(gap[0], Math.min(gap[1], wantX));
+    [".cta", ".spinner"].forEach(function (s) { var el = q(s); if (el) add(el.getBoundingClientRect(), { circle: true }); });
+    return list.filter(function (r) { return r.bottom > -40 && r.top < H + 40; });
   }
 
-
-
-  // ---------- simulation ----------
   function step(now) {
     var dt = Math.min(40, now - (last || now)); last = now;
+    if (!route) { raf = null; return; }
     var sy = window.scrollY;
-    var scrolling = now - lastScroll < 350;
-    // during a fast flick (and a moment after it) the line holds its course
-    // instead of re-planning every frame
-    var calm = now - lastFast > SETTLE;
-    var obs = obstacles();
-    // Outside an orbit the line lives in screen space: carry it along with the
-    // scroll so page jumps never show up as steps in its path. During an orbit
-    // it stays attached to the object, which moves with the page.
-    var dSy = sy - prevSy; prevSy = sy;
-    if (dSy && mode !== "orbit") {
-      head.y += dSy; guide.y += dSy;
-      if (mode === "curl") m.cy += dSy;
-    }
-    // The tail streams back with the page gradually: its newest part stays
-    // with the head, older parts drift up with the content – so a scroll bends
-    // the tail into a soft streak instead of shifting it as one piece.
-    if (dSy) {
-      for (var pi = 0; pi < points.length; pi++) {
-        var pt = points[pi];
-        if (!pt.brk) pt.y -= dSy * Math.min(1, (now - pt.t) / (TAIL_MS * 0.6));
-      }
-    }
-    if (!calm && mode !== "follow") mode = "follow";
-
-    if (mode === "follow") {
-      // the guide leads a little below mid-screen; how far below "breathes",
-      // so the line sometimes rushes ahead and sometimes lags behind
-      var ty = sy + H * (LEAD + 0.07 * Math.sin(now * 0.0011 + ph[0]));
-      var wantX = W / 2 + wander(now) * (W / 2 - 24);
-      // look ahead so it moves aside before an element reaches it
-      // far behind after a long flick: don't race across the page – let the
-      // old tail fade where it is and glide in from the screen edge instead
-      if (Math.abs(ty - guide.y) > H * 0.75) {
-        points.push({ brk: true, t: now });
-        guide.y = head.y = ty > guide.y ? sy - 12 : sy + H + 12;
-        vel.x = 0; vel.y = 0;
-      }
-      var hereX = freeX(obs, guide.y - sy, calm ? wantX : guide.x, guide.x);
-      var tx = hereX;
-      if (calm) for (var look = 40; look <= 200; look += 40) tx = freeX(obs, guide.y - sy + look, tx, guide.x);
-      var k = Math.min(1, 0.0032 * pace(now) * dt);
-      var dy = (ty - guide.y) * k, maxDy = MAX_FALL * dt;
-      guide.y += Math.max(-maxDy, Math.min(maxDy, dy));
-      // drift slowly while the way is clear, sidestep sooner when something is ahead
-      var dx = (tx - guide.x) * Math.min(1, k * (Math.abs(tx - hereX) > 1 || Math.abs(tx - guide.x) > 40 ? 6 : 1.6));
-      var maxDx = (calm ? MAX_SIDE : MAX_SIDE * 0.55) * dt;
-      guide.x += Math.max(-maxDx, Math.min(maxDx, dx));
-      if (scrolling && calm) maybeTrick(now);
-    } else if (mode === "orbit") {
-      var w = dt / m.lapMs * (0.8 + 0.3 * pace(now));
-      m.u += m.dir * w; m.turned += w; m.blend = Math.min(1, m.blend + dt / 300);
-      var o = ringPoint(m.hw, m.hh, m.rad, m.u);
-      if (m.squash < 1) o.y = o.y / (m.hh + m.rad) * (m.hh + m.rad * m.squash); // flatter loop
-      guide.x += (m.cx + o.x - guide.x) * m.blend;
-      guide.y += (m.cy + o.y - guide.y) * m.blend;
-      var cyv = m.cy - sy; // done, the object left the screen, or it took too long
-      if (m.turned >= m.total || cyv < -H * 0.1 || cyv > H * 1.1 || now > m.until) mode = "follow";
+    var target = targetFor(sy);
+    var diff = target - sHead;
+    if (Math.abs(diff) * STEP > 2500) {
+      sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
     } else {
-      var w2 = 0.0065 * dt;
-      m.a += m.dir * w2; m.turned += w2;
-      var rr = m.r * (1 - 0.55 * (m.turned / m.total)); // tightening spiral
-      guide.x = m.cx + Math.cos(m.a) * rr;
-      guide.y = m.cy + Math.sin(m.a) * rr;
-      if (m.turned >= m.total || Math.abs(m.cy - sy - H / 2) > H * 0.65) mode = "follow";
+      // ease toward the target, never faster than ~1.6 px/ms along the route
+      var ds = diff * (1 - Math.exp(-dt / 150)), cap = 1.6 * dt / STEP;
+      sHead += Math.max(-cap, Math.min(cap, ds));
     }
-    guide.x = Math.max(3, Math.min(W - 3, guide.x));
-
-    if (mode === "orbit" && m.blend >= 1) {
-      // on an orbit the outline is already smooth (rounded corners) – follow
-      // it exactly so the line never cuts a corner into the object
-      vel.x = (guide.x - head.x) / Math.max(dt, 1); vel.y = (guide.y - head.y) / Math.max(dt, 1);
-      head.x = guide.x; head.y = guide.y;
-    } else {
-      // critically damped spring toward the guide – rounds every corner
-      var ax = SPRING * SPRING * (guide.x - head.x) - 2 * SPRING * vel.x;
-      var ay = SPRING * SPRING * (guide.y - head.y) - 2 * SPRING * vel.y;
-      vel.x += ax * dt; vel.y += ay * dt;
-      var v = Math.hypot(vel.x, vel.y);
-      if (v > MAX_SPEED) { vel.x *= MAX_SPEED / v; vel.y *= MAX_SPEED / v; }
-      head.x += vel.x * dt; head.y += vel.y * dt;
-    }
-    head.x = Math.max(2, Math.min(W - 2, head.x));
-
-    // the tail is kept in screen coordinates: it stays where the line was
-    // drawn and fades there, instead of sliding along with the page
-    var lp = points[points.length - 1], hy = head.y - sy;
-    if (!lp || lp.brk || Math.hypot(lp.x - head.x, lp.y - hy) > 2) points.push({ x: head.x, y: hy, t: now });
-    while (points.length && now - points[0].t > TAIL_MS) points.shift();
-
-    draw(now, sy, obs);
-
-    var settled = mode === "follow" && !scrolling && calm && Math.hypot(guide.x - head.x, guide.y - head.y) < 2 && Math.abs(sy + H * LEAD - guide.y) < H * 0.1;
-    if (settled && points.length < 2) { raf = null; last = 0; ctx.clearRect(0, 0, W, H); return; }
+    var moving = Math.abs(target - sHead) > 0.05;
+    if (moving) lastMove = now;
+    fade = now - lastMove < IDLE_MS ? Math.min(1, fade + dt / 200) : Math.max(0, fade - dt / 700);
+    draw(sy);
+    if (fade <= 0 && !moving) { raf = null; last = 0; ctx.clearRect(0, 0, W, H); return; }
     raf = requestAnimationFrame(step);
   }
 
-  // ---------- drawing ----------
-  // The tail is drawn in a few bands of equal opacity, each band one
-  // continuous smoothed path with flat ends – no overlapping round caps,
-  // so there are no brighter dots along the line.
   var BANDS = 14;
-  function draw(now, sy, obs) {
+  function draw(sy) {
     ctx.clearRect(0, 0, W, H);
+    if (fade <= 0) return;
+    var tailS = Math.max(0, sHead - TAIL / STEP);
+    var i0 = Math.floor(tailS), i1 = Math.floor(sHead);
+    if (i1 - i0 < 2) return;
+    var pts = [];
+    for (var i = i0; i <= i1; i++) pts.push({ x: route[i].x, y: route[i].y - sy, life: (i - tailS) / (sHead - tailS) });
+    var h = at(sHead); pts.push({ x: h.x, y: h.y - sy, life: 1 });
     ctx.lineWidth = LINE; ctx.lineJoin = "round"; ctx.lineCap = "butt";
-    // a break (after a long flick) splits the tail into separate pieces
-    var run = [];
-    for (var i = 0; i <= points.length; i++) {
-      var pt = points[i];
-      if (!pt || pt.brk) { drawRun(run, now, sy); run = []; } else run.push(pt);
+    // a few bands of equal opacity, each one continuous smooth path: one
+    // width, no brighter dots where pieces would otherwise overlap
+    var n = pts.length, per = Math.max(2, Math.ceil(n / BANDS));
+    for (var s = 0; s < n - 1; s += per) {
+      var e = Math.min(n - 1, s + per);
+      ctx.strokeStyle = "rgba(" + COLOR + "," + (Math.pow(Math.max(0, pts[e].life), 1.3) * 0.85 * fade).toFixed(3) + ")";
+      ctx.beginPath();
+      if (s === 0) ctx.moveTo(pts[0].x, pts[0].y);
+      else ctx.moveTo((pts[s - 1].x + pts[s].x) / 2, (pts[s - 1].y + pts[s].y) / 2);
+      for (var k = Math.max(1, s); k < e; k++) {
+        var a = pts[k], b = pts[k + 1];
+        ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2);
+      }
+      if (e === n - 1) ctx.lineTo(pts[e].x, pts[e].y);
+      ctx.stroke();
     }
-    // The line passes *behind* videos and text: erase it over every element,
-    // so it can never be drawn on top of them, even while the page moves.
-    if (obs && obs.length) {
-      ctx.save();
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = "#000";
-      obs.forEach(function (r) {
-        var g = 3, x = r.left - g, y = r.top - g, w = r.right - r.left + 2 * g, h = r.bottom - r.top + 2 * g;
-        ctx.beginPath();
-        if (r.circle) ctx.arc(x + w / 2, y + h / 2, Math.min(w, h) / 2, 0, Math.PI * 2);
-        else roundRect(x, y, w, h, (r.round || 3) + g);
-        ctx.fill();
-      });
-      ctx.restore();
-    }
+    // safety net: the line passes behind every element
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "#000";
+    obstacles().forEach(function (r) {
+      var g = 3, x = r.left - g, y = r.top - g, w = r.right - r.left + 2 * g, hh = r.bottom - r.top + 2 * g;
+      ctx.beginPath();
+      if (r.circle) ctx.arc(x + w / 2, y + hh / 2, Math.min(w, hh) / 2, 0, Math.PI * 2);
+      else roundRect(x, y, w, hh, (r.round || 3) + g);
+      ctx.fill();
+    });
+    ctx.restore();
   }
   function roundRect(x, y, w, h, rad) {
     rad = Math.min(rad, w / 2, h / 2);
@@ -370,43 +395,27 @@
     ctx.arcTo(x, y, x + w, y, rad);
     ctx.closePath();
   }
-  function drawRun(pts, now, sy) {
-    var n = pts.length;
-    if (n < 3) return;
-    var per = Math.max(2, Math.ceil(n / BANDS));
-    for (var s = 0; s < n - 1; s += per) {
-      var e = Math.min(n - 1, s + per);
-      var life = 1 - (now - pts[e].t) / TAIL_MS;
-      if (life <= 0) continue;
-      ctx.strokeStyle = "rgba(" + COLOR + "," + (Math.pow(life, 1.3) * 0.85).toFixed(3) + ")";
-      ctx.beginPath();
-      // start exactly where the previous band ended (the midpoint before point s)
-      if (s === 0) ctx.moveTo(pts[0].x, pts[0].y);
-      else ctx.moveTo((pts[s - 1].x + pts[s].x) / 2, (pts[s - 1].y + pts[s].y) / 2);
-      for (var k = Math.max(1, s); k < e; k++) {
-        var a = pts[k], b = pts[k + 1];
-        ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2);
-      }
-      if (e === n - 1) ctx.lineTo(pts[e].x, pts[e].y);
-      ctx.stroke();
-    }
-  }
 
   function wake() {
-    var t = performance.now(), sy = window.scrollY;
-    if (t > lastSyT) {
-      var v = Math.abs(sy - lastSy) / Math.max(8, t - lastSyT);
-      scrollSpeed = scrollSpeed * 0.6 + v * 0.4;
-      if (scrollSpeed > FAST) lastFast = t;
-    }
-    lastSy = sy; lastSyT = t;
-    lastScroll = t;
-    if (!raf) {
-      if (head.y < sy - H || head.y > sy + 2 * H) { head.y = guide.y = sy + H * 0.1; guide.x = head.x; points = []; vel.x = 0; vel.y = 0; }
-      prevSy = sy;
-      raf = requestAnimationFrame(step);
-    }
+    lastMove = performance.now();
+    if (!raf && route) raf = requestAnimationFrame(step);
   }
+
+  // the route follows the layout: rebuild when sizes or fonts change
+  var rebuildTimer = null;
+  function rebuild() {
+    clearTimeout(rebuildTimer);
+    rebuildTimer = setTimeout(function () {
+      resize();
+      route = buildRoute();
+      if (route) sHead = targetFor(window.scrollY);
+    }, 120);
+  }
+  resize();
+  rebuild();
+  window.addEventListener("resize", rebuild);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
+  if ("ResizeObserver" in window) new ResizeObserver(rebuild).observe(document.body);
   window.addEventListener("scroll", wake, { passive: true });
   document.addEventListener("visibilitychange", function () {
     if (document.hidden && raf) { cancelAnimationFrame(raf); raf = null; last = 0; }
