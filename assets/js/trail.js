@@ -33,6 +33,11 @@
   var LEAD = 0.58;         // where the head heads for, as a share of the viewport height
   var CLEAR = 12;          // px the line keeps away from any element
   var SPRING = 0.024;      // 1/ms – how tightly the head follows the guide
+  var MAX_FALL = 0.8;      // px/ms – fastest the line travels down/up the page
+  var MAX_SIDE = 0.42;     // px/ms – fastest sideways move (0.22 during a fast scroll)
+  var MAX_SPEED = 1.0;     // px/ms – speed cap for the visible head
+  var FAST = 1.4;          // px/ms of scrolling that counts as a fast flick
+  var SETTLE = 280;        // ms after a fast scroll before the line re-plans its route
   var W = 0, H = 0, dpr = 1;
 
   function resize() {
@@ -52,6 +57,7 @@
   var mode = "follow", m = null;
   var nextCurl = 0, nextCaption = 0, captionsLeft = 2;
   var lastScroll = 0, raf = null, last = 0;
+  var scrollSpeed = 0, lastFast = -1e9, lastSy = window.scrollY, lastSyT = 0;
 
   var ph = [Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3];
   function wander(t) {
@@ -221,7 +227,11 @@
     var dt = Math.min(40, now - (last || now)); last = now;
     var sy = window.scrollY;
     var scrolling = now - lastScroll < 350;
+    // during a fast flick (and a moment after it) the line holds its course
+    // instead of re-planning every frame
+    var calm = now - lastFast > SETTLE;
     var obs = obstacles();
+    if (!calm && mode !== "follow") mode = "follow";
 
     if (mode === "follow") {
       // the guide leads a little below mid-screen; how far below "breathes",
@@ -229,14 +239,24 @@
       var ty = sy + H * (LEAD + 0.07 * Math.sin(now * 0.0011 + ph[0]));
       var wantX = W / 2 + wander(now) * (W / 2 - 24);
       // look ahead so it moves aside before an element reaches it
-      var hereX = freeX(obs, guide.y - sy, wantX, guide.x);
+      // far behind after a long flick: don't race across the page – let the
+      // old tail fade where it is and glide in from the screen edge instead
+      if (Math.abs(ty - guide.y) > H * 0.75) {
+        points.push({ brk: true, t: now });
+        guide.y = head.y = ty > guide.y ? sy - 12 : sy + H + 12;
+        vel.x = 0; vel.y = 0;
+      }
+      var hereX = freeX(obs, guide.y - sy, calm ? wantX : guide.x, guide.x);
       var tx = hereX;
-      for (var look = 40; look <= 200; look += 40) tx = freeX(obs, guide.y - sy + look, tx, guide.x);
+      if (calm) for (var look = 40; look <= 200; look += 40) tx = freeX(obs, guide.y - sy + look, tx, guide.x);
       var k = Math.min(1, 0.0032 * pace(now) * dt);
-      guide.y += (ty - guide.y) * k;
-      // drift slowly while the way is clear, sidestep quickly when something is ahead
-      guide.x += (tx - guide.x) * Math.min(1, k * (Math.abs(tx - hereX) > 1 || Math.abs(tx - guide.x) > 40 ? 6 : 1.6));
-      if (scrolling) maybeTrick(now);
+      var dy = (ty - guide.y) * k, maxDy = MAX_FALL * dt;
+      guide.y += Math.max(-maxDy, Math.min(maxDy, dy));
+      // drift slowly while the way is clear, sidestep sooner when something is ahead
+      var dx = (tx - guide.x) * Math.min(1, k * (Math.abs(tx - hereX) > 1 || Math.abs(tx - guide.x) > 40 ? 6 : 1.6));
+      var maxDx = (calm ? MAX_SIDE : MAX_SIDE * 0.52) * dt;
+      guide.x += Math.max(-maxDx, Math.min(maxDx, dx));
+      if (scrolling && calm) maybeTrick(now);
     } else if (mode === "orbit") {
       var w = dt / m.lapMs * (0.8 + 0.3 * pace(now));
       m.u += m.dir * w; m.turned += w; m.blend = Math.min(1, m.blend + dt / 300);
@@ -266,17 +286,19 @@
       var ax = SPRING * SPRING * (guide.x - head.x) - 2 * SPRING * vel.x;
       var ay = SPRING * SPRING * (guide.y - head.y) - 2 * SPRING * vel.y;
       vel.x += ax * dt; vel.y += ay * dt;
+      var v = Math.hypot(vel.x, vel.y);
+      if (v > MAX_SPEED) { vel.x *= MAX_SPEED / v; vel.y *= MAX_SPEED / v; }
       head.x += vel.x * dt; head.y += vel.y * dt;
     }
     head.x = Math.max(2, Math.min(W - 2, head.x));
 
     var lp = points[points.length - 1];
-    if (!lp || Math.hypot(lp.x - head.x, lp.y - head.y) > 2) points.push({ x: head.x, y: head.y, t: now });
+    if (!lp || lp.brk || Math.hypot(lp.x - head.x, lp.y - head.y) > 2) points.push({ x: head.x, y: head.y, t: now });
     while (points.length && now - points[0].t > TAIL_MS) points.shift();
 
     draw(now, sy);
 
-    var settled = mode === "follow" && !scrolling && Math.hypot(guide.x - head.x, guide.y - head.y) < 2 && Math.abs(sy + H * LEAD - guide.y) < H * 0.1;
+    var settled = mode === "follow" && !scrolling && calm && Math.hypot(guide.x - head.x, guide.y - head.y) < 2 && Math.abs(sy + H * LEAD - guide.y) < H * 0.1;
     if (settled && points.length < 2) { raf = null; last = 0; ctx.clearRect(0, 0, W, H); return; }
     raf = requestAnimationFrame(step);
   }
@@ -288,32 +310,46 @@
   var BANDS = 14;
   function draw(now, sy) {
     ctx.clearRect(0, 0, W, H);
-    var n = points.length;
-    if (n < 3) return;
     ctx.lineWidth = LINE; ctx.lineJoin = "round"; ctx.lineCap = "butt";
+    // a break (after a long flick) splits the tail into separate pieces
+    var run = [];
+    for (var i = 0; i <= points.length; i++) {
+      var pt = points[i];
+      if (!pt || pt.brk) { drawRun(run, now, sy); run = []; } else run.push(pt);
+    }
+  }
+  function drawRun(pts, now, sy) {
+    var n = pts.length;
+    if (n < 3) return;
     var per = Math.max(2, Math.ceil(n / BANDS));
     for (var s = 0; s < n - 1; s += per) {
       var e = Math.min(n - 1, s + per);
-      var life = 1 - (now - points[e].t) / TAIL_MS;
+      var life = 1 - (now - pts[e].t) / TAIL_MS;
       if (life <= 0) continue;
       ctx.strokeStyle = "rgba(" + COLOR + "," + (Math.pow(life, 1.3) * 0.85).toFixed(3) + ")";
       ctx.beginPath();
       // start exactly where the previous band ended (the midpoint before point s)
-      if (s === 0) ctx.moveTo(points[0].x, points[0].y - sy);
-      else ctx.moveTo((points[s - 1].x + points[s].x) / 2, (points[s - 1].y + points[s].y) / 2 - sy);
-      for (var i = Math.max(1, s); i < e; i++) {
-        var a = points[i], b = points[i + 1];
+      if (s === 0) ctx.moveTo(pts[0].x, pts[0].y - sy);
+      else ctx.moveTo((pts[s - 1].x + pts[s].x) / 2, (pts[s - 1].y + pts[s].y) / 2 - sy);
+      for (var k = Math.max(1, s); k < e; k++) {
+        var a = pts[k], b = pts[k + 1];
         ctx.quadraticCurveTo(a.x, a.y - sy, (a.x + b.x) / 2, (a.y + b.y) / 2 - sy);
       }
-      if (e === n - 1) ctx.lineTo(points[e].x, points[e].y - sy);
+      if (e === n - 1) ctx.lineTo(pts[e].x, pts[e].y - sy);
       ctx.stroke();
     }
   }
 
   function wake() {
-    lastScroll = performance.now();
+    var t = performance.now(), sy = window.scrollY;
+    if (t > lastSyT) {
+      var v = Math.abs(sy - lastSy) / Math.max(8, t - lastSyT);
+      scrollSpeed = scrollSpeed * 0.6 + v * 0.4;
+      if (scrollSpeed > FAST) lastFast = t;
+    }
+    lastSy = sy; lastSyT = t;
+    lastScroll = t;
     if (!raf) {
-      var sy = window.scrollY;
       if (head.y < sy - H || head.y > sy + 2 * H) { head.y = guide.y = sy + H * 0.1; guide.x = head.x; points = []; vel.x = 0; vel.y = 0; }
       raf = requestAnimationFrame(step);
     }
