@@ -84,9 +84,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   padding: 16px 0;
-  /* brands fade out before the language capsule at the right end */
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 calc(100% - var(--gutter) - 110px), transparent calc(100% - var(--gutter) - 64px));
-          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 calc(100% - var(--gutter) - 110px), transparent calc(100% - var(--gutter) - 64px));
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 .marquee__track { display: flex; width: max-content; animation: marquee 45s linear infinite; }
 .marquee:hover .marquee__track { animation-play-state: paused; }
@@ -99,25 +98,22 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 
 /* ---------- Language switch ----------
    A small rounded square showing only the language you can switch to.
-   At the top it sits at the end of the brand strip. Once the strip has
-   scrolled away it follows you in the top-right corner: it shows while you
-   scroll and slowly fades out 1.5 s after scrolling stops. */
+   Hidden while the brand strip is on screen. Once the strip has scrolled
+   away it appears in the top-right corner while you scroll and slowly
+   fades out 1.5 s after scrolling stops. */
 @property --lang-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 .lang {
-  position: absolute; z-index: 40; top: 0; right: var(--gutter);
-  height: var(--marquee-h, 52px); display: flex; align-items: center;
-}
-.lang.is-floating {
-  position: fixed; top: 12px; height: auto;
+  position: fixed; z-index: 40; top: 12px; right: var(--gutter);
+  display: flex; align-items: center;
   opacity: 0; pointer-events: none; transform: translateY(-4px);
   transition: opacity 0.9s ease, transform 0.9s ease;
 }
-.lang.is-floating.is-visible,
+.lang.is-visible,
 .lang.is-floating:focus-within {
   opacity: 1; pointer-events: auto; transform: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.lang.is-floating button { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65); }
+.lang button { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65); }
 .lang button[aria-pressed="true"] { display: none; }
 .lang button {
   position: relative; width: 40px; height: 40px; padding: 0 0 0 0.22em; cursor: pointer;

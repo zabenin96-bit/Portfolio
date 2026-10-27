@@ -293,18 +293,12 @@
   }
 
   // ---------- language button ----------
-  // Docked at the end of the brand strip; once the strip is off screen it
-  // floats top-right, shows while scrolling and fades 1.5 s after it stops.
+  // Hidden while the brand strip is visible; once the strip is off screen it
+  // shows top-right while scrolling and fades 1.5 s after scrolling stops.
   var marquee = document.querySelector(".marquee");
   var langBox = document.querySelector(".lang");
   var LANG_HIDE_DELAY = 1500;
   var langHideTimer = null;
-  function placeLang() { root.style.setProperty("--marquee-h", marquee.offsetHeight + "px"); }
-  placeLang();
-  // the strip grows once its font has loaded
-  if ("ResizeObserver" in window) new ResizeObserver(placeLang).observe(marquee);
-  else window.addEventListener("resize", placeLang);
-
   function hideLangLater() {
     clearTimeout(langHideTimer);
     langHideTimer = setTimeout(function () {
@@ -327,6 +321,8 @@
     }).observe(marquee);
     window.addEventListener("scroll", showLang, { passive: true });
     langBox.addEventListener("click", showLang);
+  } else {
+    langBox.classList.add("is-floating", "is-visible"); // old browsers: always shown
   }
 
   // ---------- smooth in-page scrolling ----------
