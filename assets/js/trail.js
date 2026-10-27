@@ -58,6 +58,7 @@
   var nextCurl = 0, nextCaption = 0, captionsLeft = 2;
   var lastScroll = 0, raf = null, last = 0;
   var scrollSpeed = 0, lastFast = -1e9, lastSy = window.scrollY, lastSyT = 0;
+  var prevSy = window.scrollY; // scroll position at the previous frame
 
   var ph = [Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3, Math.random() * 6.3];
   function wander(t) {
@@ -231,6 +232,23 @@
     // instead of re-planning every frame
     var calm = now - lastFast > SETTLE;
     var obs = obstacles();
+    // Outside an orbit the line lives in screen space: carry it along with the
+    // scroll so page jumps never show up as steps in its path. During an orbit
+    // it stays attached to the object, which moves with the page.
+    var dSy = sy - prevSy; prevSy = sy;
+    if (dSy && mode !== "orbit") {
+      head.y += dSy; guide.y += dSy;
+      if (mode === "curl") m.cy += dSy;
+    }
+    // The tail streams back with the page gradually: its newest part stays
+    // with the head, older parts drift up with the content – so a scroll bends
+    // the tail into a soft streak instead of shifting it as one piece.
+    if (dSy) {
+      for (var pi = 0; pi < points.length; pi++) {
+        var pt = points[pi];
+        if (!pt.brk) pt.y -= dSy * Math.min(1, (now - pt.t) / (TAIL_MS * 0.6));
+      }
+    }
     if (!calm && mode !== "follow") mode = "follow";
 
     if (mode === "follow") {
@@ -292,8 +310,10 @@
     }
     head.x = Math.max(2, Math.min(W - 2, head.x));
 
-    var lp = points[points.length - 1];
-    if (!lp || lp.brk || Math.hypot(lp.x - head.x, lp.y - head.y) > 2) points.push({ x: head.x, y: head.y, t: now });
+    // the tail is kept in screen coordinates: it stays where the line was
+    // drawn and fades there, instead of sliding along with the page
+    var lp = points[points.length - 1], hy = head.y - sy;
+    if (!lp || lp.brk || Math.hypot(lp.x - head.x, lp.y - hy) > 2) points.push({ x: head.x, y: hy, t: now });
     while (points.length && now - points[0].t > TAIL_MS) points.shift();
 
     draw(now, sy);
@@ -329,13 +349,13 @@
       ctx.strokeStyle = "rgba(" + COLOR + "," + (Math.pow(life, 1.3) * 0.85).toFixed(3) + ")";
       ctx.beginPath();
       // start exactly where the previous band ended (the midpoint before point s)
-      if (s === 0) ctx.moveTo(pts[0].x, pts[0].y - sy);
-      else ctx.moveTo((pts[s - 1].x + pts[s].x) / 2, (pts[s - 1].y + pts[s].y) / 2 - sy);
+      if (s === 0) ctx.moveTo(pts[0].x, pts[0].y);
+      else ctx.moveTo((pts[s - 1].x + pts[s].x) / 2, (pts[s - 1].y + pts[s].y) / 2);
       for (var k = Math.max(1, s); k < e; k++) {
         var a = pts[k], b = pts[k + 1];
-        ctx.quadraticCurveTo(a.x, a.y - sy, (a.x + b.x) / 2, (a.y + b.y) / 2 - sy);
+        ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2);
       }
-      if (e === n - 1) ctx.lineTo(pts[e].x, pts[e].y - sy);
+      if (e === n - 1) ctx.lineTo(pts[e].x, pts[e].y);
       ctx.stroke();
     }
   }
@@ -351,6 +371,7 @@
     lastScroll = t;
     if (!raf) {
       if (head.y < sy - H || head.y > sy + 2 * H) { head.y = guide.y = sy + H * 0.1; guide.x = head.x; points = []; vel.x = 0; vel.y = 0; }
+      prevSy = sy;
       raf = requestAnimationFrame(step);
     }
   }
