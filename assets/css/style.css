@@ -148,13 +148,14 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 
 /* ---------- Category grid ---------- */
+/* phones: one large tile per row (like TIHO); from 760px: two per row */
 .cats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 36px;
   padding-bottom: clamp(96px, 12vw, 160px);
 }
-@media (min-width: 760px) { .cats { gap: 56px 24px; } }
+@media (min-width: 760px) { .cats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 24px; } }
 .cat { display: flex; flex-direction: column; align-items: center; gap: 14px; transition: opacity 0.4s var(--ease); }
 @media (min-width: 760px) { .cat { gap: 20px; } }
 @media (hover: hover) {
@@ -165,12 +166,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   border-radius: 14px; background: #141414; cursor: pointer;
   transition: box-shadow 0.4s var(--ease), transform 0.4s var(--ease);
 }
-.cat__btn { aspect-ratio: 1 / 1; border-radius: 10px; }
-/* odd last tile spans the full row at the same height */
-.cat:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.cat:last-child:nth-child(odd) .cat__btn { aspect-ratio: 2 / 1; }
+.cat__btn { aspect-ratio: 4 / 3; border-radius: 12px; }
 @media (min-width: 760px) {
-  .cat__btn { aspect-ratio: 4 / 3; border-radius: 14px; }
+  .cat__btn { border-radius: 14px; }
+  /* odd last tile spans the full row at the same height */
+  .cat:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .cat:last-child:nth-child(odd) .cat__btn { aspect-ratio: 8 / 3; }
 }
 .cat__btn:hover, .card__btn:hover { box-shadow: 0 0 48px var(--tile-glow); }
@@ -179,8 +179,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 clamp(40px, 6vw, 90px) clamp(12px, 2vw, 30px) rgba(0, 0, 0, 0.6); pointer-events: none; }
 .cat__label {
-  font-size: 11px; letter-spacing: 0.2em; line-height: 1.4; text-transform: uppercase;
-  padding-left: 0.2em; text-align: center;
+  font-size: 13px; letter-spacing: 0.3em; line-height: 1.4; text-transform: uppercase;
+  padding-left: 0.3em; text-align: center;
 }
 @media (min-width: 760px) { .cat__label { font-size: clamp(14px, 1.2vw, 18px); letter-spacing: 0.32em; padding-left: 0.32em; } }
 

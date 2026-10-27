@@ -118,7 +118,7 @@
   var stillsOnly = reduceMotion || saveData;
   var lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
     (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
-  var MAX_PLAYING = lowEnd ? 2 : Infinity;
+  var MAX_PLAYING = lowEnd ? 2 : 3;
   var PLAY_RATIO = 0.5;  // share of the tile that must be on screen
   var START_GAP = 150;   // ms between consecutive starts
   var ratios = new Map(); // video -> visible share of its tile
@@ -130,11 +130,16 @@
     if (p && p.catch) p.catch(function () {}); // autoplay blocked (e.g. iOS Low Power): poster stays
   }
 
-  // Pick the file that matches the tile's real pixel size: phones get the
-  // 640px loop (4x fewer pixels to decode), big/retina tiles the 1280px one.
+  // Pick the file that matches the tile's real size. Phone-width tiles never
+  // need more than 960px (2.5+ device pixels per CSS pixel already), so the
+  // 1280px loop is reserved for large tiles on big/retina screens.
   function previewSrc(v) {
-    var px = v.parentNode.getBoundingClientRect().width * (window.devicePixelRatio || 1);
-    return px > 720 || !v.dataset.srcSmall ? v.dataset.src : v.dataset.srcSmall;
+    var css = v.parentNode.getBoundingClientRect().width;
+    var px = css * (window.devicePixelRatio || 1);
+    var d = v.dataset;
+    if (px <= 720 && d.srcSmall) return d.srcSmall;
+    if ((px <= 1000 || css < 500) && d.srcMedium) return d.srcMedium;
+    return d.src;
   }
   function ensureSrc(v) {
     if (!v.getAttribute("src")) { v.src = previewSrc(v); v.preload = "auto"; }
@@ -223,6 +228,7 @@
         v.muted = true;
         v.dataset.src = cat.preview;
         if (cat.previewSmall) v.dataset.srcSmall = cat.previewSmall;
+        if (cat.previewMedium) v.dataset.srcMedium = cat.previewMedium;
         v.addEventListener("playing", function () { v.classList.add("is-ready"); }, { once: true });
         previewObserver.observe(v);
         btn.appendChild(v);
