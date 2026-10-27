@@ -11,7 +11,7 @@
 window.SITE = {
   i18n: {
     ru: {
-      metaTitle: "whereisyoursound — звук для кино, рекламы, анимации и игр",
+      metaTitle: "whereisyoursound – звук для кино, рекламы, анимации и игр",
       sub: "Музыка · Саунд-дизайн",
       brandsLabel: "Бренды и проекты",
       workLabel: "Работы",
@@ -19,9 +19,9 @@ window.SITE = {
       who: "Обо мне",
       photoAlt: "Ната, основательница whereisyoursound",
       l1: "Я Ната, основательница whereisyoursound.",
-      l2: "Делаю звук под ключ для кино, рекламы, анимации и игр — от саунд-дизайна и музыки до сведения.",
+      l2: "Делаю звук под ключ для кино, рекламы, анимации и игр – от саунд-дизайна и музыки до сведения.",
       l3: "Работаю в тесной связке с режиссёром и командой: так звук попадает точно в замысел.",
-      l4: "Студия в Тбилиси, проекты — по всему миру.",
+      l4: "Студия в Тбилиси, проекты – по всему миру.",
       cta: "Есть идея? Напишите мне.",
       city: "Тбилиси",
       navWork: "Работы",
@@ -35,7 +35,7 @@ window.SITE = {
       role: "музыка и саунд-дизайн",
     },
     en: {
-      metaTitle: "whereisyoursound — sound for film, advertising, animation and games",
+      metaTitle: "whereisyoursound – sound for film, advertising, animation and games",
       sub: "Music · Sound design",
       brandsLabel: "Brands and projects",
       workLabel: "Work",
@@ -43,7 +43,7 @@ window.SITE = {
       who: "About",
       photoAlt: "Nata, founder of whereisyoursound",
       l1: "I’m Nata, founder of whereisyoursound.",
-      l2: "I handle sound end to end for film, advertising, animation and games — from sound design and music to the final mix.",
+      l2: "I handle sound end to end for film, advertising, animation and games – from sound design and music to the final mix.",
       l3: "I work hand in hand with directors and their teams, so the sound lands exactly on the vision.",
       l4: "Based in Tbilisi, working worldwide.",
       cta: "Have an idea? Get in touch.",
