@@ -10,7 +10,7 @@ index.html              страница
 assets/css/style.css    стили
 assets/js/data.js       ВСЕ ТЕКСТЫ, КАТЕГОРИИ, ПРОЕКТЫ И БРЕНДЫ — правится здесь
 assets/js/main.js       логика: языки, тема, курсор, бегущая строка, окна категорий
-assets/fonts/           шрифты (Cormorant, Manrope), лежат локально — без Google Fonts
+assets/fonts/           шрифт Raleway, лежит локально — без Google Fonts
 assets/video/           короткие превью-петли для плиток категорий
 assets/img/             постеры и иконка
 ```
