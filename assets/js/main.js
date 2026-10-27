@@ -36,12 +36,25 @@
   // ---------- language ----------
   function t(key) { return SITE.i18n[lang][key]; }
 
+  // Both languages are stacked in the same spot and only the active one is
+  // visible, so every label always reserves room for its longer version and
+  // nothing on the page moves when the language changes.
+  function bi(ru, en) {
+    return el("span", { class: "i18n" }, [el("span", { lang: "ru", text: ru }), el("span", { lang: "en", text: en })]);
+  }
+
   function applyLang(next) {
     lang = next;
     root.lang = lang;
     document.title = t("metaTitle");
     document.querySelectorAll("[data-i18n]").forEach(function (node) {
-      node.textContent = t(node.getAttribute("data-i18n"));
+      if (node.querySelector(".i18n")) return; // already holds both languages
+      var key = node.getAttribute("data-i18n");
+      node.textContent = "";
+      node.appendChild(bi(SITE.i18n.ru[key], SITE.i18n.en[key]));
+    });
+    document.querySelectorAll(".cat__btn").forEach(function (b) {
+      b.setAttribute("aria-label", b.dataset[lang]);
     });
     document.querySelectorAll("[data-i18n-attr]").forEach(function (node) {
       node.getAttribute("data-i18n-attr").split(",").forEach(function (pair) {
@@ -53,7 +66,6 @@
       b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang));
     });
     renderMarquee();
-    renderCats();
     if (openCat) renderSheet(openCat);
   }
 
@@ -131,7 +143,9 @@
 
   function placeholder(note, withMeter) {
     var ph = el("div", { class: "placeholder", "aria-hidden": "true" });
-    ph.appendChild(el("span", { class: "placeholder__note", text: note }));
+    var noteEl = el("span", { class: "placeholder__note" });
+    if (typeof note === "string") noteEl.textContent = note; else noteEl.appendChild(note);
+    ph.appendChild(noteEl);
     if (withMeter) {
       var m = el("div", { class: "meter" });
       for (var i = 0; i < 5; i++) m.appendChild(el("i"));
@@ -146,8 +160,10 @@
     visible.clear();
     grid.textContent = "";
     SITE.categories.forEach(function (cat) {
-      var label = cat.title[lang];
-      var btn = el("button", { type: "button", class: "cat__btn", "aria-label": label, "data-cursor": "arrow" });
+      var btn = el("button", {
+        type: "button", class: "cat__btn", "aria-label": cat.title[lang], "data-cursor": "arrow",
+        "data-ru": cat.title.ru, "data-en": cat.title.en,
+      });
       btn.style.background = cat.tint || "#141414";
       if (cat.poster) {
         // Poster sits under the video, so there is never a black frame while it loads.
@@ -164,11 +180,11 @@
         previewObserver.observe(v);
         btn.appendChild(v);
       } else if (!cat.poster) {
-        btn.appendChild(placeholder(t("previewNote"), true));
+        btn.appendChild(placeholder(bi(SITE.i18n.ru.previewNote, SITE.i18n.en.previewNote), true));
       }
       btn.appendChild(el("span", { class: "vignette" }));
       btn.addEventListener("click", function () { openSheet(cat); });
-      grid.appendChild(el("div", { class: "cat" }, [btn, el("div", { class: "cat__label", text: label, "aria-hidden": "true" })]));
+      grid.appendChild(el("div", { class: "cat" }, [btn, el("div", { class: "cat__label", "aria-hidden": "true" }, [bi(cat.title.ru, cat.title.en)])]));
     });
   }
 
@@ -178,7 +194,9 @@
   var lastTrigger = null;
 
   function renderSheet(cat) {
-    document.getElementById("sheet-title").textContent = cat.title[lang];
+    var head = document.getElementById("sheet-title");
+    head.textContent = "";
+    head.appendChild(bi(cat.title.ru, cat.title.en));
     var cards = document.getElementById("cards");
     cards.className = "cards" + (cat.format === "vertical" ? " cards--vertical" : "");
     cards.textContent = "";
@@ -192,7 +210,8 @@
       play.appendChild(svg(PLAY));
       btn.appendChild(play);
       btn.addEventListener("click", function () { playProject(btn, p); });
-      cards.appendChild(el("div", { class: "card" }, [btn, el("div", { class: "card__caption", text: title + " (" + t("role") + ")" })]));
+      var caption = bi(p.title.ru + " (" + SITE.i18n.ru.role + ")", p.title.en + " (" + SITE.i18n.en.role + ")");
+      cards.appendChild(el("div", { class: "card" }, [btn, el("div", { class: "card__caption" }, [caption])]));
     });
   }
 
@@ -323,5 +342,7 @@
 
   // ---------- misc ----------
   document.getElementById("year").textContent = String(new Date().getFullYear());
-  applyLang(initialLang());
+  lang = initialLang();
+  renderCats();
+  applyLang(lang);
 })();

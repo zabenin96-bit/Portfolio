@@ -59,6 +59,12 @@ img, video { display: block; max-width: 100%; }
 }
 .container { max-width: 1440px; margin: 0 auto; padding-inline: var(--gutter); }
 .html-locked { overflow: hidden; }
+
+/* both languages share one grid cell; the inactive one keeps its space */
+.i18n { display: inline-grid; }
+.i18n > * { grid-area: 1 / 1; }
+html[lang="ru"] .i18n > [lang="en"],
+html[lang="en"] .i18n > [lang="ru"] { visibility: hidden; }
 [tabindex="-1"]:focus { outline: none; }
 
 /* language change: copy cross-fades instead of jumping */
