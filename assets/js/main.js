@@ -67,8 +67,15 @@
   document.querySelectorAll("[data-lang]").forEach(function (b) {
     b.addEventListener("click", function () {
       var next = b.getAttribute("data-lang");
+      if (next === lang) return;
       store("lang", next);
-      applyLang(next);
+      if (reduceMotion) { applyLang(next); return; }
+      // fade the copy out, swap it, fade back in
+      root.classList.add("is-switching");
+      setTimeout(function () {
+        applyLang(next);
+        requestAnimationFrame(function () { root.classList.remove("is-switching"); });
+      }, 180);
     });
   });
 
@@ -219,13 +226,22 @@
     sheet.scrollTop = 0;
   }
   function closeSheet() {
+    if (!sheet.open || sheet.classList.contains("is-closing")) return;
+    if (reduceMotion) { finishClose(); return; }
+    sheet.classList.add("is-closing");
+    setTimeout(finishClose, 260);
+  }
+  function finishClose() {
+    sheet.classList.remove("is-closing");
     if (sheet.close) sheet.close(); else sheet.removeAttribute("open");
   }
+  // Esc: animate out instead of the browser's instant close
+  sheet.addEventListener("cancel", function (e) { e.preventDefault(); closeSheet(); });
   sheet.addEventListener("close", function () {
     openCat = null;
     root.classList.remove("html-locked");
     document.getElementById("cards").textContent = ""; // stops any playing video
-    if (lastTrigger && lastTrigger.focus) lastTrigger.focus();
+    if (lastTrigger && lastTrigger.focus) lastTrigger.focus({ preventScroll: true });
   });
   document.getElementById("sheet-close").addEventListener("click", closeSheet);
 
@@ -264,6 +280,46 @@
   // the strip grows once its font has loaded
   if ("ResizeObserver" in window) new ResizeObserver(placeLang).observe(marquee);
   else window.addEventListener("resize", placeLang);
+
+  // ---------- smooth in-page scrolling ----------
+  // Eased like native iOS/Android scrolling: quick start, long soft landing.
+  // Duration grows with distance; any wheel/touch/key input hands control back.
+  var scrollAnim = null;
+  function easeOutQuint(t) { return 1 - Math.pow(1 - t, 5); }
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function stopScrollAnim() { if (scrollAnim) { cancelAnimationFrame(scrollAnim); scrollAnim = null; } }
+  function smoothScrollTo(targetY) {
+    stopScrollAnim();
+    var startY = window.scrollY;
+    var maxY = document.documentElement.scrollHeight - window.innerHeight;
+    var endY = Math.max(0, Math.min(targetY, maxY));
+    var dist = endY - startY;
+    if (reduceMotion || Math.abs(dist) < 2) { window.scrollTo(0, endY); return; }
+    var duration = Math.min(1100, Math.max(450, Math.abs(dist) * 0.45));
+    var ease = Math.abs(dist) > window.innerHeight ? easeInOutCubic : easeOutQuint;
+    var t0 = performance.now();
+    (function step(now) {
+      var t = Math.min(1, (now - t0) / duration);
+      window.scrollTo(0, startY + dist * ease(t));
+      scrollAnim = t < 1 ? requestAnimationFrame(step) : null;
+    })(t0);
+  }
+  ["wheel", "touchstart", "keydown"].forEach(function (ev) {
+    window.addEventListener(ev, stopScrollAnim, { passive: true });
+  });
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link) return;
+    var id = link.getAttribute("href").slice(1);
+    var target = id ? document.getElementById(id) : document.body;
+    if (!target) return;
+    e.preventDefault();
+    smoothScrollTo(target.getBoundingClientRect().top + window.scrollY - 24);
+    if (history.replaceState) history.replaceState(null, "", "#" + id);
+    // move keyboard focus without a second jump
+    if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
+  });
 
   // ---------- misc ----------
   document.getElementById("year").textContent = String(new Date().getFullYear());
