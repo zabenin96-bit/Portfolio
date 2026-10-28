@@ -106,8 +106,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @property --lang-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 .lang {
   /* centred in the free margin between the videos and the screen edge
-     (the margin = gutter + whatever is left beside the 1440px container) */
-  --side-margin: calc(var(--gutter) + max(0px, (100% - 1440px) / 2));
+     (gutter + room beside the 1440px container, or beside the 1040px grid) */
+  --side-margin: max(calc(var(--gutter) + max(0px, (100% - 1440px) / 2)), calc((100% - 1040px) / 2));
   position: fixed; z-index: 40; top: 12px;
   right: max(var(--gutter), calc((var(--side-margin) - 40px) / 2));
   display: flex; align-items: center;
@@ -179,7 +179,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 /* desktop: three tiles in the first row, then two – less to scroll */
 @media (min-width: 1100px) {
-  .cats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 48px 24px; }
+  /* a calmer size: the grid stays narrower than the page */
+  .cats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 44px 24px; max-width: 1040px; margin-inline: auto; }
   .cat { grid-column: span 2; }
   .cat:nth-child(5n + 4), .cat:nth-child(5n + 5) { grid-column: span 3; }
   .cat:last-child:nth-child(odd) { grid-column: span 3; }
@@ -370,28 +371,6 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */
 .trail { position: absolute; top: 0; left: 0; z-index: 30; pointer-events: none; overflow: visible; }
-
-/* ---------- Clover cursor (fine pointers only) ---------- */
-.cursor { display: none; }
-@media (hover: hover) and (pointer: fine) {
-  html.has-cursor, html.has-cursor a, html.has-cursor button { cursor: none; }
-  .cursor {
-    display: flex; align-items: center; justify-content: center;
-    position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none;
-    width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
-    color: #fff; opacity: 0;
-    transition: width 0.25s, height 0.25s, margin 0.25s, background-color 0.25s, opacity 0.3s;
-  }
-  .cursor.is-visible { opacity: 1; }
-  .cursor svg { display: none; }
-  .cursor .cursor__clover { display: block; width: 100%; height: 100%; color: var(--accent); animation: spin-c 9s linear infinite; }
-  .cursor.is-play, .cursor.is-arrow { width: 80px; height: 80px; margin: -40px 0 0 -40px; }
-  .cursor.is-play { background: rgba(255, 90, 46, 0.4); }
-  .cursor.is-arrow { background: var(--accent); }
-  .cursor.is-play .cursor__clover, .cursor.is-arrow .cursor__clover { display: none; }
-  .cursor.is-play .cursor__play, .cursor.is-arrow .cursor__arrow { display: block; }
-}
-@keyframes spin-c { to { transform: rotate(360deg); } }
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {

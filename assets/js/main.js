@@ -212,7 +212,7 @@
     grid.textContent = "";
     SITE.categories.forEach(function (cat) {
       var btn = el("button", {
-        type: "button", class: "cat__btn", "aria-label": cat.title[lang], "data-cursor": "arrow",
+        type: "button", class: "cat__btn", "aria-label": cat.title[lang],
         "data-ru": cat.title.ru, "data-en": cat.title.en,
       });
       btn.style.background = cat.tint || "#141414";
@@ -255,7 +255,7 @@
     cards.textContent = "";
     cat.projects.forEach(function (p) {
       var title = p.title[lang];
-      var btn = el("button", { type: "button", class: "card__btn", "aria-label": t("watch") + ": " + title, "data-cursor": "play" });
+      var btn = el("button", { type: "button", class: "card__btn", "aria-label": t("watch") + ": " + title });
       if (p.poster) btn.appendChild(el("img", { src: p.poster, alt: "", loading: "lazy", decoding: "async" }));
       else btn.appendChild(placeholder("[poster]", false));
       btn.appendChild(el("span", { class: "vignette" }));
@@ -279,7 +279,6 @@
       return;
     }
     btn.classList.add("is-playing");
-    btn.removeAttribute("data-cursor");
     btn.textContent = "";
     btn.appendChild(el("iframe", {
       src: "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope) + "?autoplay=1",
@@ -321,37 +320,6 @@
     if (lastTrigger && lastTrigger.focus) lastTrigger.focus({ preventScroll: true });
   });
   document.getElementById("sheet-close").addEventListener("click", closeSheet);
-
-  // ---------- clover cursor ----------
-  var cursor = document.getElementById("cursor");
-  if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    root.classList.add("has-cursor");
-    var x = -100, y = -100, cx = -100, cy = -100, idle, raf = null;
-    function follow() {
-      cx += (x - cx) * (reduceMotion ? 1 : 0.35);
-      cy += (y - cy) * (reduceMotion ? 1 : 0.35);
-      if (Math.abs(x - cx) < 0.1 && Math.abs(y - cy) < 0.1) { cx = x; cy = y; }
-      cursor.style.transform = "translate3d(" + cx + "px," + cy + "px,0)";
-      // stop the frame loop once the clover has caught up with the pointer
-      raf = cx === x && cy === y ? null : requestAnimationFrame(follow);
-    }
-    window.addEventListener("pointermove", function (e) {
-      x = e.clientX; y = e.clientY;
-      if (!raf) raf = requestAnimationFrame(follow);
-      cursor.classList.add("is-visible");
-      clearTimeout(idle);
-      idle = setTimeout(function () { cursor.classList.remove("is-visible"); }, 3000);
-      var target = e.target.closest ? e.target.closest("[data-cursor]") : null;
-      var mode = target ? target.getAttribute("data-cursor") : "";
-      cursor.classList.toggle("is-play", mode === "play");
-      cursor.classList.toggle("is-arrow", mode === "arrow");
-    }, { passive: true });
-    document.addEventListener("pointerleave", function () { cursor.classList.remove("is-visible"); });
-    // the cursor element must sit above the modal dialog's top layer
-    sheet.addEventListener("close", function () { document.body.appendChild(cursor); });
-    var origOpen = openSheet;
-    openSheet = function (cat) { origOpen(cat); sheet.appendChild(cursor); };
-  }
 
   // ---------- language button ----------
   // Hidden at the top of the page. It first appears once the first work
