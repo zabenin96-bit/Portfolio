@@ -360,13 +360,12 @@
   }
 
   // ---------- language button ----------
-  // Hidden at the top of the page. It first appears once the first work
-  // video has reached the top of the screen; from there on it shows
-  // top-right while scrolling and fades 1.5 s after scrolling stops.
+  // Hidden at the top of the page. It appears once the brand strip has
+  // fully left the screen (so it never sits on the strip); from there on it
+  // shows top-right while scrolling and fades 1.5 s after scrolling stops.
   var marquee = document.querySelector(".marquee");
   var langBox = document.querySelector(".lang");
   var LANG_HIDE_DELAY = 1500;
-  var LANG_FROM = 12; // px: first tile's top must be at least this close to the screen top
   var langHideTimer = null;
   function hideLangLater() {
     clearTimeout(langHideTimer);
@@ -377,13 +376,12 @@
     }, LANG_HIDE_DELAY);
   }
   function langZoneReached() {
-    var first = document.querySelector(".cat__btn");
-    return first ? first.getBoundingClientRect().top <= LANG_FROM : window.scrollY > window.innerHeight;
+    return marquee ? marquee.getBoundingClientRect().bottom <= 0 : window.scrollY > 80;
   }
   function onScrollLang() {
     var active = langZoneReached();
     langBox.classList.toggle("is-floating", active);
-    // above the first video it goes away at once – no slow fade lingering
+    // back over the strip it goes away at once – no slow fade lingering
     // at the top of the page
     langBox.classList.toggle("is-leaving", !active);
     if (!active) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); return; }
