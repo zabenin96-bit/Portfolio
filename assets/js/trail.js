@@ -118,6 +118,13 @@
     if (hi > lo) { a = Math.min(Math.max(a, lo), hi); b = Math.min(Math.max(b, lo), hi); }
     return [Math.max(0, a), Math.max(0, b)];
   }
+  // a big object is circled over the whole time it is fully in view, so the
+  // loop plays out at the pace of the scroll, right as the object passes
+  function viewKeys(rect, from, to) {
+    var lo = rect.bottom + 30 - H, hi = rect.top - 30, span = hi - lo;
+    if (span < H * 0.2) return loopKeys(rect, from, to);
+    return [Math.max(0, lo + span * 0.1), Math.max(0, hi - span * 0.1)];
+  }
 
   // Go down a lane past `rect`, circling it `laps` times on the way. The
   // ring is joined along the side it shares with the lane, so the joins are
@@ -191,7 +198,7 @@
         var side = row.lane < (near.left + near.right) / 2 ? "L" : "R";
         var r = Math.max(6, Math.min(row.laneOffset, 18));
         // between rows the crossing right below rounds the exit itself
-        ringOnLane(near, r, side, 2, row.lane, loopKeys(near, 0.66, 0.36), rows[i + 1] ? 0 : 24);
+        ringOnLane(near, r, side, 2, row.lane, viewKeys(near, 0.66, 0.36), rows[i + 1] ? 0 : 24);
       }
       var next = rows[i + 1];
       if (!next) return;
@@ -209,7 +216,7 @@
         }
       }
       // corners on a crossing stay inside the gap between the rows
-      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap, 0.62, 0.42) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
+      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap, 0.7, 0.35) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
     });
     var lastRow = rows[rows.length - 1], laneX = lastRow.lane;
     // finish the work section on the lane before bending toward anything else
@@ -229,7 +236,7 @@
     if (about) {
       var side2 = laneX < (about.left + about.right) / 2 ? "L" : "R";
       var r2 = Math.max(8, Math.min(16, side2 === "L" ? about.left - 6 : W - about.right - 6));
-      ringOnLane(about, r2, side2, 1, laneX, loopKeys(about, 0.64, 0.4));
+      ringOnLane(about, r2, side2, 1, laneX, viewKeys(about, 0.64, 0.4));
       var bodyBottom = body.length ? Math.max.apply(null, body.map(function (b) { return b.bottom; })) : about.bottom;
       // past the text, but leaving room to turn toward the circle below
       var ctaEl = q(".cta"), ctaTop = ctaEl ? boxOf(ctaEl).top - 22 : Infinity;
@@ -247,7 +254,7 @@
       var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
       var cg = ringInfo({ left: cx, right: cx, top: cy, bottom: cy }, R);
       pt(exitX, cy - R);
-      var keys = loopKeys(cta, 0.6, 0.36);
+      var keys = viewKeys(cta, 0.6, 0.36);
       if (exitX < cx) loop(cg, 0, 1.25, keys); else loop(cg, 0, -1.25, keys);
     }
     return finish();
@@ -282,8 +289,26 @@
         out.push({ x: p.x + (n.x - p.x) * f2, y: p.y + (n.y - p.y) * f2, k: k });
       }
     }
-    // straight parts follow the scroll (head stays at LEAD on screen); keys
-    // never go back, and every px of route costs at least a little scroll
+    // between two loops the line moves at an even pace, so it arrives at
+    // each accent exactly when its loop is due
+    var lastKeyed = -1;
+    for (var q2 = 0; q2 < out.length; q2++) {
+      if (out[q2].k === undefined) continue;
+      if (lastKeyed >= 0 && q2 - lastKeyed > 1) {
+        var ka = out[lastKeyed].k, kb = out[q2].k;
+        var ya = out[lastKeyed].y, yb = out[q2].y, dy = yb - ya;
+        for (var g2 = lastKeyed + 1; g2 < q2; g2++) {
+          // mostly by height (keeps it on screen), a little by length (so
+          // level stretches still take some scroll)
+          var byLen = (g2 - lastKeyed) / (q2 - lastKeyed);
+          var byY = dy > 1 ? Math.min(1, Math.max(0, (out[g2].y - ya) / dy)) : byLen;
+          out[g2].k = ka + (kb - ka) * (byY * 0.75 + byLen * 0.25);
+        }
+      }
+      lastKeyed = q2;
+    }
+    // before the first and after the last loop the head stays at LEAD on
+    // screen; keys never go back
     var maxScroll = Math.max(1, document.documentElement.scrollHeight - H);
     var prev = 0;
     for (var m = 0; m < out.length; m++) {
