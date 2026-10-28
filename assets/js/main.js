@@ -263,12 +263,22 @@
       // own cover frame and play button (loaded only when scrolled to)
       if (p.kinescope && !p.poster) {
         var frame = el("div", { class: "card__btn is-playing" });
-        frame.appendChild(el("iframe", {
-          src: "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope),
-          title: title, loading: "lazy",
+        var src = "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope);
+        var iframe = el("iframe", {
+          src: src, title: title, loading: "lazy",
           allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
           allowfullscreen: "",
-        }));
+        });
+        frame.appendChild(iframe);
+        // a see-through cover on top, so the site's own cursor shows over the
+        // video too (a player's frame keeps its own cursor); a click lifts
+        // it and starts the video
+        var cover = el("button", { type: "button", class: "card__cover", "aria-label": t("watch") + ": " + title });
+        cover.addEventListener("click", function () {
+          cover.remove();
+          iframe.src = src + "?autoplay=1";
+        });
+        frame.appendChild(cover);
         cards.appendChild(el("div", { class: "card" }, [frame, caption]));
         return;
       }
