@@ -16,9 +16,9 @@
  * the line plays its loop at its own pace and then catches up. Scrolling back
  * moves the line back.
  *
- * As a safety net the line is erased wherever it would cross an element, so
- * it reads as passing behind content. Skipped for reduced motion and on
- * low-end devices; draws only while something is happening.
+ * The line is an SVG laid over the whole document, so it moves with the
+ * page and never lags behind the scroll. Skipped for reduced motion and on
+ * low-end devices; updates only while the line itself is moving.
  */
 (function () {
   "use strict";
@@ -28,12 +28,17 @@
     (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   if (reduceMotion || lowEnd || !window.requestAnimationFrame) return;
 
-  var canvas = document.createElement("canvas");
-  canvas.className = "trail";
-  canvas.setAttribute("aria-hidden", "true");
-  document.body.appendChild(canvas);
-  var ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  // The line lives in the page itself (an SVG over the whole document), so
+  // it scrolls together with the content and stays fixed in its place, even
+  // on jerky scrolling – nothing is redrawn just because the page moved.
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "trail");
+  svg.setAttribute("aria-hidden", "true");
+  var group = document.createElementNS(NS, "g");
+  group.setAttribute("fill", "none");
+  svg.appendChild(group);
+  document.body.appendChild(svg);
 
   var COLOR = "255, 255, 255";
   var LINE = 1.3;        // px, the same along the whole line
@@ -44,13 +49,15 @@
   var EYE = 0.66;        // an accent starts when its object's centre is this high on screen
   var SPEED = 1.47;      // px/ms – the line's own pace along the route
   var IDLE_MS = 1600;    // after this long without movement the line fades out
-  var W = 0, H = 0, dpr = 1;
+  var W = 0, H = 0;
 
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth; H = window.innerHeight;
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // cover the whole document (measured without the SVG itself)
+    svg.style.height = "0px";
+    var docH = document.documentElement.scrollHeight;
+    svg.style.width = document.documentElement.clientWidth + "px";
+    svg.style.height = docH + "px";
   }
 
   // ---------- page geometry (page coordinates) ----------
@@ -330,19 +337,6 @@
     return { x: route[i].x + (route[j].x - route[i].x) * f, y: route[i].y + (route[j].y - route[i].y) * f };
   }
 
-  // elements the line must never be drawn over (viewport coordinates)
-  function obstacles() {
-    var list = [];
-    function add(b, extra) { if (b && b.width) list.push(Object.assign({ left: b.left, right: b.right, top: b.top, bottom: b.bottom }, extra || {})); }
-    qa(".cat__btn").forEach(function (el) { add(el.getBoundingClientRect(), { round: parseFloat(getComputedStyle(el).borderTopLeftRadius) || 12 }); });
-    qa(".about__photo").forEach(function (el) { add(el.getBoundingClientRect(), { round: 10 }); });
-    [".cat__label", ".masthead__title", ".masthead__sub", ".about__lead", ".about__head .eyebrow", ".about__body > span", ".footer__grid > *", ".footer__links a", ".footer__word", ".footer__credit"].forEach(function (s) {
-      qa(s).forEach(function (el) { var r = document.createRange(); r.selectNodeContents(el.querySelector(".i18n") || el); add(r.getBoundingClientRect()); });
-    });
-    [".cta", ".spinner"].forEach(function (s) { var el = q(s); if (el) add(el.getBoundingClientRect(), { circle: true }); });
-    return list.filter(function (r) { return r.bottom > -40 && r.top < H + 40; });
-  }
-
   function step(now) {
     var dt = Math.min(40, now - (last || now)); last = now;
     if (!route) { raf = null; return; }
@@ -359,59 +353,50 @@
     var moving = Math.abs(target - sHead) > 0.05;
     if (moving) lastMove = now;
     fade = now - lastMove < IDLE_MS ? Math.min(1, fade + dt / 200) : Math.max(0, fade - dt / 700);
-    draw(sy);
-    if (fade <= 0 && !moving) { raf = null; last = 0; ctx.clearRect(0, 0, W, H); return; }
+    draw();
+    if (fade <= 0 && !moving) { raf = null; last = 0; return; }
     raf = requestAnimationFrame(step);
   }
 
-  var BANDS = 14;
-  function draw(sy) {
-    ctx.clearRect(0, 0, W, H);
-    if (fade <= 0) return;
+  // a few bands of equal opacity, each one continuous smooth path: one
+  // width, no brighter dots where pieces would otherwise overlap
+  var BANDS = 14, bands = [];
+  for (var bi = 0; bi < BANDS; bi++) {
+    var path = document.createElementNS(NS, "path");
+    path.setAttribute("stroke", "rgb(" + COLOR + ")");
+    path.setAttribute("stroke-width", LINE);
+    path.setAttribute("stroke-linejoin", "round");
+    group.appendChild(path);
+    bands.push(path);
+  }
+  var shown = "";
+  function f1(v) { return Math.round(v * 10) / 10; }
+  function draw() {
+    group.setAttribute("opacity", fade.toFixed(3));
     var tailS = Math.max(0, sHead - TAIL / STEP);
     var i0 = Math.floor(tailS), i1 = Math.floor(sHead);
-    if (i1 - i0 < 2) return;
+    var key = fade > 0 && i1 - i0 >= 2 ? i0 + ":" + sHead.toFixed(2) : "";
+    if (key === shown) return;
+    shown = key;
+    if (!key) { bands.forEach(function (b) { b.setAttribute("d", ""); }); return; }
+    // route points are in page coordinates – exactly the SVG's own
     var pts = [];
-    for (var i = i0; i <= i1; i++) pts.push({ x: route[i].x, y: route[i].y - sy, life: (i - tailS) / (sHead - tailS) });
-    var h = at(sHead); pts.push({ x: h.x, y: h.y - sy, life: 1 });
-    ctx.lineWidth = LINE; ctx.lineJoin = "round"; ctx.lineCap = "butt";
-    // a few bands of equal opacity, each one continuous smooth path: one
-    // width, no brighter dots where pieces would otherwise overlap
-    var n = pts.length, per = Math.max(2, Math.ceil(n / BANDS));
-    for (var s = 0; s < n - 1; s += per) {
-      var e = Math.min(n - 1, s + per);
-      ctx.strokeStyle = "rgba(" + COLOR + "," + (Math.pow(Math.max(0, pts[e].life), 1.3) * 0.85 * fade).toFixed(3) + ")";
-      ctx.beginPath();
-      if (s === 0) ctx.moveTo(pts[0].x, pts[0].y);
-      else ctx.moveTo((pts[s - 1].x + pts[s].x) / 2, (pts[s - 1].y + pts[s].y) / 2);
+    for (var i = i0; i <= i1; i++) pts.push({ x: route[i].x, y: route[i].y, life: (i - tailS) / (sHead - tailS) });
+    var h = at(sHead); pts.push({ x: h.x, y: h.y, life: 1 });
+    var n = pts.length, per = Math.max(2, Math.ceil(n / BANDS)), b = 0;
+    for (var s = 0; s < n - 1; s += per, b++) {
+      var e = Math.min(n - 1, s + per), d;
+      if (s === 0) d = "M" + f1(pts[0].x) + " " + f1(pts[0].y);
+      else d = "M" + f1((pts[s - 1].x + pts[s].x) / 2) + " " + f1((pts[s - 1].y + pts[s].y) / 2);
       for (var k = Math.max(1, s); k < e; k++) {
-        var a = pts[k], b = pts[k + 1];
-        ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2);
+        var a = pts[k], c = pts[k + 1];
+        d += "Q" + f1(a.x) + " " + f1(a.y) + " " + f1((a.x + c.x) / 2) + " " + f1((a.y + c.y) / 2);
       }
-      if (e === n - 1) ctx.lineTo(pts[e].x, pts[e].y);
-      ctx.stroke();
+      if (e === n - 1) d += "L" + f1(pts[e].x) + " " + f1(pts[e].y);
+      bands[b].setAttribute("d", d);
+      bands[b].setAttribute("stroke-opacity", (Math.pow(Math.max(0, pts[e].life), 1.3) * 0.85).toFixed(3));
     }
-    // safety net: the line passes behind every element
-    ctx.save();
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.fillStyle = "#000";
-    obstacles().forEach(function (r) {
-      var g = 3, x = r.left - g, y = r.top - g, w = r.right - r.left + 2 * g, hh = r.bottom - r.top + 2 * g;
-      ctx.beginPath();
-      if (r.circle) ctx.arc(x + w / 2, y + hh / 2, Math.min(w, hh) / 2, 0, Math.PI * 2);
-      else roundRect(x, y, w, hh, (r.round || 3) + g);
-      ctx.fill();
-    });
-    ctx.restore();
-  }
-  function roundRect(x, y, w, h, rad) {
-    rad = Math.min(rad, w / 2, h / 2);
-    ctx.moveTo(x + rad, y);
-    ctx.arcTo(x + w, y, x + w, y + h, rad);
-    ctx.arcTo(x + w, y + h, x, y + h, rad);
-    ctx.arcTo(x, y + h, x, y, rad);
-    ctx.arcTo(x, y, x + w, y, rad);
-    ctx.closePath();
+    for (; b < BANDS; b++) bands[b].setAttribute("d", "");
   }
 
   function wake() {

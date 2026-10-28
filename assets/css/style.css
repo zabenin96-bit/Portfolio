@@ -363,7 +363,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */
-.trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none; }
+.trail { position: absolute; top: 0; left: 0; z-index: 30; pointer-events: none; overflow: visible; }
 
 /* ---------- Clover cursor (fine pointers only) ---------- */
 .cursor { display: none; }
