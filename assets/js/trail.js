@@ -52,7 +52,12 @@
   var W = 0, H = 0;
 
   function resize() {
-    W = window.innerWidth; H = window.innerHeight;
+    // On phones the address bar slides in and out while scrolling and
+    // changes the window height a little – keep the old height then, so
+    // the route does not shift under the line mid-scroll.
+    var w = window.innerWidth, h = window.innerHeight;
+    if (w !== W || !H || Math.abs(h - H) > H * 0.25) H = h;
+    W = w;
     // cover the whole document (measured without the SVG itself)
     svg.style.height = "0px";
     var docH = document.documentElement.scrollHeight;
@@ -324,6 +329,17 @@
   // ---------- following the route ----------
   var route = null, sHead = 0, lastMove = 0, raf = null, last = 0, fade = 0;
 
+  // the route point closest to p, looked for near the old place along the
+  // route (a double loop passes the same spot twice)
+  function nearest(p, hint) {
+    var best = 0, bd = Infinity;
+    var from = Math.max(0, Math.floor(hint) - 600), to = Math.min(route.length, Math.floor(hint) + 600);
+    for (var i = from; i < to; i++) {
+      var d = (route[i].x - p.x) * (route[i].x - p.x) + (route[i].y - p.y) * (route[i].y - p.y);
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
   function targetFor(scroll) {
     if (scroll <= route[0].k) return 0;
     if (scroll >= route[route.length - 1].k) return route.length - 1;
@@ -409,11 +425,16 @@
   function rebuild() {
     clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(function () {
+      var was = route && built ? at(sHead) : null, wasS = sHead;
       resize();
-      route = buildRoute();
-      if (!route) return;
+      var next = buildRoute();
+      if (!next) return;
+      route = next;
       // the first time, the line draws itself round the subtitle as the page opens
       if (!built && window.scrollY < 40) { sHead = 0; wake(); }
+      // later rebuilds (late images, fonts, resizes) keep the line where it
+      // is instead of making it jump to a new place
+      else if (was) { sHead = nearest(was, wasS); shown = ""; draw(); }
       else sHead = targetFor(window.scrollY);
       built = true;
     }, 120);
