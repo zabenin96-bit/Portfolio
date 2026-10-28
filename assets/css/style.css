@@ -27,7 +27,7 @@
   --muted: #8c8c8c;
   --line: #262626;
   --nav-bg: rgba(205, 205, 205, 0.9);
-  --cta-bg: var(--accent);
+  --cta-bg: var(--tri);
   --cta-fg: #000000;
   --tile-glow: rgba(255, 255, 255, 0.22);
   --font-display: "Raleway", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -325,18 +325,21 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   padding: 40px 0 clamp(96px, 12vw, 160px);
 }
 .cta {
-  width: min(340px, 72vw); aspect-ratio: 1; border-radius: 50%;
+  width: min(260px, 64vw); aspect-ratio: 1; border-radius: 50%;
   background: var(--cta-bg); color: var(--cta-fg);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-  text-align: center; padding: 40px; transition: transform 0.5s var(--ease);
+  text-align: center; padding: 30px; transition: transform 0.5s var(--ease);
 }
+.cta svg { width: 30px; height: 30px; }
 .cta:hover { transform: scale(1.04); }
 .cta:active { transform: scale(0.98); transition-duration: 0.12s; }
 .cta__text {
   font-family: var(--font-display); font-weight: 300;
-  font-size: clamp(22px, 2.2vw, 30px); line-height: 1.15;
+  font-size: clamp(19px, 1.7vw, 23px); line-height: 1.15;
 }
 .spinner { width: min(340px, 70vw); aspect-ratio: 1; color: var(--accent); }
+/* on computers the contact block is just the circle */
+@media (min-width: 760px) { .spinner { display: none; } }
 
 /* ---------- Footer ---------- */
 .footer { padding-bottom: 150px; }
