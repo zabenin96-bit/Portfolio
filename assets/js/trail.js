@@ -294,7 +294,7 @@
       var left = exitX < cx, sideX = left ? cta.left + half - R : cta.right - half + R;
       // step over in the free room below the text and above the small line
       // over the button (first moving the last corner down into that room)
-      var last = ctl[ctl.length - 1], kick = textOf(q(".contact__kicker"));
+      var last = ctl[ctl.length - 1], kick = boxOf(q(".contact__kicker"));
       var kTop = (kick ? kick.top : cta.top) - 14;
       var stepY = Math.min(kTop, last.y + Math.max(30, (kTop - last.y) * 0.5));
       if (stepY > last.y + 10) last.y = stepY;
