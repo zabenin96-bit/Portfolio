@@ -270,7 +270,8 @@
       ringOnLane(about, r2, side2, 1, laneX, viewKeys(about));
       var bodyBottom = body.length ? Math.max.apply(null, body.map(function (b) { return b.bottom; })) : about.bottom;
       // past the text, but leaving room to turn toward the circle below
-      var ctaEl = q(".cta"), ctaTop = ctaEl ? boxOf(ctaEl).top - 22 : Infinity;
+      // (the contact block starts with the small line above the button)
+      var ctaEl = q(".contact__kicker") || q(".cta"), ctaTop = ctaEl ? boxOf(ctaEl).top - 22 : Infinity;
       var after = Math.max(bodyBottom + 20, about.bottom + 24);
       if (after > ctaTop - 70) after = (Math.max(bodyBottom, about.bottom) + ctaTop) / 2;
       // keep to the ring's own side, so the line runs on without a jog
@@ -278,20 +279,27 @@
       pt(laneX, after);
     }
 
-    // 6. around the "Have an idea?" capsule, entered at its top along a level line
+    // 6. around the "Have an idea?" capsule. It is joined at its outer end,
+    //    coming straight down beside it, so the line never crosses the small
+    //    line of text above the button
     var cta = boxOf(q(".cta"));
     if (cta) {
       var half = (cta.bottom - cta.top) / 2, R = half + 18;
       var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
       var cg = ringInfo({ left: cta.left + half, right: cta.right - half, top: cy, bottom: cy }, R);
       var keys = viewKeys(cta);
-      // join the top edge right where the line arrives, so it never turns back
-      var x0 = cta.left + half, x1 = cta.right - half;
-      var u0 = x1 > x0 ? Math.min(1, Math.max(0, (exitX - x0) / (x1 - x0))) * cg.u.topEnd : 0;
-      // the loop starts a little further on, so the corner into it is rounded
-      var dir = exitX < cx ? 1 : -1, lead = 44 / cg.T;
-      pt(exitX, cy - R, 22);
-      loop(cg, u0 + dir * lead, u0 + dir * (lead + 1.25), keys);
+      var left = exitX < cx, sideX = left ? cta.left + half - R : cta.right - half + R;
+      // step over in the free room below the text and above the small line
+      // over the button (first moving the last corner down into that room)
+      var last = ctl[ctl.length - 1], kick = textOf(q(".contact__kicker"));
+      var kTop = (kick ? kick.top : cta.top) - 14;
+      var stepY = Math.min(kTop, last.y + Math.max(30, (kTop - last.y) * 0.5));
+      if (stepY > last.y + 10) last.y = stepY;
+      if (Math.abs(last.x - sideX) < 60) pt(sideX, Math.min(kTop, last.y + 40)); // a slight slant
+      else pt(sideX, last.y);                                                   // a level step
+      // down the outer end of the ring and round it once and a quarter
+      if (left) loop(cg, cg.u.leftStart, cg.u.leftStart - 1.25, keys);
+      else loop(cg, cg.u.rightStart, cg.u.rightStart + 1.25, keys);
     }
     return finish();
   }

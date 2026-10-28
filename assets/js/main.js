@@ -337,6 +337,28 @@
   });
   document.getElementById("sheet-close").addEventListener("click", closeSheet);
 
+  // ---------- magnetic contact button (computers only) ----------
+  var cta = document.querySelector(".cta");
+  if (cta && !reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    var MAG_RANGE = 110, MAG_MAX = 8; // px around the button, px it may move
+    var magOn = false;
+    window.addEventListener("pointermove", function (e) {
+      var b = cta.getBoundingClientRect();
+      // distance from the pointer to the button's edge
+      var ox = Math.max(b.left - e.clientX, 0, e.clientX - b.right);
+      var oy = Math.max(b.top - e.clientY, 0, e.clientY - b.bottom);
+      if (Math.hypot(ox, oy) > MAG_RANGE) {
+        if (magOn) { magOn = false; cta.style.setProperty("--mx", "0px"); cta.style.setProperty("--my", "0px"); }
+        return;
+      }
+      magOn = true;
+      var dx = e.clientX - (b.left + b.right) / 2, dy = e.clientY - (b.top + b.bottom) / 2;
+      var k = Math.min(1, MAG_MAX / Math.max(1, Math.hypot(dx * 0.12, dy * 0.25)));
+      cta.style.setProperty("--mx", (dx * 0.12 * k).toFixed(1) + "px");
+      cta.style.setProperty("--my", (dy * 0.25 * k).toFixed(1) + "px");
+    }, { passive: true });
+  }
+
   // ---------- language button ----------
   // Hidden at the top of the page. It first appears once the first work
   // video has reached the top of the screen; from there on it shows
