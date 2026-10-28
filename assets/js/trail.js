@@ -9,7 +9,7 @@
  *   3. a loop around one video,
  *   4. a flat loop around one caption while crossing between rows,
  *   5. a loop around Nata's photo and name,
- *   6. a loop around the "Have an idea?" circle, where it ends.
+ *   6. a loop around the contact button, where it ends.
  * Corners are rounded and loops are entered and left along their tangent, so
  * the path is one smooth curve. On straight parts the head keeps one height
  * on screen and goes down with the scroll; once an object reaches eye level
@@ -279,7 +279,7 @@
       pt(laneX, after);
     }
 
-    // 6. around the "Have an idea?" capsule. It is joined at its outer end,
+    // 6. around the contact button. It is joined at its outer end,
     //    coming straight down beside it, so the line never crosses the small
     //    line of text above the button
     var cta = boxOf(q(".cta"));
@@ -289,12 +289,17 @@
       var half = (cta.bottom - cta.top) / 2;
       var R = half + Math.max(8, Math.min(18, Math.min(cta.left, W - cta.right) - 6));
       var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
-      var cg = ringInfo({ left: cta.left + half, right: cta.right - half, top: cy, bottom: cy }, R);
+      // if the small line above is wider than the button, the loop is drawn
+      // out sideways past it, so the line comes down clear of its ends
+      var kick = boxOf(q(".contact__kicker"));
+      var x0 = cta.left + half, x1 = cta.right - half;
+      if (kick) { x0 = Math.min(x0, kick.left - 14 + R); x1 = Math.max(x1, kick.right + 14 - R); }
+      var cg = ringInfo({ left: x0, right: x1, top: cy, bottom: cy }, R);
       var keys = viewKeys(cta);
-      var left = exitX < cx, sideX = left ? cta.left + half - R : cta.right - half + R;
+      var left = exitX < cx, sideX = left ? x0 - R : x1 + R;
       // step over in the free room below the text and above the small line
       // over the button (first moving the last corner down into that room)
-      var last = ctl[ctl.length - 1], kick = boxOf(q(".contact__kicker"));
+      var last = ctl[ctl.length - 1];
       var kTop = (kick ? kick.top : cta.top) - 14;
       var stepY = Math.min(kTop, last.y + Math.max(30, (kTop - last.y) * 0.5));
       if (stepY > last.y + 10) last.y = stepY;

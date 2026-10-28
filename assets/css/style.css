@@ -366,7 +366,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   transition: transform 0.35s var(--ease);
 }
 .cta:hover { box-shadow: 0 10px 40px rgba(255, 212, 92, 0.3); }
-.cta:hover svg { transform: translate(calc(var(--mx) * 0.5), calc(var(--my) * 0.5)) rotate(45deg) scale(1.08); }
+.cta:hover svg { transform: translate(calc(var(--mx) * 0.5 + 2px), calc(var(--my) * 0.5 - 2px)) scale(1.08); }
 .cta:active { transform: translate(var(--mx), var(--my)) scale(0.97); transition-duration: 0.12s; }
 @media (max-width: 400px) {
   .cta { gap: 12px; padding: 6px 6px 6px 22px; }
