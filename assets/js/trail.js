@@ -284,7 +284,10 @@
     //    line of text above the button
     var cta = boxOf(q(".cta"));
     if (cta) {
-      var half = (cta.bottom - cta.top) / 2, R = half + 18;
+      // the ring keeps 18px around the button, less on narrow phones so it
+      // stays on screen
+      var half = (cta.bottom - cta.top) / 2;
+      var R = half + Math.max(8, Math.min(18, Math.min(cta.left, W - cta.right) - 6));
       var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
       var cg = ringInfo({ left: cta.left + half, right: cta.right - half, top: cy, bottom: cy }, R);
       var keys = viewKeys(cta);

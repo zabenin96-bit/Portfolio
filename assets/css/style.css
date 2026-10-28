@@ -340,32 +340,49 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   font-family: var(--font-display); font-size: 12px; letter-spacing: 0.3em; padding-left: 0.3em;
   text-transform: uppercase; color: #9a9a9a; text-align: center;
 }
-/* a yellow capsule with the arrow in a black disc at its end. Now and then
-   a thin glint runs across it; on computers it is pulled toward a nearby
-   pointer like a magnet (--mx/--my are set by main.js) */
+/* a yellow capsule: Nata's face at the start, the arrow in a black disc at
+   the end. Now and then a thin glint runs across it; on hover the black of
+   the disc floods the whole capsule and the words turn yellow */
 .cta {
-  --mx: 0px; --my: 0px;
-  position: relative; display: inline-flex; align-items: center; gap: 16px; overflow: hidden;
-  padding: 8px 8px 8px 26px; border-radius: 999px;
+  position: relative; display: inline-flex; align-items: center; gap: 14px; overflow: hidden;
+  padding: 8px; border-radius: 999px; isolation: isolate;
   background: var(--cta-bg); color: var(--cta-fg);
-  transform: translate(var(--mx), var(--my));
-  transition: transform 0.35s var(--ease), box-shadow 0.5s var(--ease);
+  transition: transform 0.35s var(--ease), box-shadow 0.5s var(--ease), color 0.35s var(--ease);
+}
+.cta::before {
+  content: ""; position: absolute; z-index: -1; right: 8px; top: 50%;
+  width: 46px; height: 46px; margin-top: -23px; border-radius: 50%; background: #000;
+  transform: scale(0); transition: transform 0.6s var(--ease);
 }
 .cta::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.65) 50%, transparent 65%);
   transform: translateX(-120%); animation: cta-glint 4.5s ease-in-out infinite;
 }
-.cta__text, .cta svg { position: relative; z-index: 1; }
+.cta__face {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.85); transition: box-shadow 0.35s var(--ease);
+}
+/* close in on the face */
+.cta__face img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transform: scale(2.5); transform-origin: 44% 22%; }
 .cta svg {
   flex: none; width: 46px; height: 46px; padding: 12px; border-radius: 50%;
   background: #000; color: var(--tri);
-  transform: translate(calc(var(--mx) * 0.5), calc(var(--my) * 0.5));
-  transition: transform 0.35s var(--ease);
+  transition: transform 0.5s var(--ease), background-color 0.35s var(--ease), color 0.35s var(--ease);
 }
-.cta:hover { box-shadow: 0 10px 40px rgba(255, 212, 92, 0.3); }
-.cta:hover svg { transform: translate(calc(var(--mx) * 0.5), calc(var(--my) * 0.5)) rotate(45deg); }
-.cta:active { transform: translate(var(--mx), var(--my)) scale(0.97); transition-duration: 0.12s; }
+.cta:hover { color: var(--tri); box-shadow: 0 10px 40px rgba(255, 212, 92, 0.25); }
+.cta:hover::before { transform: scale(16); }
+.cta:hover::after { animation-play-state: paused; opacity: 0; }
+.cta:hover svg { background: var(--tri); color: #000; transform: rotate(45deg); }
+.cta:hover .cta__face { box-shadow: 0 0 0 2px var(--tri); }
+.cta:active { transform: scale(0.97); transition-duration: 0.12s; }
+@media (max-width: 400px) {
+  .cta { gap: 10px; padding: 6px; }
+  .cta__face, .cta svg { width: 40px; height: 40px; }
+  .cta svg { padding: 10px; }
+  .cta::before { width: 40px; height: 40px; margin-top: -20px; right: 6px; }
+  .cta__text { font-size: 15px; }
+}
 .cta__text {
   font-family: var(--font-display); font-weight: 400; white-space: nowrap;
   font-size: clamp(16px, 1.3vw, 19px); line-height: 1.15; letter-spacing: 0.01em;
