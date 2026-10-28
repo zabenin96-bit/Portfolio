@@ -336,7 +336,7 @@
     function add(b, extra) { if (b && b.width) list.push(Object.assign({ left: b.left, right: b.right, top: b.top, bottom: b.bottom }, extra || {})); }
     qa(".cat__btn").forEach(function (el) { add(el.getBoundingClientRect(), { round: parseFloat(getComputedStyle(el).borderTopLeftRadius) || 12 }); });
     qa(".about__photo").forEach(function (el) { add(el.getBoundingClientRect(), { round: 10 }); });
-    [".cat__label", ".masthead__title", ".masthead__sub", ".about__lead", ".about__head .eyebrow", ".about__body > span", ".footer__grid > *", ".footer__links a", ".footer__word"].forEach(function (s) {
+    [".cat__label", ".masthead__title", ".masthead__sub", ".about__lead", ".about__head .eyebrow", ".about__body > span", ".footer__grid > *", ".footer__links a", ".footer__word", ".footer__credit"].forEach(function (s) {
       qa(s).forEach(function (el) { var r = document.createRange(); r.selectNodeContents(el.querySelector(".i18n") || el); add(r.getBoundingClientRect()); });
     });
     [".cta", ".spinner"].forEach(function (s) { var el = q(s); if (el) add(el.getBoundingClientRect(), { circle: true }); });
