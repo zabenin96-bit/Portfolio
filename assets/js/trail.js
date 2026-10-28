@@ -6,7 +6,7 @@
  *   1. a loop around "Sound design studio" under the name,
  *   2. down a side lane next to the work videos, crossing to the other side
  *      in the free gap below each row,
- *   3. two loops around one video (one on phones),
+ *   3. a loop around one video,
  *   4. a flat loop around one caption while crossing between rows,
  *   5. a loop around Nata's photo and name,
  *   6. a loop around the "Have an idea?" circle, where it ends.
@@ -47,7 +47,7 @@
   var FILLET = 46;       // px, how much the route's corners are rounded
   var LEAD = 0.72;       // where the head sits on screen on straight parts (share of height)
   var EYE = 0.66;        // an accent starts when its object's centre is this high on screen
-  var SPEED = 1.47;      // px/ms – the line's own pace along the route
+  var SPEED = 1.0;       // px/ms – the line's own pace along the route
   var IDLE_MS = 1600;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
@@ -224,9 +224,9 @@
     rr.lane = side === "L" ? near.left - r : near.right + r;
     rows.forEach(function (row, i) {
       if (i === ringRow) {
-        // two loops around the video next to this row's lane
+        // one loop around the video next to this row's lane
         // (between rows the crossing right below rounds the exit itself)
-        ringOnLane(near, r, side, W < 760 ? 1 : 2, row.lane, viewKeys(near), rows[i + 1] ? 0 : 24);
+        ringOnLane(near, r, side, 1, row.lane, viewKeys(near), rows[i + 1] ? 0 : 24);
       }
       var next = rows[i + 1];
       if (!next) return;
@@ -382,7 +382,7 @@
       sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
     } else {
       // ease toward the target, never faster than SPEED along the route
-      var ds = diff * (1 - Math.exp(-dt / 180)), cap = SPEED * dt / STEP;
+      var ds = diff * (1 - Math.exp(-dt / 260)), cap = SPEED * dt / STEP;
       sHead += Math.max(-cap, Math.min(cap, ds));
     }
     var moving = Math.abs(target - sHead) > 0.05;

@@ -255,9 +255,10 @@
     cards.textContent = "";
     cat.projects.forEach(function (p, n) {
       var title = p.title[lang] || cat.title[lang] + " " + (n + 1);
-      var caption = p.title.ru || p.title.en
-        ? el("div", { class: "card__caption" }, [bi(p.title.ru + " (" + SITE.i18n.ru.role + ")", p.title.en + " (" + SITE.i18n.en.role + ")")])
-        : null;
+      // the project's name in the site's own type; until names are given,
+      // its number in the section
+      var num = (n < 9 ? "0" : "") + (n + 1);
+      var caption = el("div", { class: "card__caption" }, [bi(p.title.ru || num, p.title.en || num)]);
       // no cover of our own: show Kinescope's player right away, with its
       // own cover frame and play button (loaded only when scrolled to)
       if (p.kinescope && !p.poster) {
@@ -268,7 +269,7 @@
           allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
           allowfullscreen: "",
         }));
-        cards.appendChild(el("div", { class: "card" }, caption ? [frame, caption] : [frame]));
+        cards.appendChild(el("div", { class: "card" }, [frame, caption]));
         return;
       }
       var btn = el("button", { type: "button", class: "card__btn", "aria-label": t("watch") + ": " + title });
@@ -279,7 +280,7 @@
       play.appendChild(svg(PLAY));
       btn.appendChild(play);
       btn.addEventListener("click", function () { playProject(btn, p); });
-      cards.appendChild(el("div", { class: "card" }, caption ? [btn, caption] : [btn]));
+      cards.appendChild(el("div", { class: "card" }, [btn, caption]));
     });
   }
 
