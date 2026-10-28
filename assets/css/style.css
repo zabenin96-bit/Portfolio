@@ -19,9 +19,9 @@
 /* ---------- Tokens ---------- */
 :root {
   --accent: #ff5a2e;
-  --tri: #f685bb; /* the pink of the triangles: marquee and cursor */
-  --cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 1.5 16 7.2 7.2 16z' fill='%23f685bb' stroke='%23000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, auto;
-  --cursor-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 1.5 16 7.2 7.2 16z' fill='%23f685bb' stroke='%23000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, pointer;
+  --tri: #eafd4c; /* the acid yellow of the triangles: marquee, cursor, contact circle */
+  --cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 1.5 16 7.2 7.2 16z' fill='%23eafd4c' stroke='%23000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, auto;
+  --cursor-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 1.5 16 7.2 7.2 16z' fill='%23eafd4c' stroke='%23000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, pointer;
   --bg: #000000;
   --fg: #ffffff;
   --muted: #8c8c8c;
@@ -314,10 +314,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
     display: block; transform-origin: bottom left;
     animation: rise linear both; animation-timeline: view(); animation-range: entry 10% entry 90%;
   }
-  .spinner { animation: spin linear both; animation-timeline: view(); }
 }
 @keyframes rise { from { opacity: 0; transform: translateY(70%) rotateX(20deg); } to { opacity: 1; transform: none; } }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- Contact ---------- */
 .contact {
@@ -337,9 +335,6 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   font-family: var(--font-display); font-weight: 300;
   font-size: clamp(19px, 1.7vw, 23px); line-height: 1.15;
 }
-.spinner { width: min(340px, 70vw); aspect-ratio: 1; color: var(--accent); }
-/* on computers the contact block is just the circle */
-@media (min-width: 760px) { .spinner { display: none; } }
 
 /* ---------- Footer ---------- */
 .footer { padding-bottom: 150px; }
