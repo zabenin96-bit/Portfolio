@@ -30,7 +30,7 @@
       localStorage.setItem(key, value);
     } catch (e) { return null; }
   }
-  var TRIANGLE = '<svg class="marquee__sep" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3.5 21 12 6 20.5z"/></svg>';
+  var TRIANGLE = '<svg class="marquee__sep" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.4 3.9Q5.5 2.8 5.5 5v14q0 2.2 1.9 1.1l12-6.9q1.9-1.2 0-2.4z"/></svg>';
   var PLAY = '<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
   // ---------- language ----------
