@@ -324,18 +324,29 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 48px;
   padding: 40px 0 clamp(96px, 12vw, 160px);
 }
+/* a yellow capsule with the arrow in a black disc at its end; it breathes
+   a soft glow so it asks to be pressed */
 .cta {
-  width: min(260px, 64vw); aspect-ratio: 1; border-radius: 50%;
+  position: relative; display: inline-flex; align-items: center; gap: 16px;
+  padding: 8px 8px 8px 26px; border-radius: 999px;
   background: var(--cta-bg); color: var(--cta-fg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-  text-align: center; padding: 30px; transition: transform 0.5s var(--ease);
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+  animation: cta-glow 3.2s ease-in-out infinite;
 }
-.cta svg { width: 30px; height: 30px; }
-.cta:hover { transform: scale(1.04); }
-.cta:active { transform: scale(0.98); transition-duration: 0.12s; }
+.cta svg {
+  flex: none; width: 46px; height: 46px; padding: 12px; border-radius: 50%;
+  background: #000; color: var(--tri); transition: transform 0.5s var(--ease);
+}
+.cta:hover { transform: translateY(-2px); animation-play-state: paused; box-shadow: 0 10px 40px rgba(255, 212, 92, 0.35); }
+.cta:hover svg { transform: rotate(45deg); }
+.cta:active { transform: scale(0.97); transition-duration: 0.12s; }
 .cta__text {
-  font-family: var(--font-display); font-weight: 300;
-  font-size: clamp(19px, 1.7vw, 23px); line-height: 1.15;
+  font-family: var(--font-display); font-weight: 400; white-space: nowrap;
+  font-size: clamp(16px, 1.3vw, 19px); line-height: 1.15; letter-spacing: 0.01em;
+}
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 212, 92, 0); }
+  50% { box-shadow: 0 0 34px 2px rgba(255, 212, 92, 0.28); }
 }
 
 /* ---------- Footer ---------- */

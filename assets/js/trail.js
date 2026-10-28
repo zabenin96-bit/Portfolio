@@ -278,15 +278,20 @@
       pt(laneX, after);
     }
 
-    // 6. around the "Have an idea?" circle, entered at its top along a level line
+    // 6. around the "Have an idea?" capsule, entered at its top along a level line
     var cta = boxOf(q(".cta"));
     if (cta) {
-      var R = (cta.right - cta.left) / 2 + 22;
+      var half = (cta.bottom - cta.top) / 2, R = half + 18;
       var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
-      var cg = ringInfo({ left: cx, right: cx, top: cy, bottom: cy }, R);
-      pt(exitX, cy - R);
+      var cg = ringInfo({ left: cta.left + half, right: cta.right - half, top: cy, bottom: cy }, R);
       var keys = viewKeys(cta);
-      if (exitX < cx) loop(cg, 0, 1.25, keys); else loop(cg, 0, -1.25, keys);
+      // join the top edge right where the line arrives, so it never turns back
+      var x0 = cta.left + half, x1 = cta.right - half;
+      var u0 = x1 > x0 ? Math.min(1, Math.max(0, (exitX - x0) / (x1 - x0))) * cg.u.topEnd : 0;
+      // the loop starts a little further on, so the corner into it is rounded
+      var dir = exitX < cx ? 1 : -1, lead = 44 / cg.T;
+      pt(exitX, cy - R, 22);
+      loop(cg, u0 + dir * lead, u0 + dir * (lead + 1.25), keys);
     }
     return finish();
   }
