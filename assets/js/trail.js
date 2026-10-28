@@ -6,13 +6,15 @@
  *   1. a loop around the studio name,
  *   2. down a side lane next to the work videos, crossing to the other side
  *      in the free gap below each row,
- *   3. two loops around one video (with its caption),
+ *   3. two loops around one video (one on phones),
  *   4. a flat loop around one caption while crossing between rows,
  *   5. a loop around Nata's photo and name,
  *   6. a loop around the "Have an idea?" circle, where it ends.
  * Corners are rounded and loops are entered and left along their tangent, so
- * the path is one smooth curve. The scroll position picks the place on the
- * route; scrolling back moves the line back.
+ * the path is one smooth curve. On straight parts the head keeps one height
+ * on screen and goes down with the scroll; once an object reaches eye level
+ * the line plays its loop at its own pace and then catches up. Scrolling back
+ * moves the line back.
  *
  * As a safety net the line is erased wherever it would cross an element, so
  * it reads as passing behind content. Skipped for reduced motion and on
@@ -39,6 +41,8 @@
   var STEP = 3;          // px between route samples
   var FILLET = 46;       // px, how much the route's corners are rounded
   var LEAD = 0.55;       // where the head sits on screen on straight parts (share of height)
+  var EYE = 0.5;         // an accent starts when its object's centre is this high on screen
+  var SPEED = 2.2;       // px/ms – the line's own pace along the route
   var IDLE_MS = 1600;    // after this long without movement the line fades out
   var W = 0, H = 0, dpr = 1;
 
@@ -109,19 +113,13 @@
       ctl.push({ x: p.x, y: p.y, k: keys[0] + (keys[1] - keys[0]) * i / n });
     }
   }
-  // scroll range in which the object sits well on screen while it is circled
-  function loopKeys(rect, from, to) {
-    var c = (rect.top + rect.bottom) / 2;
-    var a = c - H * from, b = c - H * to;
-    // keep the whole object on screen while the line goes round it
-    var lo = rect.bottom + 30 - H, hi = rect.top - 30;
-    if (hi > lo) { a = Math.min(Math.max(a, lo), hi); b = Math.min(Math.max(b, lo), hi); }
-    return [Math.max(0, a), Math.max(0, b)];
+  // an accent starts once its object reaches eye level; the loop itself
+  // then plays out at the line's own pace, and the line catches up after
+  function loopKeys(rect) {
+    var k = Math.max(0, (rect.top + rect.bottom) / 2 - H * EYE);
+    return [k, k];
   }
-  // a big object is circled while it passes the middle of the screen – at
-  // eye level – from the moment its centre is at 3/4 of the screen height
-  // until it is at 1/4 (and never while part of it is off screen)
-  function viewKeys(rect) { return loopKeys(rect, 0.75, 0.25); }
+  var viewKeys = loopKeys;
 
   // Go down a lane past `rect`, circling it `laps` times on the way. The
   // ring is joined along the side it shares with the lane, so the joins are
@@ -179,9 +177,8 @@
 
     // 1. start on a loop around the studio name, leave it along its bottom edge
     var tg = ringInfo(title, 20);
-    // done before the top of the ring scrolls off the screen
-    var titleEnd = Math.min(Math.max(140, Math.min(260, tg.cy - H * 0.25)), Math.max(40, tg.cy - tg.hh - tg.r - 14));
-    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [0, titleEnd]);
+    // drawn right away when the page opens
+    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [0, 0]);
     pt(rows[0].lane, title.bottom + 20);
 
     // 2–4. down the lanes, crossing between rows
@@ -213,11 +210,14 @@
         }
       }
       // corners on a crossing stay inside the gap between the rows
-      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap, 0.68, 0.3) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
+      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
     });
     var lastRow = rows[rows.length - 1], laneX = lastRow.lane;
     // finish the work section on the lane before bending toward anything else
-    pt(laneX, lastRow.bottom + 24);
+    // (unless a loop has just left the last row – then go on from there)
+    var tail = ctl[ctl.length - 1];
+    if (tail.y >= lastRow.bottom) laneX = tail.x;
+    else pt(laneX, lastRow.bottom + 24);
 
     // 5. a loop around Nata's photo and name (or the photo alone if the
     //    bigger loop would run into the text beside it)
@@ -286,26 +286,8 @@
         out.push({ x: p.x + (n.x - p.x) * f2, y: p.y + (n.y - p.y) * f2, k: k });
       }
     }
-    // between two loops the line moves at an even pace, so it arrives at
-    // each accent exactly when its loop is due
-    var lastKeyed = -1;
-    for (var q2 = 0; q2 < out.length; q2++) {
-      if (out[q2].k === undefined) continue;
-      if (lastKeyed >= 0 && q2 - lastKeyed > 1) {
-        var ka = out[lastKeyed].k, kb = out[q2].k;
-        var ya = out[lastKeyed].y, yb = out[q2].y, dy = yb - ya;
-        for (var g2 = lastKeyed + 1; g2 < q2; g2++) {
-          // mostly by height (keeps it on screen), a little by length (so
-          // level stretches still take some scroll)
-          var byLen = (g2 - lastKeyed) / (q2 - lastKeyed);
-          var byY = dy > 1 ? Math.min(1, Math.max(0, (out[g2].y - ya) / dy)) : byLen;
-          out[g2].k = ka + (kb - ka) * (byY * 0.75 + byLen * 0.25);
-        }
-      }
-      lastKeyed = q2;
-    }
-    // before the first and after the last loop the head stays at LEAD on
-    // screen; keys never go back
+    // straight parts follow the scroll (the head stays at LEAD on screen);
+    // keys never go back
     var maxScroll = Math.max(1, document.documentElement.scrollHeight - H);
     var prev = 0;
     for (var m = 0; m < out.length; m++) {
@@ -362,8 +344,8 @@
     if (Math.abs(diff) * STEP > 2500) {
       sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
     } else {
-      // ease toward the target, never faster than ~4 px/ms along the route
-      var ds = diff * (1 - Math.exp(-dt / 70)), cap = 4 * dt / STEP;
+      // ease toward the target, never faster than SPEED along the route
+      var ds = diff * (1 - Math.exp(-dt / 120)), cap = SPEED * dt / STEP;
       sHead += Math.max(-cap, Math.min(cap, ds));
     }
     var moving = Math.abs(target - sHead) > 0.05;
@@ -430,13 +412,17 @@
   }
 
   // the route follows the layout: rebuild when sizes or fonts change
-  var rebuildTimer = null;
+  var rebuildTimer = null, built = false;
   function rebuild() {
     clearTimeout(rebuildTimer);
     rebuildTimer = setTimeout(function () {
       resize();
       route = buildRoute();
-      if (route) sHead = targetFor(window.scrollY);
+      if (!route) return;
+      // the first time, the line draws itself round the title as the page opens
+      if (!built && window.scrollY < 40) { sHead = 0; wake(); }
+      else sHead = targetFor(window.scrollY);
+      built = true;
     }, 120);
   }
   resize();
