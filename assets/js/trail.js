@@ -112,7 +112,11 @@
   // scroll range in which the object sits well on screen while it is circled
   function loopKeys(rect, from, to) {
     var c = (rect.top + rect.bottom) / 2;
-    return [Math.max(0, c - H * from), Math.max(0, c - H * to)];
+    var a = c - H * from, b = c - H * to;
+    // keep the whole object on screen while the line goes round it
+    var lo = rect.bottom + 30 - H, hi = rect.top - 30;
+    if (hi > lo) { a = Math.min(Math.max(a, lo), hi); b = Math.min(Math.max(b, lo), hi); }
+    return [Math.max(0, a), Math.max(0, b)];
   }
 
   // Go down a lane past `rect`, circling it `laps` times on the way. The
@@ -171,7 +175,9 @@
 
     // 1. start on a loop around the studio name, leave it along its bottom edge
     var tg = ringInfo(title, 20);
-    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [0, Math.max(140, Math.min(260, tg.cy - H * 0.25))]);
+    // done before the top of the ring scrolls off the screen
+    var titleEnd = Math.min(Math.max(140, Math.min(260, tg.cy - H * 0.25)), Math.max(40, tg.cy - tg.hh - tg.r - 14));
+    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [0, titleEnd]);
     pt(rows[0].lane, title.bottom + 20);
 
     // 2–4. down the lanes, crossing between rows
@@ -282,7 +288,7 @@
     var prev = 0;
     for (var m = 0; m < out.length; m++) {
       var key = out[m].k !== undefined ? out[m].k : out[m].y - H * LEAD;
-      key = Math.max(key, prev + (m ? STEP * 0.25 : 0));
+      key = Math.max(key, prev + (m ? STEP * 0.02 : 0));
       out[m].k = prev = key;
     }
     // squeeze the end so the route finishes exactly at the bottom of the page
