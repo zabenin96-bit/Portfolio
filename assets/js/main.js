@@ -30,7 +30,7 @@
       localStorage.setItem(key, value);
     } catch (e) { return null; }
   }
-  var CLOVER = '<svg class="marquee__sep" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="6.6" r="5"/><circle cx="17.4" cy="12" r="5"/><circle cx="12" cy="17.4" r="5"/><circle cx="6.6" cy="12" r="5"/></svg>';
+  var TRIANGLE = '<svg class="marquee__sep" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3.5 21 12 6 20.5z"/></svg>';
   var PLAY = '<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
   // ---------- language ----------
@@ -103,7 +103,7 @@
         b.names.forEach(function (n) { item.appendChild(el("span", { class: "marquee__name", text: n })); });
         item.appendChild(el("span", { class: "marquee__note", text: b.note }));
         group.appendChild(item);
-        group.appendChild(svg(CLOVER));
+        group.appendChild(svg(TRIANGLE));
       });
       track.appendChild(group);
     }

@@ -19,6 +19,9 @@
 /* ---------- Tokens ---------- */
 :root {
   --accent: #ff5a2e;
+  --tri: #f685bb; /* the pink of the triangles: marquee and cursor */
+  --cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 1.5 16 7.2 7.2 16z' fill='%23f685bb' stroke='%23000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, auto;
+  --cursor-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 1.5 16 7.2 7.2 16z' fill='%23f685bb' stroke='%23000' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, pointer;
   --bg: #000000;
   --fg: #ffffff;
   --muted: #8c8c8c;
@@ -95,7 +98,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .marquee__item { display: flex; align-items: baseline; gap: 32px; padding-inline: 40px; white-space: nowrap; }
 .marquee__name { font-family: var(--font-display); font-weight: 400; font-size: clamp(15px, 1.4vw, 19px); letter-spacing: 0.12em; text-transform: uppercase; line-height: 1; }
 .marquee__note { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.marquee__sep { flex: none; width: 16px; height: 16px; color: var(--accent); }
+.marquee__sep { flex: none; width: 14px; height: 14px; color: var(--tri); }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- Language switch ----------
@@ -122,7 +125,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .lang button { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65); }
 .lang button[aria-pressed="true"] { display: none; }
 .lang button {
-  position: relative; width: 40px; height: 40px; padding: 0 0 0 0.22em; cursor: pointer;
+  position: relative; width: 40px; height: 40px; padding: 0 0 0 0.22em; cursor: var(--cursor-link);
   border-radius: 11px; border: 1px solid transparent;
   background:
     linear-gradient(180deg, #0f0f0f, #000) padding-box,
@@ -167,7 +170,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .cat__btn, .card__btn {
   position: relative; width: 100%; border: 0; padding: 0; overflow: hidden;
-  border-radius: 14px; background: #141414; cursor: pointer;
+  border-radius: 14px; background: #141414; cursor: var(--cursor-link);
   transition: box-shadow 0.4s var(--ease), transform 0.4s var(--ease);
 }
 .cat__btn { aspect-ratio: 4 / 3; border-radius: 12px; }
@@ -240,7 +243,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .sheet__close {
   flex: none; width: 60px; height: 60px; border: 1px solid var(--line); background: transparent;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; cursor: var(--cursor-link);
 }
 .cards {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
@@ -371,6 +374,12 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */
 .trail { position: absolute; top: 0; left: 0; z-index: 30; pointer-events: none; overflow: visible; }
+
+/* ---------- Cursor: a small pink triangle (fine pointers only) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  html { cursor: var(--cursor); }
+  a, button, label, summary, [role="button"] { cursor: var(--cursor-link); }
+}
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
