@@ -22,6 +22,7 @@
   --tri: #ffd45c; /* the warm yellow of the triangles: marquee, cursor, contact circle */
   --cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12.5' fill='rgba(0,0,0,0.45)' stroke='rgba(0,0,0,0.5)' stroke-width='3'/%3E%3Ccircle cx='14' cy='14' r='12.5' fill='none' stroke='%23ffd45c' stroke-width='1.4'/%3E%3Cpath d='M12.2 9.6Q11 8.9 11 10.3v7.4q0 1.4 1.2.7l6.3-3.7q1.2-.7 0-1.4z' fill='%23ffd45c'/%3E%3C/svg%3E") 14 14, auto;
   --cursor-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12.5' fill='rgba(0,0,0,0.45)' stroke='rgba(0,0,0,0.5)' stroke-width='3'/%3E%3Ccircle cx='14' cy='14' r='12.5' fill='none' stroke='%23ffd45c' stroke-width='1.4'/%3E%3Cpath d='M12.2 9.6Q11 8.9 11 10.3v7.4q0 1.4 1.2.7l6.3-3.7q1.2-.7 0-1.4z' fill='%23ffd45c'/%3E%3C/svg%3E") 14 14, pointer;
+  --cursor-video: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12.5' fill='rgba(0,0,0,0.45)' stroke='rgba(0,0,0,0.5)' stroke-width='3'/%3E%3Ccircle cx='14' cy='14' r='12.5' fill='none' stroke='%23ffd45c' stroke-width='1'/%3E%3Cpath d='M12.2 9.6Q11 8.9 11 10.3v7.4q0 1.4 1.2.7l6.3-3.7q1.2-.7 0-1.4z' fill='%23ffd45c'/%3E%3C/svg%3E") 28 28, pointer; /* bigger over the videos */
   --bg: #000000;
   --fg: #ffffff;
   --muted: #8c8c8c;
@@ -377,6 +378,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @media (hover: hover) and (pointer: fine) {
   html { cursor: var(--cursor); }
   a, button, label, summary, [role="button"] { cursor: var(--cursor-link); }
+  .cat__btn, .card__btn { cursor: var(--cursor-video); }
 }
 
 /* ---------- Reduced motion ---------- */
