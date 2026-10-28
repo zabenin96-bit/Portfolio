@@ -118,13 +118,10 @@
     if (hi > lo) { a = Math.min(Math.max(a, lo), hi); b = Math.min(Math.max(b, lo), hi); }
     return [Math.max(0, a), Math.max(0, b)];
   }
-  // a big object is circled over the whole time it is fully in view, so the
-  // loop plays out at the pace of the scroll, right as the object passes
-  function viewKeys(rect, from, to) {
-    var lo = rect.bottom + 30 - H, hi = rect.top - 30, span = hi - lo;
-    if (span < H * 0.2) return loopKeys(rect, from, to);
-    return [Math.max(0, lo + span * 0.1), Math.max(0, hi - span * 0.1)];
-  }
+  // a big object is circled while it passes the middle of the screen – at
+  // eye level – from the moment its centre is at 3/4 of the screen height
+  // until it is at 1/4 (and never while part of it is off screen)
+  function viewKeys(rect) { return loopKeys(rect, 0.75, 0.25); }
 
   // Go down a lane past `rect`, circling it `laps` times on the way. The
   // ring is joined along the side it shares with the lane, so the joins are
@@ -198,7 +195,7 @@
         var side = row.lane < (near.left + near.right) / 2 ? "L" : "R";
         var r = Math.max(6, Math.min(row.laneOffset, 18));
         // between rows the crossing right below rounds the exit itself
-        ringOnLane(near, r, side, 2, row.lane, viewKeys(near, 0.66, 0.36), rows[i + 1] ? 0 : 24);
+        ringOnLane(near, r, side, W < 760 ? 1 : 2, row.lane, viewKeys(near), rows[i + 1] ? 0 : 24);
       }
       var next = rows[i + 1];
       if (!next) return;
@@ -216,7 +213,7 @@
         }
       }
       // corners on a crossing stay inside the gap between the rows
-      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap, 0.7, 0.35) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
+      crossing(y, row.lane, next.lane, cap, cap ? loopKeys(cap, 0.68, 0.3) : null, Math.max(10, (next.top - row.bottom) / 2 - 3));
     });
     var lastRow = rows[rows.length - 1], laneX = lastRow.lane;
     // finish the work section on the lane before bending toward anything else
@@ -236,7 +233,7 @@
     if (about) {
       var side2 = laneX < (about.left + about.right) / 2 ? "L" : "R";
       var r2 = Math.max(8, Math.min(16, side2 === "L" ? about.left - 6 : W - about.right - 6));
-      ringOnLane(about, r2, side2, 1, laneX, viewKeys(about, 0.64, 0.4));
+      ringOnLane(about, r2, side2, 1, laneX, viewKeys(about));
       var bodyBottom = body.length ? Math.max.apply(null, body.map(function (b) { return b.bottom; })) : about.bottom;
       // past the text, but leaving room to turn toward the circle below
       var ctaEl = q(".cta"), ctaTop = ctaEl ? boxOf(ctaEl).top - 22 : Infinity;
@@ -254,7 +251,7 @@
       var cx = (cta.left + cta.right) / 2, cy = (cta.top + cta.bottom) / 2;
       var cg = ringInfo({ left: cx, right: cx, top: cy, bottom: cy }, R);
       pt(exitX, cy - R);
-      var keys = viewKeys(cta, 0.6, 0.36);
+      var keys = viewKeys(cta);
       if (exitX < cx) loop(cg, 0, 1.25, keys); else loop(cg, 0, -1.25, keys);
     }
     return finish();
@@ -365,8 +362,8 @@
     if (Math.abs(diff) * STEP > 2500) {
       sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
     } else {
-      // ease toward the target, never faster than ~1.6 px/ms along the route
-      var ds = diff * (1 - Math.exp(-dt / 150)), cap = 1.6 * dt / STEP;
+      // ease toward the target, never faster than ~4 px/ms along the route
+      var ds = diff * (1 - Math.exp(-dt / 70)), cap = 4 * dt / STEP;
       sHead += Math.max(-cap, Math.min(cap, ds));
     }
     var moving = Math.abs(target - sHead) > 0.05;
