@@ -3,7 +3,7 @@
  * line travels along as you scroll – like a bead on a thread.
  *
  * The route is built from the live layout (so it fits phones and desktops):
- *   1. a loop around the studio name,
+ *   1. a loop around "Sound design studio" under the name,
  *   2. down a side lane next to the work videos, crossing to the other side
  *      in the free gap below each row,
  *   3. two loops around one video (one on phones),
@@ -40,8 +40,8 @@
   var TAIL = 460;        // px of route visible behind the head
   var STEP = 3;          // px between route samples
   var FILLET = 46;       // px, how much the route's corners are rounded
-  var LEAD = 0.55;       // where the head sits on screen on straight parts (share of height)
-  var EYE = 0.5;         // an accent starts when its object's centre is this high on screen
+  var LEAD = 0.72;       // where the head sits on screen on straight parts (share of height)
+  var EYE = 0.66;        // an accent starts when its object's centre is this high on screen
   var SPEED = 2.2;       // px/ms – the line's own pace along the route
   var IDLE_MS = 1600;    // after this long without movement the line fades out
   var W = 0, H = 0, dpr = 1;
@@ -175,11 +175,19 @@
       }));
     });
 
-    // 1. start on a loop around the studio name, leave it along its bottom edge
-    var tg = ringInfo(title, 20);
-    // drawn right away when the page opens
-    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [0, 0]);
-    pt(rows[0].lane, title.bottom + 20);
+    // 1. start on a loop around "Sound design studio" under the name (the
+    //    name itself sits too high to be circled in time), drawn right away
+    //    when the page opens; leave it along its bottom edge
+    var sub = textOf(q(".masthead__sub")) || title;
+    var nameBottom = (textOf(q(".masthead__title")) || sub).bottom;
+    var subR = Math.max(6, Math.min(12, sub.top - nameBottom - 6));
+    var sg = ringInfo({ left: sub.left - 14, right: sub.right + 14, top: sub.top, bottom: sub.bottom }, subR);
+    // (keys below zero: already due at the very top of the page)
+    loop(sg, sg.u.topStart, sg.u.bottomEnd + 1, [-H, -H]);
+    // a level line out to the lane, then down it beside the videos
+    var subExitY = sub.bottom + subR;
+    pt(rows[0].lane, subExitY, Math.max(8, Math.min(FILLET, (rows[0].top - subExitY) * 0.8)));
+    pt(rows[0].lane, rows[0].top + 20);
 
     // 2–4. down the lanes, crossing between rows
     var ringRow = Math.min(1, rows.length - 1);
@@ -289,7 +297,7 @@
     // straight parts follow the scroll (the head stays at LEAD on screen);
     // keys never go back
     var maxScroll = Math.max(1, document.documentElement.scrollHeight - H);
-    var prev = 0;
+    var prev = -Infinity;
     for (var m = 0; m < out.length; m++) {
       var key = out[m].k !== undefined ? out[m].k : out[m].y - H * LEAD;
       key = Math.max(key, prev + (m ? STEP * 0.02 : 0));
@@ -419,7 +427,7 @@
       resize();
       route = buildRoute();
       if (!route) return;
-      // the first time, the line draws itself round the title as the page opens
+      // the first time, the line draws itself round the subtitle as the page opens
       if (!built && window.scrollY < 40) { sHead = 0; wake(); }
       else sHead = targetFor(window.scrollY);
       built = true;
