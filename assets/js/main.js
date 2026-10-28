@@ -253,8 +253,24 @@
     var cards = document.getElementById("cards");
     cards.className = "cards" + (cat.format === "vertical" ? " cards--vertical" : "");
     cards.textContent = "";
-    cat.projects.forEach(function (p) {
-      var title = p.title[lang];
+    cat.projects.forEach(function (p, n) {
+      var title = p.title[lang] || cat.title[lang] + " " + (n + 1);
+      var caption = p.title.ru || p.title.en
+        ? el("div", { class: "card__caption" }, [bi(p.title.ru + " (" + SITE.i18n.ru.role + ")", p.title.en + " (" + SITE.i18n.en.role + ")")])
+        : null;
+      // no cover of our own: show Kinescope's player right away, with its
+      // own cover frame and play button (loaded only when scrolled to)
+      if (p.kinescope && !p.poster) {
+        var frame = el("div", { class: "card__btn is-playing" });
+        frame.appendChild(el("iframe", {
+          src: "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope),
+          title: title, loading: "lazy",
+          allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
+          allowfullscreen: "",
+        }));
+        cards.appendChild(el("div", { class: "card" }, caption ? [frame, caption] : [frame]));
+        return;
+      }
       var btn = el("button", { type: "button", class: "card__btn", "aria-label": t("watch") + ": " + title });
       if (p.poster) btn.appendChild(el("img", { src: p.poster, alt: "", loading: "lazy", decoding: "async" }));
       else btn.appendChild(placeholder("[poster]", false));
@@ -263,8 +279,7 @@
       play.appendChild(svg(PLAY));
       btn.appendChild(play);
       btn.addEventListener("click", function () { playProject(btn, p); });
-      var caption = bi(p.title.ru + " (" + SITE.i18n.ru.role + ")", p.title.en + " (" + SITE.i18n.en.role + ")");
-      cards.appendChild(el("div", { class: "card" }, [btn, el("div", { class: "card__caption" }, [caption])]));
+      cards.appendChild(el("div", { class: "card" }, caption ? [btn, caption] : [btn]));
     });
   }
 

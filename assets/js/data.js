@@ -9,6 +9,8 @@
  *
  * Project video: upload the full video to Kinescope and paste its ID
  * (the part after kinescope.io/ in the share link) into `kinescope`.
+ * `title` is optional (shown under the video); without a `poster` the
+ * card shows Kinescope's own player with its cover frame.
  */
 window.SITE = {
   i18n: {
@@ -85,10 +87,8 @@ window.SITE = {
       format: "vertical",
       preview: "assets/video/vertical.mp4", previewSmall: "assets/video/vertical-640.mp4", previewMedium: "assets/video/vertical-960.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
       projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 4]", en: "[Project 4]" }, kinescope: "", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", poster: "" },
       ],
     },
     {
@@ -96,9 +96,8 @@ window.SITE = {
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
       preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
       projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
       ],
     },
     {
@@ -106,9 +105,10 @@ window.SITE = {
       title: { ru: "Реклама", en: "Commercials" },
       preview: "assets/video/commercials.mp4", previewSmall: "assets/video/commercials-640.mp4", previewMedium: "assets/video/commercials-960.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
       projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "eMs3woezYncoaQpC2zwUKG", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "0VHYckipP1yFtUHgSroYtd", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "sXrhE1wZFMQPPaN81Epi2b", poster: "" },
       ],
     },
     {
@@ -116,9 +116,9 @@ window.SITE = {
       title: { ru: "Анимация", en: "Animation" },
       preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", previewMedium: "assets/video/animation-960.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "wk3Aik8kNa2XgryingxbaV", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", poster: "" },
       ],
     },
   ],
