@@ -139,11 +139,21 @@
   function ringOnLane(rect, r, side, laps, laneX, keys, exitLen) {
     var g = ringInfo(rect, r);
     var sideX = side === "L" ? rect.left - r : rect.right + r;
-    // bend over from the lane to the ring's side within the room that is
-    // left above it – always moving onward, never back up
+    // cross over from the lane to the ring's side along a level line in the
+    // room that is left above it – like the crossings between rows
     var prevY = ctl.length ? ctl[ctl.length - 1].y : rect.top - 100;
     var room = rect.top - prevY;
-    if (Math.abs(sideX - laneX) > 1 && room > 30) { pt(laneX, prevY + room * 0.3); pt(sideX, prevY + room * 0.75); }
+    if (Math.abs(sideX - laneX) > 1 && room > 30) {
+      var shift = Math.abs(sideX - laneX);
+      if (shift < 60) {
+        // a small step over (phones): a soft slant reads smoother
+        pt(laneX, prevY + room * 0.3); pt(sideX, prevY + room * 0.75);
+      } else {
+        // below the middle, clear of the thin divider above the section
+        var ym = prevY + room * 0.7, rnd = Math.max(8, Math.min(FILLET, room * 0.26));
+        pt(laneX, ym, rnd); pt(sideX, ym, rnd);
+      }
+    }
     if (side === "R") loop(g, g.u.rightStart, g.u.rightEnd + laps, keys);
     else loop(g, g.u.leftEnd, g.u.leftStart - laps, keys);
     // leave along the same side for a moment, so the turn after it is rounded
@@ -204,14 +214,18 @@
     // 2–4. down the lanes, crossing between rows
     var ringRow = Math.min(1, rows.length - 1);
     var capRow = rows.length >= 4 ? 3 : 0;
+    // the ring row's lane runs exactly along the side of its ring, so the
+    // crossing above leads straight into the loop without an extra bend
+    var rr = rows[ringRow];
+    var rdist = function (it) { return Math.min(Math.abs(rr.lane - it.left), Math.abs(rr.lane - it.right)); };
+    var near = rr.items.reduce(function (a, b) { return rdist(a) <= rdist(b) ? a : b; });
+    var side = rr.lane < (near.left + near.right) / 2 ? "L" : "R";
+    var r = Math.max(6, Math.min(rr.laneOffset, 18));
+    rr.lane = side === "L" ? near.left - r : near.right + r;
     rows.forEach(function (row, i) {
       if (i === ringRow) {
         // two loops around the video next to this row's lane
-        var dist = function (it) { return Math.min(Math.abs(row.lane - it.left), Math.abs(row.lane - it.right)); };
-        var near = row.items.reduce(function (a, b) { return dist(a) <= dist(b) ? a : b; });
-        var side = row.lane < (near.left + near.right) / 2 ? "L" : "R";
-        var r = Math.max(6, Math.min(row.laneOffset, 18));
-        // between rows the crossing right below rounds the exit itself
+        // (between rows the crossing right below rounds the exit itself)
         ringOnLane(near, r, side, W < 760 ? 1 : 2, row.lane, viewKeys(near), rows[i + 1] ? 0 : 24);
       }
       var next = rows[i + 1];
