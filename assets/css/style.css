@@ -118,6 +118,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   opacity: 0; pointer-events: none; transform: translateY(-4px);
   transition: opacity 0.9s ease, transform 0.9s ease;
 }
+.lang.is-leaving { transition: opacity 0.12s ease, transform 0.12s ease; }
 .lang.is-visible,
 .lang.is-floating:focus-within {
   opacity: 1; pointer-events: auto; transform: none;

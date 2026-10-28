@@ -345,6 +345,9 @@
   function onScrollLang() {
     var active = langZoneReached();
     langBox.classList.toggle("is-floating", active);
+    // above the first video it goes away at once – no slow fade lingering
+    // at the top of the page
+    langBox.classList.toggle("is-leaving", !active);
     if (!active) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); return; }
     langBox.classList.add("is-visible");
     hideLangLater();
