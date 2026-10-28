@@ -92,16 +92,6 @@ window.SITE = {
       ],
     },
     {
-      id: "games",
-      title: { ru: "Игры", en: "Games" },
-      preview: "assets/video/games.mp4", previewSmall: "assets/video/games-640.mp4", previewMedium: "assets/video/games-960.mp4", poster: "assets/img/games.webp", tint: "#121821",
-      projects: [
-        { title: { ru: "[Проект 1]", en: "[Project 1]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 2]", en: "[Project 2]" }, kinescope: "", poster: "" },
-        { title: { ru: "[Проект 3]", en: "[Project 3]" }, kinescope: "", poster: "" },
-      ],
-    },
-    {
       id: "film",
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
       preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
