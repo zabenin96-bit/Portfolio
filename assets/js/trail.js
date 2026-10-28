@@ -47,7 +47,7 @@
   var FILLET = 46;       // px, how much the route's corners are rounded
   var LEAD = 0.72;       // where the head sits on screen on straight parts (share of height)
   var EYE = 0.66;        // an accent starts when its object's centre is this high on screen
-  var SPEED = 1.0;       // px/ms – the line's own pace along the route
+  var SPEED = 0.6;       // px/ms – the line's own pace along the route
   var IDLE_MS = 1600;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
@@ -390,7 +390,7 @@
       sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
     } else {
       // ease toward the target, never faster than SPEED along the route
-      var ds = diff * (1 - Math.exp(-dt / 260)), cap = SPEED * dt / STEP;
+      var ds = diff * (1 - Math.exp(-dt / 420)), cap = SPEED * dt / STEP;
       sHead += Math.max(-cap, Math.min(cap, ds));
     }
     var moving = Math.abs(target - sHead) > 0.05;
