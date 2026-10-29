@@ -153,31 +153,28 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .masthead__cta:hover { border-color: var(--tri); }
 .masthead__cta:hover svg { transform: translateX(3px); }
 /* "Discuss a project" at the top unfolds in place: the words lift away and
-   three yellow buttons – mail, Telegram, WhatsApp – roll out one by one,
-   with a small cross to fold them back */
-.hero-contact { position: relative; display: inline-block; margin-top: 18px; }
+   three yellow buttons – mail, Telegram, WhatsApp – roll out one by one;
+   a click anywhere else folds them back */
+.hero-contact { position: relative; display: inline-flex; align-items: center; min-height: 56px; margin-top: 12px; }
 .masthead__cta { transition: opacity 0.3s var(--ease), transform 0.4s var(--ease), border-color 0.3s var(--ease), color 0.3s; }
 .hero-contact.is-open .masthead__cta { opacity: 0; transform: translateY(-10px); pointer-events: none; }
 .hero-ways {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  display: flex; align-items: center; gap: 12px; pointer-events: none;
+  display: flex; align-items: center; gap: 16px; pointer-events: none;
 }
-.hero-ways a, .hero-ways__close {
-  display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; padding: 0; border: 0;
+.hero-ways a {
+  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; padding: 0; border: 0;
   background: var(--tri); color: #000;
   opacity: 0; transform: translateY(8px) scale(0.4) rotate(-40deg);
   transition: opacity 0.25s var(--ease), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
 }
-.hero-ways svg { width: 18px; height: 18px; }
-.hero-ways__close { width: 28px; height: 28px; background: none; color: #8c8c8c; border: 1px solid #333; margin-left: 2px; cursor: var(--cursor-link); }
-.hero-ways__close svg { width: 14px; height: 14px; }
+.hero-ways svg { width: 24px; height: 24px; }
 .hero-contact.is-open .hero-ways { pointer-events: auto; }
 .hero-contact.is-open .hero-ways > * { opacity: 1; transform: none; }
 .hero-contact.is-open .hero-ways > :nth-child(2) { transition-delay: 0.06s; }
 .hero-contact.is-open .hero-ways > :nth-child(3) { transition-delay: 0.12s; }
-.hero-contact.is-open .hero-ways > :nth-child(4) { transition-delay: 0.2s; }
 .hero-ways a:hover { box-shadow: 0 6px 20px rgba(255, 212, 92, 0.45); transform: translateY(-2px) scale(1.06); transition-delay: 0s; }
-.hero-ways__close:hover { color: #fff; border-color: #666; }
+
 
 /* ---------- Category grid ---------- */
 /* phones: one large tile per row (like TIHO); from 760px: two per row */

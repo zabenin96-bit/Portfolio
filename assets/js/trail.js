@@ -178,8 +178,8 @@
     var tiles = qa(".cat");
     // the whole opening block: name, "Sound design studio", the line of what
     // the studio does and the small "Discuss a project" link
-    var title = [".masthead__sub", ".masthead__offer", ".masthead__cta"].reduce(function (acc, sel) {
-      var el = q(sel); return union(acc, el && (sel === ".masthead__cta" ? boxOf(el) : textOf(el)));
+    var title = [".masthead__sub", ".masthead__offer", ".hero-contact"].reduce(function (acc, sel) {
+      var el = q(sel); return union(acc, el && (sel === ".hero-contact" ? boxOf(el) : textOf(el)));
     }, textOf(q(".masthead__title")));
     if (!tiles.length || !title) return null;
 
@@ -208,7 +208,7 @@
     // On phones the name fills the width and a ring round it would leave
     // the screen: there the opening loop goes round the small "Discuss a
     // project" link under it instead.
-    var ctaTop = boxOf(q(".masthead__cta"));
+    var ctaTop = boxOf(q(".hero-contact")); // (room for the unfolded buttons too)
     if (ctaTop && (title.left < 24 || W - title.right < 24)) title = ctaTop;
     var tR = Math.max(10, Math.min(18, rows[0].top - title.bottom - 30));
     // keep clear of the RU / EN switch above it (close on phones)

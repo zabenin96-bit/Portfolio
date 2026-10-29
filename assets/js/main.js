@@ -428,7 +428,6 @@
       if (open) heroWays[0].focus({ preventScroll: true }); else if (hero.contains(document.activeElement)) heroBtn.focus({ preventScroll: true });
     };
     heroBtn.addEventListener("click", function (e) { e.stopPropagation(); setHero(true); });
-    hero.querySelector(".hero-ways__close").addEventListener("click", function (e) { e.stopPropagation(); setHero(false); });
     document.addEventListener("click", function (e) { if (hero.classList.contains("is-open") && !hero.contains(e.target)) setHero(false); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && hero.classList.contains("is-open")) setHero(false); });
   }
