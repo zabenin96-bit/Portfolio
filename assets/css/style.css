@@ -219,6 +219,12 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .cat__btn video, .cat__btn img, .card__btn video, .card__btn img, .card__btn iframe {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0;
 }
+/* the previews run 2px past every edge of their rounded tile: no hairline
+   of the tile (or of a video's own edge row) can peek through after
+   sub-pixel rounding */
+.cat__btn video, .cat__btn img, .card__btn video, .card__btn img {
+  inset: -2px; width: calc(100% + 4px); height: calc(100% + 4px);
+}
 .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 clamp(40px, 6vw, 90px) clamp(12px, 2vw, 30px) rgba(0, 0, 0, 0.6); pointer-events: none; }
 .cat__label {
   font-size: 13px; letter-spacing: 0.3em; line-height: 1.4; text-transform: uppercase;
