@@ -10,7 +10,7 @@
 <link rel="preload" href="assets/fonts/raleway-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/raleway-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://kinescope.io">
-<link rel="stylesheet" href="assets/css/style.css?v=20261029a">
+<link rel="stylesheet" href="assets/css/style.css?v=20261029b">
 </head>
 <body>
 
@@ -18,11 +18,6 @@
   <h2 id="brands-label" class="visually-hidden" data-i18n="brandsLabel">Бренды и проекты</h2>
   <div class="marquee__track" id="marquee"></div>
 </section>
-
-<div class="lang" role="group" aria-label="Язык" data-i18n-attr="aria-label:langLabel">
-  <button type="button" data-lang="ru" aria-pressed="true" lang="ru" aria-label="Русский">RU</button>
-  <button type="button" data-lang="en" aria-pressed="false" lang="en" aria-label="English">EN</button>
-</div>
 
 <main>
   <header class="masthead container">
@@ -85,7 +80,11 @@
 <nav class="nav" aria-label="Основная навигация" data-i18n-attr="aria-label:navLabel">
   <a href="#work" data-i18n="navWork">Работы</a>
   <a href="#about" data-i18n="navAbout">Обо мне</a>
-  <a href="#contact" data-i18n="navContact">Контакты</a>
+  <a class="nav__cta" href="https://t.me/whereisyourbird" target="_blank" rel="noopener" data-i18n="navCta">Обсудить проект</a>
+  <span class="nav__lang" role="group" aria-label="Язык" data-i18n-attr="aria-label:langLabel">
+    <button type="button" data-lang="ru" aria-pressed="true" lang="ru" aria-label="Русский">RU</button>
+    <button type="button" data-lang="en" aria-pressed="false" lang="en" aria-label="English">EN</button>
+  </span>
 </nav>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
@@ -100,8 +99,8 @@
   </div>
 </dialog>
 
-<script src="assets/js/data.js?v=20261029a"></script>
-<script src="assets/js/main.js?v=20261029a"></script>
-<script src="assets/js/trail.js?v=20261029a" defer></script>
+<script src="assets/js/data.js?v=20261029b"></script>
+<script src="assets/js/main.js?v=20261029b"></script>
+<script src="assets/js/trail.js?v=20261029b" defer></script>
 </body>
 </html>
