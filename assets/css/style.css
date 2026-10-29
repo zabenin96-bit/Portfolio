@@ -368,27 +368,31 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .footer__credit { display: inline-block; margin-top: 6px; font-size: 13px; letter-spacing: 0.04em; white-space: nowrap; color: var(--muted); text-decoration: none; transition: color 0.2s var(--ease); }
 .footer__credit:hover { color: #fff; }
 
-/* ---------- Bottom nav pill ---------- */
+/* ---------- Bottom menu ----------
+   A light pill with just "Work · About · EN", and beside it a round yellow
+   button with an envelope that opens Telegram. */
 .nav {
   position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 40;
-  display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px;
+  display: flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 17px;
+}
+.nav__pill {
+  display: flex; align-items: center; gap: 4px; padding: 6px 10px 6px 12px; border-radius: 999px;
   /* see-through, with a light blur behind so the words stay readable over video */
   background: var(--nav-bg); color: #000;
   -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
-  font-size: 17px; white-space: nowrap; transition: background-color 0.4s var(--ease);
 }
 .nav a { padding: 12px 16px; transition: opacity 0.2s, transform 0.15s ease; }
-.nav a:hover { opacity: 0.6; }
-/* the contact button rides in the menu: a small yellow capsule */
+.nav__pill a:hover { opacity: 0.6; }
 .nav .nav__cta {
-  margin-left: 4px; padding: 10px 18px; border-radius: 999px;
-  background: var(--tri); color: #000; font-weight: 500;
+  display: grid; place-items: center; width: 56px; height: 56px; padding: 0; border-radius: 50%;
+  background: var(--tri); color: #000;
   transition: box-shadow 0.3s var(--ease), transform 0.15s ease;
 }
-.nav__cta .i18n { justify-items: center; } /* the shorter language sits centred */
-.nav .nav__cta:hover { opacity: 1; box-shadow: 0 6px 22px rgba(255, 212, 92, 0.45); }
+.nav__cta svg { width: 24px; height: 24px; transition: transform 0.3s var(--ease); }
+.nav .nav__cta:hover { box-shadow: 0 6px 22px rgba(255, 212, 92, 0.45); }
+.nav__cta:hover svg { transform: translateY(-1px) scale(1.06); }
 /* language: only the one you can switch to is shown */
-.nav__lang { display: flex; margin-left: 2px; }
+.nav__lang { display: flex; }
 .nav__lang button {
   position: relative; padding: 12px 10px 12px 12px; border: 0; background: none; color: inherit;
   font: inherit; font-size: 0.78em; font-weight: 600; letter-spacing: 0.18em; cursor: var(--cursor-link);
@@ -397,10 +401,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .nav__lang button:hover { opacity: 0.6; }
 .nav__lang button[aria-pressed="true"] { display: none; }
 @media (max-width: 480px) {
-  .nav { padding: 5px 6px 5px 8px; font-size: 14px; bottom: 16px; gap: 0; }
-  .nav a { padding: 11px 8px; }
-  .nav .nav__cta { padding: 9px 13px; }
-  .nav__lang button { padding: 11px 8px 11px 10px; }
+  .nav { font-size: 15px; bottom: 16px; gap: 8px; }
+  .nav__pill { padding: 4px 6px 4px 8px; gap: 0; }
+  .nav a { padding: 12px 10px; }
+  .nav .nav__cta { width: 50px; height: 50px; }
+  .nav__lang button { padding: 12px 8px 12px 10px; }
 }
 
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */

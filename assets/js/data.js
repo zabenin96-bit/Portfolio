@@ -32,7 +32,7 @@ window.SITE = {
       credit: "Разработка сайта –",
       navWork: "Работы",
       navAbout: "Обо мне",
-      navCta: "Обсудить проект",
+      navCta: "Обсудить проект в Telegram",
       navLabel: "Основная навигация",
       langLabel: "Язык",
       close: "Закрыть",
@@ -58,7 +58,7 @@ window.SITE = {
       credit: "Website by",
       navWork: "Work",
       navAbout: "About",
-      navCta: "Let’s talk",
+      navCta: "Discuss a project on Telegram",
       navLabel: "Main navigation",
       langLabel: "Language",
       close: "Close",
@@ -95,6 +95,15 @@ window.SITE = {
       ],
     },
     {
+      id: "film",
+      title: { ru: "Постпродакшн кино", en: "Film postproduction" },
+      preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
+      projects: [
+        { title: { ru: "", en: "" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
+      ],
+    },
+    {
       id: "animation",
       title: { ru: "Анимация", en: "Animation" },
       preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", previewMedium: "assets/video/animation-960.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
@@ -102,15 +111,6 @@ window.SITE = {
         { title: { ru: "", en: "" }, kinescope: "wk3Aik8kNa2XgryingxbaV", poster: "" },
         { title: { ru: "", en: "" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", poster: "" },
         { title: { ru: "", en: "" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", poster: "" },
-      ],
-    },
-    {
-      id: "film",
-      title: { ru: "Постпродакшн кино", en: "Film postproduction" },
-      preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
-      projects: [
-        { title: { ru: "", en: "" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
       ],
     },
     {
