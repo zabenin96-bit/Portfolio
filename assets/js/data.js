@@ -107,9 +107,9 @@ window.SITE = {
       title: { ru: "Анимация", en: "Animation" },
       preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", previewMedium: "assets/video/animation-960.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
-        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", poster: "" },
-        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", poster: "" },
-        { title: { ru: "Run", en: "Run" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", poster: "" },
+        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", preview: "assets/video/projects/samurai-sd.mp4", poster: "assets/img/projects/samurai-sd.webp" },
+        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", preview: "assets/video/projects/samurai-ost.mp4", poster: "assets/img/projects/samurai-ost.webp" },
+        { title: { ru: "Run", en: "Run" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", preview: "assets/video/projects/run.mp4", poster: "assets/img/projects/run.webp" },
       ],
     },
     {
@@ -118,8 +118,8 @@ window.SITE = {
       format: "vertical",
       preview: "assets/video/vertical.mp4", previewSmall: "assets/video/vertical-640.mp4", previewMedium: "assets/video/vertical-960.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
       projects: [
-        { title: { ru: "MSI", en: "MSI" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", poster: "" },
-        { title: { ru: "М.Видео", en: "M.Video" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", poster: "" },
+        { title: { ru: "MSI", en: "MSI" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", preview: "assets/video/projects/msi.mp4", poster: "assets/img/projects/msi.webp" },
+        { title: { ru: "М.Видео", en: "M.Video" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", preview: "assets/video/projects/mvideo.mp4", poster: "assets/img/projects/mvideo.webp" },
       ],
     },
   ],
