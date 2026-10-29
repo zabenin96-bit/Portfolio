@@ -233,8 +233,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
   gap: 48px 32px; padding-bottom: 120px;
 }
-.cards--vertical { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; }
-@media (min-width: 760px) { .cards--vertical { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 48px 24px; } }
+/* vertical videos: columns of a fixed share, centred, so a short row
+   (two videos) sits in the middle instead of leaving room on the right */
+.cards--vertical { --cols: 2; --gap: 12px; display: flex; flex-wrap: wrap; justify-content: center; gap: 28px var(--gap); }
+.cards--vertical .card { width: calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols)); }
+@media (min-width: 760px) { .cards--vertical { --cols: 4; --gap: 24px; row-gap: 48px; } }
 .cards--vertical .card__btn { aspect-ratio: 9 / 16; }
 .cards--vertical .card__play { width: 56px; height: 56px; }
 .cards--vertical .card__caption { font-size: 12px; letter-spacing: 0.22em; padding-left: 0.22em; }
