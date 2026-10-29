@@ -319,12 +319,12 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 
 /* the brand strip, after the contact button and before the footer: a
    middle voice – larger and lighter than the quiet strip, not shouting */
-.marquee--loud { border-top: 1px solid var(--line); padding: 20px 0; }
-.marquee--loud .marquee__track { height: clamp(15px, 1.4vw, 20px); animation-duration: 60s; }
-.marquee--loud .marquee__item { gap: 34px; padding-inline: 40px; }
-.marquee--loud .marquee__name { font-size: clamp(14px, 1.4vw, 20px); letter-spacing: 0.14em; color: #bdbdbd; }
-.marquee--loud .marquee__note { font-size: 11px; color: #6a6a6a; }
-.marquee--loud .marquee__sep { width: 12px; height: 12px; }
+.marquee--loud { border-top: 1px solid var(--line); padding: 15px 0; }
+.marquee--loud .marquee__track { height: 15px; animation-duration: 66s; }
+.marquee--loud .marquee__item { gap: 30px; padding-inline: 36px; }
+.marquee--loud .marquee__name { font-size: clamp(12px, 1vw, 15px); letter-spacing: 0.18em; color: #9e9e9e; }
+.marquee--loud .marquee__note { font-size: 10.5px; color: #5c5c5c; }
+.marquee--loud .marquee__sep { width: 10px; height: 10px; }
 
 /* ---------- About ---------- */
 .about { padding: clamp(56px, 6vw, 96px) 0 clamp(80px, 10vw, 140px); }
