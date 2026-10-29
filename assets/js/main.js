@@ -117,7 +117,7 @@
   var stillsOnly = reduceMotion || saveData;
   var lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
     (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
-  var MAX_PLAYING = lowEnd ? 2 : 3;
+  var MAX_PLAYING = lowEnd ? 2 : 4;
   var PLAY_RATIO = 0.5;  // share of the tile that must be on screen
   var START_GAP = 150;   // ms between consecutive starts
   var ratios = new Map(); // video -> visible share of its tile
