@@ -10,7 +10,7 @@
 <link rel="preload" href="assets/fonts/raleway-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/raleway-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://kinescope.io">
-<link rel="stylesheet" href="assets/css/style.css?v=20261029d">
+<link rel="stylesheet" href="assets/css/style.css?v=20261029e">
 </head>
 <body>
 
@@ -18,6 +18,11 @@
   <h2 id="brands-label" class="visually-hidden" data-i18n="brandsLabel">Бренды и проекты</h2>
   <div class="marquee__track" id="marquee"></div>
 </section>
+
+<div class="lang" role="group" aria-label="Язык" data-i18n-attr="aria-label:langLabel">
+  <button type="button" data-lang="ru" aria-pressed="true" lang="ru" aria-label="Русский">RU</button>
+  <button type="button" data-lang="en" aria-pressed="false" lang="en" aria-label="English">EN</button>
+</div>
 
 <main>
   <header class="masthead container">
@@ -78,15 +83,9 @@
 </footer>
 
 <nav class="nav" aria-label="Основная навигация" data-i18n-attr="aria-label:navLabel">
-  <div class="nav__pill">
-    <a href="#work" data-i18n="navWork">Работы</a>
-    <a href="#about" data-i18n="navAbout">Обо мне</a>
-    <span class="nav__lang" role="group" aria-label="Язык" data-i18n-attr="aria-label:langLabel">
-      <button type="button" data-lang="ru" aria-pressed="true" lang="ru" aria-label="Русский">RU</button>
-      <button type="button" data-lang="en" aria-pressed="false" lang="en" aria-label="English">EN</button>
-    </span>
-  </div>
-  <a class="nav__cta" href="https://t.me/whereisyourbird" target="_blank" rel="noopener" aria-label="Обсудить проект в Telegram" data-i18n-attr="aria-label:navCta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m3.8 7 8.2 6 8.2-6"/></svg></a>
+  <a href="#work" data-i18n="navWork">Работы</a>
+  <a href="#about" data-i18n="navAbout">Обо мне</a>
+  <a href="#contact" data-i18n="navContact">Контакты</a>
 </nav>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
@@ -101,8 +100,8 @@
   </div>
 </dialog>
 
-<script src="assets/js/data.js?v=20261029d"></script>
-<script src="assets/js/main.js?v=20261029d"></script>
-<script src="assets/js/trail.js?v=20261029d" defer></script>
+<script src="assets/js/data.js?v=20261029e"></script>
+<script src="assets/js/main.js?v=20261029e"></script>
+<script src="assets/js/trail.js?v=20261029e" defer></script>
 </body>
 </html>

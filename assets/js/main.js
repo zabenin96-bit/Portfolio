@@ -255,69 +255,38 @@
     cards.textContent = "";
     cat.projects.forEach(function (p, n) {
       var title = p.title[lang] || cat.title[lang] + " " + (n + 1);
-      // the project's name in the site's own type; until names are given,
-      // its number in the section
-      var num = (n < 9 ? "0" : "") + (n + 1);
-      var caption = el("div", { class: "card__caption" }, [bi(p.title.ru || num, p.title.en || num)]);
-      // no cover of our own: show Kinescope's player right away, with its
-      // own cover frame and play button (loaded only when scrolled to)
-      if (p.kinescope && !p.poster) {
-        var frame = el("div", { class: "card__btn is-playing" });
-        var src = "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope);
-        var iframe = el("iframe", {
-          src: src, title: title, loading: "lazy",
-          allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
-          allowfullscreen: "",
-        });
-        // the player stays hidden over a dark shimmer until it has drawn its
-        // cover: its page loads white first, so we wait for the player to
-        // speak up (it posts messages once it is set up), or 1.5 s at most
-        frame.classList.add("is-loading");
-        watchPlayer(iframe, frame);
-        frame.appendChild(iframe);
-        // On computers a see-through cover on top shows the site's own cursor
-        // over the video too; a click lifts it and starts the video. Touch
-        // screens have no cursor, so there the player is tapped directly.
-        if (finePointer) {
-          var cover = el("button", { type: "button", class: "card__cover", "aria-label": t("watch") + ": " + title });
-          cover.addEventListener("click", function () {
-            cover.remove();
-            frame.classList.add("is-loading");
-            watchPlayer(iframe, frame);
-            iframe.src = src + "?autoplay=1";
-          });
-          frame.appendChild(cover);
-        }
-        cards.appendChild(el("div", { class: "card" }, [frame, caption]));
-        return;
-      }
+      // the project's name in the site's own type, once it is given
+      var caption = p.title.ru || p.title.en
+        ? el("div", { class: "card__caption" }, [bi(p.title.ru || p.title.en, p.title.en || p.title.ru)])
+        : null;
+      // A quiet dark card (or our own cover) with the yellow play button.
+      // The Kinescope player is only loaded on a click: its page starts
+      // white, so it stays hidden over a dark shimmer until it is ready.
       var btn = el("button", { type: "button", class: "card__btn", "aria-label": t("watch") + ": " + title });
       if (p.poster) btn.appendChild(el("img", { src: p.poster, alt: "", loading: "lazy", decoding: "async" }));
-      else btn.appendChild(placeholder("[poster]", false));
       btn.appendChild(el("span", { class: "vignette" }));
       var play = el("span", { class: "card__play" });
       play.appendChild(svg(PLAY));
       btn.appendChild(play);
       btn.addEventListener("click", function () { playProject(btn, p); });
-      cards.appendChild(el("div", { class: "card" }, [btn, caption]));
+      cards.appendChild(el("div", { class: "card" }, caption ? [btn, caption] : [btn]));
     });
   }
 
   // Kinescope players: reveal each one once it has drawn itself
-  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   var waiting = [];
   function reveal(w) {
     if (w.done) return;
     w.done = true;
     clearTimeout(w.timer);
-    setTimeout(function () { w.frame.classList.remove("is-loading"); }, 400);
+    setTimeout(function () { w.frame.classList.remove("is-loading"); }, 900);
   }
   function watchPlayer(iframe, frame) {
     var w = { iframe: iframe, frame: frame, done: false, timer: null };
     waiting.push(w);
     iframe.addEventListener("load", function () {
       clearTimeout(w.timer);
-      w.timer = setTimeout(function () { reveal(w); }, 1500);
+      w.timer = setTimeout(function () { reveal(w); }, 2500);
     });
   }
   window.addEventListener("message", function (e) {
@@ -338,14 +307,16 @@
       }
       return;
     }
-    btn.classList.add("is-playing");
+    btn.classList.add("is-playing", "is-loading");
     btn.textContent = "";
-    btn.appendChild(el("iframe", {
+    var iframe = el("iframe", {
       src: "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope) + "?autoplay=1",
-      title: p.title[lang],
+      title: p.title[lang] || t("watch"),
       allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
       allowfullscreen: "",
-    }));
+    });
+    watchPlayer(iframe, btn);
+    btn.appendChild(iframe);
   }
 
   function openSheet(cat) {
@@ -407,7 +378,37 @@
     });
   }
 
+  // ---------- language button ----------
+  // Hidden at the top of the page. It appears once the brand strip has
+  // fully left the screen (so it never sits on the strip); from there on it
+  // shows top-right while scrolling and fades 1.5 s after scrolling stops.
   var marquee = document.querySelector(".marquee");
+  var langBox = document.querySelector(".lang");
+  var LANG_HIDE_DELAY = 1500;
+  var langHideTimer = null;
+  function hideLangLater() {
+    clearTimeout(langHideTimer);
+    langHideTimer = setTimeout(function () {
+      // keep it while the pointer is on it or it has keyboard focus
+      if (langBox.matches(":hover") || langBox.contains(document.activeElement)) { hideLangLater(); return; }
+      langBox.classList.remove("is-visible");
+    }, LANG_HIDE_DELAY);
+  }
+  function langZoneReached() {
+    return marquee ? marquee.getBoundingClientRect().bottom <= 0 : window.scrollY > 80;
+  }
+  function onScrollLang() {
+    var active = langZoneReached();
+    langBox.classList.toggle("is-floating", active);
+    // back over the strip it goes away at once – no slow fade lingering
+    // at the top of the page
+    langBox.classList.toggle("is-leaving", !active);
+    if (!active) { clearTimeout(langHideTimer); langBox.classList.remove("is-visible"); return; }
+    langBox.classList.add("is-visible");
+    hideLangLater();
+  }
+  window.addEventListener("scroll", onScrollLang, { passive: true });
+  langBox.addEventListener("click", function () { if (langBox.classList.contains("is-floating")) hideLangLater(); });
 
   // the brand strip stops animating while it is off screen
   if ("IntersectionObserver" in window) {

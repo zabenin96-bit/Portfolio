@@ -77,10 +77,10 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .is-switching main, .is-switching footer, .is-switching .marquee, .is-switching .nav { opacity: 0; }
 
 /* tactile press feedback, like native apps */
-.nav a, .nav__lang button, .cat__btn, .card__btn, .cta, .sheet__close, .footer__links a {
+.nav a, .lang button, .cat__btn, .card__btn, .cta, .sheet__close, .footer__links a {
   -webkit-tap-highlight-color: transparent;
 }
-.nav a:active, .nav__lang button:active, .sheet__close:active { transform: scale(0.94); }
+.nav a:active, .lang button:active, .sheet__close:active { transform: scale(0.94); }
 .cat__btn:active, .card__btn:active { transform: scale(0.98); }
 .sheet__close { transition: opacity 0.2s, transform 0.15s ease; }
 
@@ -102,6 +102,48 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .marquee__note { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .marquee__sep { flex: none; width: 14px; height: 14px; color: var(--tri); }
 @keyframes marquee { to { transform: translateX(-50%); } }
+
+/* ---------- Language switch ----------
+   A small rounded square showing only the language you can switch to.
+   Hidden while the brand strip is on screen. Once the strip has scrolled
+   away it appears in the top-right corner while you scroll and slowly
+   fades out 1.5 s after scrolling stops. */
+@property --lang-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.lang {
+  /* centred in the free margin between the videos and the screen edge
+     (gutter + room beside the 1440px container, or beside the 1040px grid) */
+  --side-margin: max(calc(var(--gutter) + max(0px, (100% - 1440px) / 2)), calc((100% - 1040px) / 2));
+  position: fixed; z-index: 40; top: 12px;
+  right: max(var(--gutter), calc((var(--side-margin) - 40px) / 2));
+  display: flex; align-items: center;
+  opacity: 0; pointer-events: none; transform: translateY(-4px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.lang.is-leaving { transition: opacity 0.12s ease, transform 0.12s ease; }
+.lang.is-visible,
+.lang.is-floating:focus-within {
+  opacity: 1; pointer-events: auto; transform: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.lang button { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65); }
+.lang button[aria-pressed="true"] { display: none; }
+.lang button {
+  position: relative; width: 40px; height: 40px; padding: 0 0 0 0.22em; cursor: var(--cursor-link);
+  border-radius: 11px; border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, #0f0f0f, #000) padding-box,
+    conic-gradient(from var(--lang-angle),
+      #1c1c1c 0deg, #444 60deg, #6b6b6b 90deg, #2a2a2a 140deg, #161616 210deg,
+      #383838 290deg, #1c1c1c 360deg) border-box;
+  color: #cfcfcf; font-size: 12px; font-weight: 500; letter-spacing: 0.22em;
+  animation: lang-shimmer 8s linear infinite;
+  transition: color 0.25s, box-shadow 0.35s, transform 0.15s ease;
+}
+.lang button::after { content: ""; position: absolute; inset: -4px; } /* 48px touch target */
+.lang button:hover { color: #fff; }
+@keyframes lang-shimmer { to { --lang-angle: 360deg; } }
+/* no repaint work while the button is hidden */
+.lang:not(.is-visible):not(:focus-within) button { animation-play-state: paused; }
 
 /* ---------- Header ---------- */
 .masthead { text-align: center; padding: clamp(64px, 9vw, 120px) 0 clamp(40px, 5vw, 64px); }
@@ -224,7 +266,6 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .card__btn:hover .card__play { transform: scale(1.06); }
 .card__btn.is-playing { cursor: auto; }
-.card__cover { position: absolute; inset: 0; z-index: 2; background: transparent; border: 0; padding: 0; }
 /* dark, not white, while the player is still loading: the frame waits
    hidden over a slow dark shimmer and fades in once it has loaded */
 .card__btn iframe { background: #111; color-scheme: dark; transition: opacity 0.5s var(--ease); }
@@ -368,44 +409,20 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .footer__credit { display: inline-block; margin-top: 6px; font-size: 13px; letter-spacing: 0.04em; white-space: nowrap; color: var(--muted); text-decoration: none; transition: color 0.2s var(--ease); }
 .footer__credit:hover { color: #fff; }
 
-/* ---------- Bottom menu ----------
-   A light pill with just "Work · About · EN", and beside it a round yellow
-   button with an envelope that opens Telegram. */
+/* ---------- Bottom nav pill ---------- */
 .nav {
   position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 40;
-  display: flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 17px;
-}
-.nav__pill {
-  display: flex; align-items: center; gap: 4px; padding: 6px 10px 6px 12px; border-radius: 999px;
+  display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px;
   /* see-through, with a light blur behind so the words stay readable over video */
   background: var(--nav-bg); color: #000;
   -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
+  font-size: 17px; white-space: nowrap; transition: background-color 0.4s var(--ease);
 }
 .nav a { padding: 12px 16px; transition: opacity 0.2s, transform 0.15s ease; }
-.nav__pill a:hover { opacity: 0.6; }
-.nav .nav__cta {
-  display: grid; place-items: center; width: 56px; height: 56px; padding: 0; border-radius: 50%;
-  background: var(--tri); color: #000;
-  transition: box-shadow 0.3s var(--ease), transform 0.15s ease;
-}
-.nav__cta svg { width: 24px; height: 24px; transition: transform 0.3s var(--ease); }
-.nav .nav__cta:hover { box-shadow: 0 6px 22px rgba(255, 212, 92, 0.45); }
-.nav__cta:hover svg { transform: translateY(-1px) scale(1.06); }
-/* language: only the one you can switch to is shown */
-.nav__lang { display: flex; }
-.nav__lang button {
-  position: relative; padding: 12px 10px 12px 12px; border: 0; background: none; color: inherit;
-  font: inherit; font-size: 0.78em; font-weight: 600; letter-spacing: 0.18em; cursor: var(--cursor-link);
-  transition: opacity 0.2s, transform 0.15s ease;
-}
-.nav__lang button:hover { opacity: 0.6; }
-.nav__lang button[aria-pressed="true"] { display: none; }
+.nav a:hover { opacity: 0.6; }
 @media (max-width: 480px) {
-  .nav { font-size: 15px; bottom: 16px; gap: 8px; }
-  .nav__pill { padding: 4px 6px 4px 8px; gap: 0; }
+  .nav { padding-left: 12px; font-size: 15px; bottom: 16px; }
   .nav a { padding: 12px 10px; }
-  .nav .nav__cta { width: 50px; height: 50px; }
-  .nav__lang button { padding: 12px 8px 12px 10px; }
 }
 
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */
@@ -415,7 +432,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @media (hover: hover) and (pointer: fine) {
   html { cursor: var(--cursor); }
   a, button, label, summary, [role="button"] { cursor: var(--cursor-link); }
-  .cat__btn, .card__btn, .card__cover { cursor: var(--cursor-video); }
+  .cat__btn, .card__btn { cursor: var(--cursor-video); }
   .cta, .cta * { cursor: var(--cursor-cta); }
 }
 
