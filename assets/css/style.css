@@ -104,20 +104,26 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- Language switch ----------
-   Just the letters of the language you can switch to.
-   It has one fixed place: top right, just under the brand strip, and
-   scrolls away with the page. */
+   "RU / EN" in the site type, the current language white, the other grey.
+   It has one fixed place just under the brand strip, lined up with the
+   right edge of the videos, and scrolls away with the page. */
 .masthead { position: relative; }
-.lang { position: absolute; z-index: 5; top: 14px; right: var(--gutter); display: flex; align-items: center; }
-.lang button[aria-pressed="true"] { display: none; }
-/* plain letters in the site type, like the section labels */
-.lang button {
-  position: relative; padding: 10px 0 10px 0.3em; border: 0; background: none; cursor: var(--cursor-link);
-  font-family: var(--font-display); font-size: 13px; font-weight: 400; letter-spacing: 0.3em;
-  color: #9a9a9a; transition: color 0.25s, transform 0.15s ease;
+.lang {
+  position: absolute; z-index: 5; top: 16px;
+  /* the work grid is at most 1040px wide and centred: line up with its edge */
+  right: calc(var(--gutter) + max(0px, (100% - 2 * var(--gutter) - 1040px) / 2));
+  display: flex; align-items: center; gap: 2px;
 }
-.lang button::after { content: ""; position: absolute; inset: -6px -10px; } /* a bigger touch target */
-.lang button:hover { color: #fff; }
+.lang button {
+  position: relative; padding: 8px 4px 8px calc(4px + 0.24em); border: 0; background: none; cursor: var(--cursor-link);
+  font-family: var(--font-display); font-size: 12px; font-weight: 400; letter-spacing: 0.24em;
+  color: #6f6f6f; transition: color 0.25s, transform 0.15s ease;
+}
+.lang button + button::before {
+  content: "/"; position: absolute; left: -4px; color: #3d3d3d; letter-spacing: 0; pointer-events: none;
+}
+.lang button[aria-pressed="true"] { color: #fff; cursor: default; }
+.lang button[aria-pressed="false"]:hover { color: #cfcfcf; }
 
 /* ---------- Header ---------- */
 .masthead { text-align: center; padding: clamp(64px, 9vw, 120px) 0 clamp(40px, 5vw, 64px); }
