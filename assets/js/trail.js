@@ -416,16 +416,17 @@
     var target = targetFor(scrollLog[0].y);
     var diff = target - sHead;
     // The head moves like a weight on a soft spring towards its target:
-    // it never jumps and never stops dead. Speeding up is limited (so it
-    // sets off gently, a little quicker when it is far behind), braking is
-    // not, so it always settles smoothly without overshooting.
-    var acc = OMEGA * OMEGA * diff - 2 * OMEGA * vHead;   // critically damped
-    if (acc * vHead > 0 || vHead === 0) {                  // speeding up
-      var aMax = (SPEED / STEP) / RAMP_MS * Math.max(1, Math.abs(diff) * STEP / 400);
-      acc = Math.max(-aMax, Math.min(aMax, acc));
-    }
-    // sub-steps keep the motion even on slow frames
+    // it never jumps and never stops dead. Speeding up is limited (gentle
+    // start, a little quicker when far behind) and so is braking (firmer,
+    // but never abrupt). Sub-steps keep the motion even on slow frames, and
+    // every sub-step obeys the same limits.
     for (var k = 0, n = Math.ceil(dt / 8), h = dt / n; k < n; k++) {
+      diff = target - sHead;
+      var acc = OMEGA * OMEGA * diff - 2 * OMEGA * vHead;   // critically damped
+      var aMax = (SPEED / STEP) / RAMP_MS * Math.max(1, Math.min(4, Math.abs(diff) * STEP / 400));
+      // speeding up gently; slowing down may be firmer, but never abrupt
+      var lim = acc * vHead > 0 || vHead === 0 ? aMax : aMax * 3;
+      acc = Math.max(-lim, Math.min(lim, acc));
       var newV = vHead + acc * h;
       // round an accent (a loop) the line keeps a calm, even pace: it may
       // not speed up past it, and if it arrives faster it eases down to it
@@ -436,8 +437,6 @@
       }
       vHead = newV;
       sHead += vHead * h;
-      diff = target - sHead;
-      acc = OMEGA * OMEGA * diff - 2 * OMEGA * vHead;
     }
     var moving = Math.abs(target - sHead) > 0.05 || Math.abs(vHead) > 0.0005;
     if (moving) lastMove = now;
