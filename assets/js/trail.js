@@ -434,9 +434,11 @@
     raf = requestAnimationFrame(step);
   }
 
-  // a few bands of equal opacity, each one continuous smooth path: one
-  // width, no brighter dots where pieces would otherwise overlap
-  var BANDS = 14, bands = [];
+  // the tail is drawn as many short bands, each of one opacity and each a
+  // continuous smooth path that starts exactly where the last one ended:
+  // one width, no overlaps (no brighter dots), and so many steps that the
+  // fade from white to nothing reads as one smooth gradient
+  var BANDS = 64, bands = [];
   for (var bi = 0; bi < BANDS; bi++) {
     var path = document.createElementNS(NS, "path");
     path.setAttribute("stroke", "rgb(" + COLOR + ")");
@@ -459,7 +461,7 @@
     var pts = [];
     for (var i = i0; i <= i1; i++) pts.push({ x: route[i].x, y: route[i].y, life: (i - tailS) / (sHead - tailS) });
     var h = at(sHead); pts.push({ x: h.x, y: h.y, life: 1 });
-    var n = pts.length, per = Math.max(2, Math.ceil(n / BANDS)), b = 0;
+    var n = pts.length, per = Math.max(1, Math.ceil(n / BANDS)), b = 0;
     for (var s = 0; s < n - 1; s += per, b++) {
       var e = Math.min(n - 1, s + per), d;
       if (s === 0) d = "M" + f1(pts[0].x) + " " + f1(pts[0].y);
@@ -470,7 +472,10 @@
       }
       if (e === n - 1) d += "L" + f1(pts[e].x) + " " + f1(pts[e].y);
       bands[b].setAttribute("d", d);
-      bands[b].setAttribute("stroke-opacity", (Math.pow(Math.max(0, pts[e].life), 1.3) * 0.85).toFixed(3));
+      // opacity taken at the middle of the band, on a smooth ease-in curve,
+      // so neighbouring bands differ by only a hair – no visible steps
+      var mid = (pts[s].life + pts[e].life) / 2;
+      bands[b].setAttribute("stroke-opacity", (mid * mid * (3 - 2 * mid) * 0.85).toFixed(3));
     }
     for (; b < BANDS; b++) bands[b].setAttribute("d", "");
   }
