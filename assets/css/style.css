@@ -105,26 +105,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 
 /* ---------- Language switch ----------
    A small rounded square showing only the language you can switch to.
-   Hidden while the brand strip is on screen. Once the strip has scrolled
-   away it appears in the top-right corner while you scroll and slowly
-   fades out 1.5 s after scrolling stops. */
+   It has one fixed place: top right, just under the brand strip, and
+   scrolls away with the page. */
 @property --lang-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-.lang {
-  /* centred in the free margin between the videos and the screen edge
-     (gutter + room beside the 1440px container, or beside the 1040px grid) */
-  --side-margin: max(calc(var(--gutter) + max(0px, (100% - 1440px) / 2)), calc((100% - 1040px) / 2));
-  position: fixed; z-index: 40; top: 12px;
-  right: max(var(--gutter), calc((var(--side-margin) - 40px) / 2));
-  display: flex; align-items: center;
-  opacity: 0; pointer-events: none; transform: translateY(-4px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-.lang.is-leaving { transition: opacity 0.12s ease, transform 0.12s ease; }
-.lang.is-visible,
-.lang.is-floating:focus-within {
-  opacity: 1; pointer-events: auto; transform: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
+.masthead { position: relative; }
+.lang { position: absolute; z-index: 5; top: 14px; right: var(--gutter); display: flex; align-items: center; }
 .lang button { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65); }
 .lang button[aria-pressed="true"] { display: none; }
 .lang button {
@@ -142,8 +127,6 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .lang button::after { content: ""; position: absolute; inset: -4px; } /* 48px touch target */
 .lang button:hover { color: #fff; }
 @keyframes lang-shimmer { to { --lang-angle: 360deg; } }
-/* no repaint work while the button is hidden */
-.lang:not(.is-visible):not(:focus-within) button { animation-play-state: paused; }
 
 /* ---------- Header ---------- */
 .masthead { text-align: center; padding: clamp(64px, 9vw, 120px) 0 clamp(40px, 5vw, 64px); }
