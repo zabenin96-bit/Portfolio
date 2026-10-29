@@ -87,9 +87,9 @@ window.SITE = {
       title: { ru: "Реклама", en: "Commercials" },
       preview: "assets/video/commercials.mp4", previewSmall: "assets/video/commercials-640.mp4", previewMedium: "assets/video/commercials-960.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
       projects: [
-        { title: { ru: "Буше", en: "Bushe" }, role: { ru: "саунд-дизайн, обработка голоса, сведение", en: "sound design, voice processing & mix" }, kinescope: "0VHYckipP1yFtUHgSroYtd", preview: "assets/video/projects/bushe.mp4", poster: "assets/img/projects/bushe.webp" },
-        { title: { ru: "Л’Этуаль", en: "L’Étoile" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", preview: "assets/video/projects/letoile.mp4", poster: "assets/img/projects/letoile.webp" },
         { title: { ru: "MG Motor", en: "MG Motor" }, role: { ru: "музыка, саунд-дизайн, сведение", en: "music, sound design & mix" }, kinescope: "eMs3woezYncoaQpC2zwUKG", preview: "assets/video/projects/mgmotor.mp4", poster: "assets/img/projects/mgmotor.webp" },
+        { title: { ru: "Л’Этуаль", en: "L’Étoile" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", preview: "assets/video/projects/letoile.mp4", poster: "assets/img/projects/letoile.webp" },
+        { title: { ru: "Буше", en: "Bushe" }, role: { ru: "саунд-дизайн, обработка голоса, сведение", en: "sound design, voice processing & mix" }, kinescope: "0VHYckipP1yFtUHgSroYtd", preview: "assets/video/projects/bushe.mp4", poster: "assets/img/projects/bushe.webp" },
         { title: { ru: "Яндекс Доставка", en: "Yandex Deliverer" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "sXrhE1wZFMQPPaN81Epi2b", preview: "assets/video/projects/yandex.mp4", poster: "assets/img/projects/yandex.webp" },
       ],
     },
@@ -98,8 +98,8 @@ window.SITE = {
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
       preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
       projects: [
-        { title: { ru: "To the Light", en: "To the Light" }, role: { ru: "реж. Меген Тарба, 2024", en: "dir. Megen Tarba, 2024" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", preview: "assets/video/projects/tothelight.mp4", poster: "assets/img/projects/tothelight.webp" },
-        { title: { ru: "Walk a Meter in My Shoes", en: "Walk a Meter in My Shoes" }, role: { ru: "реж. Анн Маковски, 2026", en: "dir. Ann Makovsky, 2026" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", preview: "assets/video/projects/walkameter.mp4", poster: "assets/img/projects/walkameter.webp" },
+        { title: { ru: "К свету", en: "To the Light" }, role: { ru: "реж. Меген Тарба, 2024", en: "dir. Megen Tarba, 2024" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", preview: "assets/video/projects/tothelight.mp4", poster: "assets/img/projects/tothelight.webp" },
+        { title: { ru: "Пройди метр в моих ботинках", en: "Walk a Meter in My Shoes" }, role: { ru: "реж. Анн Маковски, 2026", en: "dir. Ann Makovsky, 2026" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", preview: "assets/video/projects/walkameter.mp4", poster: "assets/img/projects/walkameter.webp" },
       ],
     },
     {
@@ -107,9 +107,9 @@ window.SITE = {
       title: { ru: "Анимация", en: "Animation" },
       preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", previewMedium: "assets/video/animation-960.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
-        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", preview: "assets/video/projects/samurai-sd.mp4", poster: "assets/img/projects/samurai-sd.webp" },
-        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", preview: "assets/video/projects/samurai-ost.mp4", poster: "assets/img/projects/samurai-ost.webp" },
-        { title: { ru: "Run", en: "Run" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", preview: "assets/video/projects/run.mp4", poster: "assets/img/projects/run.webp" },
+        { title: { ru: "Половина самурая", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", preview: "assets/video/projects/samurai-sd.mp4", poster: "assets/img/projects/samurai-sd.webp" },
+        { title: { ru: "Половина самурая", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", preview: "assets/video/projects/samurai-ost.mp4", poster: "assets/img/projects/samurai-ost.webp" },
+        { title: { ru: "Беги", en: "Run" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", preview: "assets/video/projects/run.mp4", poster: "assets/img/projects/run.webp" },
       ],
     },
     {
