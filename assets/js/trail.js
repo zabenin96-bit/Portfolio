@@ -3,7 +3,7 @@
  * line travels along as you scroll – like a bead on a thread.
  *
  * The route is built from the live layout (so it fits phones and desktops):
- *   1. a loop around "Sound design studio" under the name,
+ *   1. a loop around the studio name and "Sound design studio",
  *   2. down a side lane next to the work videos, crossing to the other side
  *      in the free gap below each row,
  *   3. a loop around one video,
@@ -48,7 +48,8 @@
   var LEAD = 0.72;       // where the head sits on screen on straight parts (share of height)
   var EYE = 0.66;        // an accent starts when its object's centre is this high on screen
   var SPEED = 0.6;       // px/ms – the line's own pace along the route
-  var IDLE_MS = 1600;    // after this long without movement the line fades out
+  var DELAY = 500;       // ms the line waits before following the scroll
+  var IDLE_MS = 2100;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
   function resize() {
@@ -197,17 +198,18 @@
       }));
     });
 
-    // 1. start on a loop around "Sound design studio" under the name (the
-    //    name itself sits too high to be circled in time), drawn right away
-    //    when the page opens; leave it along its bottom edge
-    var sub = textOf(q(".masthead__sub")) || title;
-    var nameBottom = (textOf(q(".masthead__title")) || sub).bottom;
-    var subR = Math.max(6, Math.min(12, sub.top - nameBottom - 6));
-    var sg = ringInfo({ left: sub.left - 14, right: sub.right + 14, top: sub.top, bottom: sub.bottom }, subR);
+    // 1. start on a loop around the studio name and "Sound design studio"
+    //    under it, drawn right away when the page opens (it is due before
+    //    any scrolling); leave it along its bottom edge
+    var tR = Math.max(10, Math.min(18, rows[0].top - title.bottom - 30));
+    // keep clear of the RU / EN switch above it (close on phones)
+    var langBox = boxOf(q(".lang"));
+    if (langBox && langBox.left < title.right + 16 + tR) tR = Math.max(6, Math.min(tR, title.top - langBox.bottom - 8));
+    var tg = ringInfo({ left: title.left - 16, right: title.right + 16, top: title.top, bottom: title.bottom }, tR);
     // (keys below zero: already due at the very top of the page)
-    loop(sg, sg.u.topStart, sg.u.bottomEnd + 1, [-H, -H]);
+    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [-H, -H]);
     // a level line out to the lane, then down it beside the videos
-    var subExitY = sub.bottom + subR;
+    var subExitY = title.bottom + tR;
     pt(rows[0].lane, subExitY, Math.max(8, Math.min(FILLET, (rows[0].top - subExitY) * 0.8)));
     pt(rows[0].lane, rows[0].top + 20);
 
@@ -362,6 +364,7 @@
   }
 
   // ---------- following the route ----------
+  var scrollLog = [];
   var route = null, sHead = 0, lastMove = 0, raf = null, last = 0, fade = 0;
 
   // the route point closest to p, looked for near the old place along the
@@ -392,7 +395,11 @@
     var dt = Math.min(40, now - (last || now)); last = now;
     if (!route) { raf = null; return; }
     var sy = window.scrollY;
-    var target = targetFor(sy);
+    // the line answers the scroll half a second late: it heads for where
+    // the page was DELAY ms ago, so it sets off calmly after the page moves
+    scrollLog.push({ t: now, y: sy });
+    while (scrollLog.length > 2 && scrollLog[1].t <= now - DELAY) scrollLog.shift();
+    var target = targetFor(scrollLog[0].y);
     var diff = target - sHead;
     if (Math.abs(diff) * STEP > 2500) {
       sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
