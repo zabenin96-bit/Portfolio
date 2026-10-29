@@ -9,8 +9,7 @@
  *
  * Project video: upload the full video to Kinescope and paste its ID
  * (the part after kinescope.io/ in the share link) into `kinescope`.
- * `title` is optional (shown under the video); without a `poster` the
- * card shows Kinescope's own player with its cover frame.
+ * `title` and `role` are shown under the video (`role`: what was done on it).
  */
 window.SITE = {
   i18n: {
@@ -88,10 +87,10 @@ window.SITE = {
       title: { ru: "Реклама", en: "Commercials" },
       preview: "assets/video/commercials.mp4", previewSmall: "assets/video/commercials-640.mp4", previewMedium: "assets/video/commercials-960.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
       projects: [
-        { title: { ru: "", en: "" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "eMs3woezYncoaQpC2zwUKG", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "0VHYckipP1yFtUHgSroYtd", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "sXrhE1wZFMQPPaN81Epi2b", poster: "" },
+        { title: { ru: "Буше", en: "Bushe" }, role: { ru: "саунд-дизайн, обработка голоса, сведение", en: "sound design, voice processing & mix" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", poster: "" },
+        { title: { ru: "Л’Этуаль", en: "L’Étoile" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "eMs3woezYncoaQpC2zwUKG", poster: "" },
+        { title: { ru: "MG Motor", en: "MG Motor" }, role: { ru: "музыка, саунд-дизайн, сведение", en: "music, sound design & mix" }, kinescope: "0VHYckipP1yFtUHgSroYtd", poster: "" },
+        { title: { ru: "Яндекс Доставка", en: "Yandex Deliverer" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "sXrhE1wZFMQPPaN81Epi2b", poster: "" },
       ],
     },
     {
@@ -99,8 +98,8 @@ window.SITE = {
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
       preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
       projects: [
-        { title: { ru: "", en: "" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
+        { title: { ru: "To the Light", en: "To the Light" }, role: { ru: "реж. Меген Тарба, 2024", en: "dir. Megen Tarba, 2024" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
+        { title: { ru: "Walk a Meter in My Shoes", en: "Walk a Meter in My Shoes" }, role: { ru: "реж. Анн Маковски, 2026", en: "dir. Ann Makovsky, 2026" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
       ],
     },
     {
@@ -108,9 +107,9 @@ window.SITE = {
       title: { ru: "Анимация", en: "Animation" },
       preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", previewMedium: "assets/video/animation-960.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
-        { title: { ru: "", en: "" }, kinescope: "wk3Aik8kNa2XgryingxbaV", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", poster: "" },
+        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", poster: "" },
+        { title: { ru: "Half of Samurai", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", poster: "" },
+        { title: { ru: "Run", en: "Run" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", poster: "" },
       ],
     },
     {
@@ -119,8 +118,8 @@ window.SITE = {
       format: "vertical",
       preview: "assets/video/vertical.mp4", previewSmall: "assets/video/vertical-640.mp4", previewMedium: "assets/video/vertical-960.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
       projects: [
-        { title: { ru: "", en: "" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", poster: "" },
+        { title: { ru: "MSI", en: "MSI" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", poster: "" },
+        { title: { ru: "М.Видео", en: "M.Video" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", poster: "" },
       ],
     },
   ],

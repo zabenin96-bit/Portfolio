@@ -255,10 +255,13 @@
     cards.textContent = "";
     cat.projects.forEach(function (p, n) {
       var title = p.title[lang] || cat.title[lang] + " " + (n + 1);
-      // the project's name in the site's own type, once it is given
-      var caption = p.title.ru || p.title.en
-        ? el("div", { class: "card__caption" }, [bi(p.title.ru || p.title.en, p.title.en || p.title.ru)])
-        : null;
+      // the project's name in the site's own type, and under it what was
+      // done on it
+      var caption = null;
+      if (p.title.ru || p.title.en) {
+        caption = el("div", { class: "card__caption" }, [el("span", { class: "card__name" }, [bi(p.title.ru || p.title.en, p.title.en || p.title.ru)])]);
+        if (p.role) caption.appendChild(el("span", { class: "card__role" }, [bi(p.role.ru, p.role.en)]));
+      }
       // A quiet dark card (or our own cover) with the yellow play button.
       // The Kinescope player is only loaded on a click: its page starts
       // white, so it stays hidden over a dark shimmer until it is ready.
