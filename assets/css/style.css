@@ -28,7 +28,7 @@
   --fg: #ffffff;
   --muted: #8c8c8c;
   --line: #262626;
-  --nav-bg: rgba(205, 205, 205, 0.55);
+  --nav-bg: rgba(205, 205, 205, 0.4);
   --cta-bg: var(--tri);
   --cta-fg: #000000;
   --tile-glow: rgba(255, 255, 255, 0.22);
