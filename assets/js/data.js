@@ -52,7 +52,7 @@ window.SITE = {
       photoAlt: "Nata, founder of whereisyoursound",
       l1: "I’m Nata, founder of whereisyoursound.",
       l2: "I write music, build the sound world of a project and deliver the final mix.",
-      l3: "I work hand in hand with directors and their teams, so the sound lands exactly on the vision.",
+      l3: "I work hand in hand with directors and teams, so the sound lands exactly on the vision.",
       kicker: "Sound for your project",
       byMail: "Email",
       cta: "Discuss a project",
