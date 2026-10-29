@@ -24,10 +24,13 @@
     t.innerHTML = markup.trim();
     return t.content.firstChild;
   }
+  // the chosen language is kept only for this visit (session storage): every
+  // new visit opens in English, on any device
   function store(key, value) {
     try {
-      if (value === undefined) return localStorage.getItem(key);
-      localStorage.setItem(key, value);
+      try { localStorage.removeItem(key); } catch (e) {} // forget choices kept by older versions
+      if (value === undefined) return sessionStorage.getItem(key);
+      sessionStorage.setItem(key, value);
     } catch (e) { return null; }
   }
   var TRIANGLE = '<svg class="marquee__sep" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.4 3.9Q5.5 2.8 5.5 5v14q0 2.2 1.9 1.1l12-6.9q1.9-1.2 0-2.4z"/></svg>';
