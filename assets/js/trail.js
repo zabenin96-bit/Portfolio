@@ -209,8 +209,12 @@
     // the screen: there the opening loop goes round the small "Discuss a
     // project" link under it instead.
     var ctaTop = boxOf(q(".hero-contact")); // (room for the unfolded buttons too)
-    if (ctaTop && (title.left < 24 || W - title.right < 24)) title = ctaTop;
+    var phoneLoop = ctaTop && (title.left < 24 || W - title.right < 24);
+    if (phoneLoop) title = ctaTop;
     var tR = Math.max(10, Math.min(18, rows[0].top - title.bottom - 30));
+    // keep clear of the line of text just above the small link
+    var offerBox = phoneLoop && textOf(q(".masthead__offer"));
+    if (offerBox) tR = Math.max(4, Math.min(tR, title.top - offerBox.bottom - 8));
     // keep clear of the RU / EN switch above it (close on phones)
     var langBox = boxOf(q(".lang"));
     if (langBox && langBox.left < title.right + 16 + tR) tR = Math.max(6, Math.min(tR, title.top - langBox.bottom - 8));
