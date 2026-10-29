@@ -266,7 +266,16 @@
       // The Kinescope player is only loaded on a click: its page starts
       // white, so it stays hidden over a dark shimmer until it is ready.
       var btn = el("button", { type: "button", class: "card__btn", "aria-label": t("watch") + ": " + title });
-      if (p.poster) btn.appendChild(el("img", { src: p.poster, alt: "", loading: "lazy", decoding: "async" }));
+      // a short muted loop from the video (or a still) shows what it is right
+      // away; the loop only plays while the card is on screen
+      if (p.preview) {
+        var loopVid = el("video", { muted: "", loop: "", playsinline: "", preload: "metadata", "aria-hidden": "true" });
+        loopVid.muted = true;
+        if (p.poster) loopVid.poster = p.poster;
+        loopVid.src = p.preview;
+        btn.appendChild(loopVid);
+        cardLoops.observe(loopVid);
+      } else if (p.poster) btn.appendChild(el("img", { src: p.poster, alt: "", loading: "lazy", decoding: "async" }));
       btn.appendChild(el("span", { class: "vignette" }));
       var play = el("span", { class: "card__play" });
       play.appendChild(svg(PLAY));
@@ -275,6 +284,15 @@
       cards.appendChild(el("div", { class: "card" }, caption ? [btn, caption] : [btn]));
     });
   }
+
+  // preview loops on the cards play only while on screen
+  var cardLoops = "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var v = e.target;
+      if (e.isIntersecting && !reduceMotion && !saveData) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      else v.pause();
+    });
+  }, { threshold: 0.4 }) : { observe: function () {} };
 
   // Kinescope players: reveal each one once it has drawn itself
   var waiting = [];

@@ -180,7 +180,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   .cat:first-child:nth-last-child(4) .cat__btn, .cat:first-child:nth-last-child(4) ~ .cat .cat__btn { aspect-ratio: 16 / 9; }
 }
 .cat__btn:hover, .card__btn:hover { box-shadow: 0 0 48px var(--tile-glow); }
-.cat__btn video, .cat__btn img, .card__btn img, .card__btn iframe {
+.cat__btn video, .cat__btn img, .card__btn video, .card__btn img, .card__btn iframe {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0;
 }
 .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 clamp(40px, 6vw, 90px) clamp(12px, 2vw, 30px) rgba(0, 0, 0, 0.6); pointer-events: none; }
