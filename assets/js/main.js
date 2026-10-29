@@ -66,7 +66,6 @@
       b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang));
     });
     renderMarquee();
-    renderProof();
     if (openCat) renderSheet(openCat);
   }
 
@@ -107,16 +106,6 @@
       });
       track.appendChild(group);
     }
-  }
-
-  // ---------- proof: brands, festivals, streaming ----------
-  // the same lists as the brand strip, laid out calmly after the work
-  function renderProof() {
-    var groups = SITE.brands[lang];
-    ["proof-brands", "proof-fest", "proof-stream"].forEach(function (id, i) {
-      var dd = document.getElementById(id);
-      if (dd && groups[i]) dd.textContent = groups[i].names.join(" · ");
-    });
   }
 
   // ---------- category tiles ----------

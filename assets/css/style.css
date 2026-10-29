@@ -293,16 +293,13 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   padding: 8px 14px; border-radius: 999px; background: rgba(0, 0, 0, 0.7); color: #fff; font-size: 13px;
 }
 
-/* ---------- Proof: brands, festivals, streaming ---------- */
-.proof { margin-top: clamp(56px, 7vw, 96px); }
-.proof__grid {
-  max-width: 1040px; margin: 0 auto; padding: 28px 0; display: grid; gap: 22px;
-  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+/* the brand strip as a band between the work and the text about Nata,
+   as wide as the work grid so the line can pass beside it */
+.marquee--band {
+  max-width: 1040px; margin: clamp(56px, 7vw, 96px) auto 0;
+  border-top: 1px solid var(--line);
 }
-.proof__grid > div { text-align: center; }
-.proof dt { font-size: 11px; letter-spacing: 0.3em; padding-left: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.proof dd { margin: 0; font-size: clamp(14px, 1.1vw, 16px); line-height: 1.6; color: #d6d6d6; }
-@media (min-width: 760px) { .proof__grid { grid-template-columns: 1.6fr 1fr 1fr; gap: 32px; } }
+@media (max-width: 1100px) { .marquee--band { margin-inline: var(--gutter); } }
 
 /* services under the text about Nata */
 .about__services {
@@ -313,7 +310,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #bdbdbd;
 }
 /* ---------- About ---------- */
-.about { padding: clamp(80px, 10vw, 140px) 0; border-top: 1px solid var(--line); }
+.about { padding: clamp(80px, 10vw, 140px) 0; }
 .eyebrow {
   margin: 0 0 10px; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
 }
