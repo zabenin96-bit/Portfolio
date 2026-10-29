@@ -48,6 +48,7 @@
   var SPEED = 0.6;       // px/ms – the line's own pace along the route
   var DELAY = 500;       // ms the line waits before following the scroll
   var RAMP_MS = 900;     // ms to speed up from standstill to full speed
+  var OMEGA = 0.004;     // 1/ms – stiffness of the soft spring the head follows
   var IDLE_MS = 2100;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
@@ -409,24 +410,23 @@
     while (scrollLog.length > 2 && scrollLog[1].t <= now - DELAY) scrollLog.shift();
     var target = targetFor(scrollLog[0].y);
     var diff = target - sHead;
-    if (Math.abs(diff) * STEP > 2500) {
-      sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
-      vHead = 0;
-    } else {
-      // The head has a speed of its own: it wants to close the gap (slowing
-      // down as it gets close) but may only change speed gradually, so it
-      // starts off slowly, gathers pace and never jolts.
-      // its top speed grows with how far behind it is, so after a quick
-      // scroll it still catches up and stays on screen
-      var maxV = Math.max(SPEED, Math.abs(diff) * STEP / 700) / STEP; // route steps per ms
-      var want = Math.max(-maxV, Math.min(maxV, diff / 420));
-      var acc = maxV / RAMP_MS * dt;                    // speed change allowed this frame
-      vHead += Math.max(-acc, Math.min(acc, want - vHead));
-      var ds = vHead * dt;
-      if ((diff > 0 && ds > diff) || (diff < 0 && ds < diff)) { ds = diff; vHead = 0; }
-      sHead += ds;
+    // The head moves like a weight on a soft spring towards its target:
+    // it never jumps and never stops dead. Speeding up is limited (so it
+    // sets off gently, a little quicker when it is far behind), braking is
+    // not, so it always settles smoothly without overshooting.
+    var acc = OMEGA * OMEGA * diff - 2 * OMEGA * vHead;   // critically damped
+    if (acc * vHead > 0 || vHead === 0) {                  // speeding up
+      var aMax = (SPEED / STEP) / RAMP_MS * Math.max(1, Math.abs(diff) * STEP / 400);
+      acc = Math.max(-aMax, Math.min(aMax, acc));
     }
-    var moving = Math.abs(target - sHead) > 0.05;
+    // sub-steps keep the motion even on slow frames
+    for (var k = 0, n = Math.ceil(dt / 8), h = dt / n; k < n; k++) {
+      vHead += acc * h;
+      sHead += vHead * h;
+      diff = target - sHead;
+      acc = OMEGA * OMEGA * diff - 2 * OMEGA * vHead;
+    }
+    var moving = Math.abs(target - sHead) > 0.05 || Math.abs(vHead) > 0.0005;
     if (moving) lastMove = now;
     fade = now - lastMove < IDLE_MS ? Math.min(1, fade + dt / 200) : Math.max(0, fade - dt / 700);
     draw();
