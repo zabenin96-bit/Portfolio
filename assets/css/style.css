@@ -491,8 +491,9 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .nav a:hover { opacity: 0.6; }
 /* phones: an even rhythm – no tall empty bands between blocks */
 @media (max-width: 759px) {
-  .masthead { padding: 52px 0 32px; }
-  .lang { top: 12px; }
+  /* more air above the name: calmer, and the name stands out */
+  .masthead { padding: 104px 0 36px; }
+  .lang { top: 18px; }
   .about { padding: 48px 0 32px; }
   .contact { gap: 24px; padding: 24px 0 56px; }
   .footer { padding-bottom: 110px; }

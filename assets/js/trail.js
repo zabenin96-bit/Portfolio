@@ -49,6 +49,7 @@
   var DELAY = 500;       // ms the line waits before following the scroll
   var RAMP_MS = 900;     // ms to speed up from standstill to full speed
   var OMEGA = 0.004;     // 1/ms – stiffness of the soft spring the head follows
+  var LOOP_SPEED = 0.42; // px/ms – the calm pace round an accent (the loops)
   var IDLE_MS = 2100;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
@@ -353,7 +354,7 @@
         acc -= STEP;
         var f2 = d ? 1 - acc / d : 1;
         var k = p.k !== undefined && n.k !== undefined ? p.k + (n.k - p.k) * f2 : undefined;
-        out.push({ x: p.x + (n.x - p.x) * f2, y: p.y + (n.y - p.y) * f2, k: k });
+        out.push({ x: p.x + (n.x - p.x) * f2, y: p.y + (n.y - p.y) * f2, k: k, loop: k !== undefined });
       }
     }
     // straight parts follow the scroll (the head stays at LEAD on screen);
@@ -425,7 +426,15 @@
     }
     // sub-steps keep the motion even on slow frames
     for (var k = 0, n = Math.ceil(dt / 8), h = dt / n; k < n; k++) {
-      vHead += acc * h;
+      var newV = vHead + acc * h;
+      // round an accent (a loop) the line keeps a calm, even pace: it may
+      // not speed up past it, and if it arrives faster it eases down to it
+      var here = route[Math.max(0, Math.min(route.length - 1, Math.round(sHead)))];
+      var vLoop = LOOP_SPEED / STEP;
+      if (here && here.loop && Math.abs(newV) > vLoop) {
+        newV = Math.sign(newV) * Math.max(vLoop, Math.min(Math.abs(newV), Math.abs(vHead) - vLoop * h / 250));
+      }
+      vHead = newV;
       sHead += vHead * h;
       diff = target - sHead;
       acc = OMEGA * OMEGA * diff - 2 * OMEGA * vHead;
