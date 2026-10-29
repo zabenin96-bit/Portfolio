@@ -269,23 +269,25 @@
           allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
           allowfullscreen: "",
         });
-        // the player stays hidden until it has painted, over a dark shimmer,
-        // so there is no white flash while it loads
+        // the player stays hidden over a dark shimmer until it has drawn its
+        // cover: its page loads white first, so we wait for the player to
+        // speak up (it posts messages once it is set up), or 1.5 s at most
         frame.classList.add("is-loading");
-        iframe.addEventListener("load", function () {
-          setTimeout(function () { frame.classList.remove("is-loading"); }, 250);
-        });
+        watchPlayer(iframe, frame);
         frame.appendChild(iframe);
-        // a see-through cover on top, so the site's own cursor shows over the
-        // video too (a player's frame keeps its own cursor); a click lifts
-        // it and starts the video
-        var cover = el("button", { type: "button", class: "card__cover", "aria-label": t("watch") + ": " + title });
-        cover.addEventListener("click", function () {
-          cover.remove();
-          frame.classList.add("is-loading");
-          iframe.src = src + "?autoplay=1";
-        });
-        frame.appendChild(cover);
+        // On computers a see-through cover on top shows the site's own cursor
+        // over the video too; a click lifts it and starts the video. Touch
+        // screens have no cursor, so there the player is tapped directly.
+        if (finePointer) {
+          var cover = el("button", { type: "button", class: "card__cover", "aria-label": t("watch") + ": " + title });
+          cover.addEventListener("click", function () {
+            cover.remove();
+            frame.classList.add("is-loading");
+            watchPlayer(iframe, frame);
+            iframe.src = src + "?autoplay=1";
+          });
+          frame.appendChild(cover);
+        }
         cards.appendChild(el("div", { class: "card" }, [frame, caption]));
         return;
       }
@@ -300,6 +302,31 @@
       cards.appendChild(el("div", { class: "card" }, [btn, caption]));
     });
   }
+
+  // Kinescope players: reveal each one once it has drawn itself
+  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var waiting = [];
+  function reveal(w) {
+    if (w.done) return;
+    w.done = true;
+    clearTimeout(w.timer);
+    setTimeout(function () { w.frame.classList.remove("is-loading"); }, 400);
+  }
+  function watchPlayer(iframe, frame) {
+    var w = { iframe: iframe, frame: frame, done: false, timer: null };
+    waiting.push(w);
+    iframe.addEventListener("load", function () {
+      clearTimeout(w.timer);
+      w.timer = setTimeout(function () { reveal(w); }, 1500);
+    });
+  }
+  window.addEventListener("message", function (e) {
+    if (!/kinescope\.io$/.test(String(e.origin).replace(/^https?:\/\//, ""))) return;
+    waiting = waiting.filter(function (w) {
+      if (w.iframe.contentWindow === e.source) { reveal(w); return false; }
+      return !w.done;
+    });
+  });
 
   function playProject(btn, p) {
     if (btn.classList.contains("is-playing")) return;
