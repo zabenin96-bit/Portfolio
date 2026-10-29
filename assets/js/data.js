@@ -84,25 +84,6 @@ window.SITE = {
   // format: "vertical" shows 9:16 cards (2 per row on phones, 4 on desktop)
   categories: [
     {
-      id: "vertical",
-      title: { ru: "Вертикальный контент", en: "Vertical content" },
-      format: "vertical",
-      preview: "assets/video/vertical.mp4", previewSmall: "assets/video/vertical-640.mp4", previewMedium: "assets/video/vertical-960.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
-      projects: [
-        { title: { ru: "", en: "" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", poster: "" },
-      ],
-    },
-    {
-      id: "film",
-      title: { ru: "Постпродакшн кино", en: "Film postproduction" },
-      preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
-      projects: [
-        { title: { ru: "", en: "" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
-        { title: { ru: "", en: "" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
-      ],
-    },
-    {
       id: "commercials",
       title: { ru: "Реклама", en: "Commercials" },
       preview: "assets/video/commercials.mp4", previewSmall: "assets/video/commercials-640.mp4", previewMedium: "assets/video/commercials-960.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
@@ -121,6 +102,25 @@ window.SITE = {
         { title: { ru: "", en: "" }, kinescope: "wk3Aik8kNa2XgryingxbaV", poster: "" },
         { title: { ru: "", en: "" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", poster: "" },
         { title: { ru: "", en: "" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", poster: "" },
+      ],
+    },
+    {
+      id: "film",
+      title: { ru: "Постпродакшн кино", en: "Film postproduction" },
+      preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
+      projects: [
+        { title: { ru: "", en: "" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
+      ],
+    },
+    {
+      id: "vertical",
+      title: { ru: "Вертикальный контент", en: "Vertical content" },
+      format: "vertical",
+      preview: "assets/video/vertical.mp4", previewSmall: "assets/video/vertical-640.mp4", previewMedium: "assets/video/vertical-960.mp4", poster: "assets/img/vertical.webp", tint: "#1d1528",
+      projects: [
+        { title: { ru: "", en: "" }, kinescope: "wj4T7z24UWSFR2SjedVdWn", poster: "" },
+        { title: { ru: "", en: "" }, kinescope: "nZG4VdWbuistHaFSt1NDwi", poster: "" },
       ],
     },
   ],

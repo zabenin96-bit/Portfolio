@@ -269,6 +269,12 @@
           allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
           allowfullscreen: "",
         });
+        // the player stays hidden until it has painted, over a dark shimmer,
+        // so there is no white flash while it loads
+        frame.classList.add("is-loading");
+        iframe.addEventListener("load", function () {
+          setTimeout(function () { frame.classList.remove("is-loading"); }, 250);
+        });
         frame.appendChild(iframe);
         // a see-through cover on top, so the site's own cursor shows over the
         // video too (a player's frame keeps its own cursor); a click lifts
@@ -276,6 +282,7 @@
         var cover = el("button", { type: "button", class: "card__cover", "aria-label": t("watch") + ": " + title });
         cover.addEventListener("click", function () {
           cover.remove();
+          frame.classList.add("is-loading");
           iframe.src = src + "?autoplay=1";
         });
         frame.appendChild(cover);
