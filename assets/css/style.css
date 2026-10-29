@@ -37,6 +37,9 @@
   --font-body: "Raleway", system-ui, -apple-system, "Segoe UI", sans-serif;
   --gutter: clamp(16px, 3.4vw, 48px);
   --ease: cubic-bezier(0.35, 1, 0.6, 1);
+  /* iOS-like motion: the system sheet curve, and a soft spring for presses */
+  --ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring: cubic-bezier(0.34, 1.36, 0.64, 1);
   color-scheme: dark;
 }
 
@@ -81,9 +84,10 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .nav a, .lang button, .cat__btn, .card__btn, .cta, .sheet__close, .footer__links a {
   -webkit-tap-highlight-color: transparent;
 }
-.nav a:active, .lang button:active, .sheet__close:active { transform: scale(0.94); }
-.cat__btn:active, .card__btn:active { transform: scale(0.98); }
-.sheet__close { transition: opacity 0.2s, transform 0.15s ease; }
+/* press: quick and soft going in, a gentle spring coming back – like iOS */
+.nav a:active, .lang button:active, .sheet__close:active { transform: scale(0.94); transition-duration: 0.1s; transition-timing-function: ease-out; }
+.cat__btn:active, .card__btn:active { transform: scale(0.97); transition-duration: 0.12s; transition-timing-function: ease-out; }
+.sheet__close { transition: opacity 0.2s, transform 0.45s var(--spring); }
 
 /* ---------- Marquee ---------- */
 .marquee {
@@ -193,7 +197,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .cat__btn, .card__btn {
   position: relative; width: 100%; border: 0; padding: 0; overflow: hidden;
   border-radius: 14px; background: #141414; cursor: var(--cursor-link);
-  transition: box-shadow 0.4s var(--ease), transform 0.4s var(--ease);
+  transition: box-shadow 0.5s var(--ios), transform 0.55s var(--spring);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cat__btn:hover, .card__btn:not(.is-playing):hover { transform: scale(1.012); }
+  .cat__btn:hover:active, .card__btn:not(.is-playing):hover:active { transform: scale(0.97); transition-duration: 0.12s; }
 }
 .cat__btn { aspect-ratio: 4 / 3; border-radius: 12px; }
 @media (min-width: 760px) {
@@ -257,10 +265,18 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   margin: 0; padding: 0; border: 0; background: var(--bg); color: var(--fg); overflow-y: auto;
 }
 .sheet::backdrop { background: var(--bg); }
-.sheet[open] { animation: sheet-in 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
-.sheet.is-closing { animation: sheet-out 0.26s cubic-bezier(0.4, 0, 1, 1) forwards; }
-@keyframes sheet-in { from { opacity: 0; transform: translateY(24px) scale(0.985); } }
-@keyframes sheet-out { to { opacity: 0; transform: translateY(16px) scale(0.99); } }
+/* opens like an iOS sheet: rises from below on the system curve; its
+   cards follow one after another; closes by sliding back down */
+.sheet[open] { animation: sheet-in 0.6s var(--ios); }
+.sheet.is-closing { animation: sheet-out 0.34s cubic-bezier(0.4, 0, 0.8, 0.3) forwards; }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(14vh); } 40% { opacity: 1; } }
+@keyframes sheet-out { to { opacity: 0; transform: translateY(10vh); } }
+.sheet[open] .card { animation: card-in 0.7s var(--ios) both; }
+.sheet[open] .card:nth-child(2) { animation-delay: 0.05s; }
+.sheet[open] .card:nth-child(3) { animation-delay: 0.1s; }
+.sheet[open] .card:nth-child(4) { animation-delay: 0.15s; }
+.sheet[open] .card:nth-child(n + 5) { animation-delay: 0.2s; }
+@keyframes card-in { from { opacity: 0; transform: translateY(28px); } }
 .sheet__head {
   position: sticky; top: 0; z-index: 1; background: var(--bg);
   display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 24px 0 28px;
@@ -429,8 +445,8 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   position: absolute; z-index: 35; left: 50%; bottom: calc(100% + 14px);
   display: flex; gap: 6px; padding: 10px; border-radius: 22px;
   background: rgba(18, 18, 18, 0.96); border: 1px solid #2a2a2a; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
-  transform: translateX(-50%) translateY(8px) scale(0.96); transform-origin: 50% 100%;
-  opacity: 0; transition: opacity 0.25s var(--ease), transform 0.35s var(--ease);
+  transform: translateX(-50%) translateY(10px) scale(0.9); transform-origin: 50% 100%;
+  opacity: 0; transition: opacity 0.22s var(--ios), transform 0.5s var(--spring);
 }
 .contact-menu[hidden] { display: flex; visibility: hidden; pointer-events: none; }
 .contact-menu.is-open { opacity: 1; transform: translateX(-50%); }

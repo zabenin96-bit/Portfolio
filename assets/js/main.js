@@ -371,7 +371,7 @@
     if (!sheet.open || sheet.classList.contains("is-closing")) return;
     if (reduceMotion) { finishClose(); return; }
     sheet.classList.add("is-closing");
-    setTimeout(finishClose, 260);
+    setTimeout(finishClose, 340);
   }
   function finishClose() {
     sheet.classList.remove("is-closing");
