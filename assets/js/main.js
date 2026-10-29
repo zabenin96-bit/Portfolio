@@ -240,6 +240,16 @@
     });
   }
 
+  // ---------- first paint ----------
+  // The work tiles and the language come first, before any of the extras
+  // below, so a hiccup further down can never leave the page without its
+  // videos.
+  lang = initialLang();
+  renderCats();
+  applyLang(lang);
+  var yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
   // ---------- category sheet ----------
   var sheet = document.getElementById("sheet");
   var openCat = null;
@@ -507,9 +517,4 @@
     target.focus({ preventScroll: true });
   });
 
-  // ---------- misc ----------
-  document.getElementById("year").textContent = String(new Date().getFullYear());
-  lang = initialLang();
-  renderCats();
-  applyLang(lang);
 })();
