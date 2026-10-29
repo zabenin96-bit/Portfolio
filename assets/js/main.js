@@ -328,7 +328,13 @@
       return;
     }
     btn.classList.add("is-playing", "is-loading");
-    btn.textContent = "";
+    // with a preview loop, it keeps running underneath until the player is
+    // ready, then the player fades in over it; otherwise a dark shimmer
+    var loopVid = btn.querySelector("video");
+    if (loopVid) {
+      btn.classList.add("has-preview");
+      Array.prototype.forEach.call(btn.querySelectorAll(".card__play, .vignette"), function (n) { n.remove(); });
+    } else btn.textContent = "";
     var iframe = el("iframe", {
       src: "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope) + "?autoplay=1",
       title: p.title[lang] || t("watch"),
@@ -337,6 +343,7 @@
     });
     watchPlayer(iframe, btn);
     btn.appendChild(iframe);
+    if (loopVid) iframe.addEventListener("transitionend", function () { if (!btn.classList.contains("is-loading")) { loopVid.pause(); loopVid.remove(); } });
   }
 
   function openSheet(cat) {

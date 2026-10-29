@@ -244,7 +244,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
    hidden over a slow dark shimmer and fades in once it has loaded */
 .card__btn iframe { background: #111; color-scheme: dark; transition: opacity 0.5s var(--ease); }
 .card__btn.is-loading iframe { opacity: 0; }
-.card__btn.is-loading::before {
+.card__btn.is-loading:not(.has-preview)::before {
   content: ""; position: absolute; inset: 0;
   background: linear-gradient(100deg, #111 30%, #1d1d1d 50%, #111 70%) 0 0 / 300% 100%;
   animation: card-shimmer 1.4s linear infinite;

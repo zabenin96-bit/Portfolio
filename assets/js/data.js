@@ -87,10 +87,10 @@ window.SITE = {
       title: { ru: "Реклама", en: "Commercials" },
       preview: "assets/video/commercials.mp4", previewSmall: "assets/video/commercials-640.mp4", previewMedium: "assets/video/commercials-960.mp4", poster: "assets/img/commercials.webp", tint: "#2a1714",
       projects: [
-        { title: { ru: "Буше", en: "Bushe" }, role: { ru: "саунд-дизайн, обработка голоса, сведение", en: "sound design, voice processing & mix" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", poster: "" },
-        { title: { ru: "Л’Этуаль", en: "L’Étoile" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "eMs3woezYncoaQpC2zwUKG", poster: "" },
-        { title: { ru: "MG Motor", en: "MG Motor" }, role: { ru: "музыка, саунд-дизайн, сведение", en: "music, sound design & mix" }, kinescope: "0VHYckipP1yFtUHgSroYtd", poster: "" },
-        { title: { ru: "Яндекс Доставка", en: "Yandex Deliverer" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "sXrhE1wZFMQPPaN81Epi2b", poster: "" },
+        { title: { ru: "Буше", en: "Bushe" }, role: { ru: "саунд-дизайн, обработка голоса, сведение", en: "sound design, voice processing & mix" }, kinescope: "weDc8LrJaGXVNJ3sDjhmgM", preview: "assets/video/projects/bushe.mp4", poster: "assets/img/projects/bushe.webp" },
+        { title: { ru: "Л’Этуаль", en: "L’Étoile" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "eMs3woezYncoaQpC2zwUKG", preview: "assets/video/projects/letoile.mp4", poster: "assets/img/projects/letoile.webp" },
+        { title: { ru: "MG Motor", en: "MG Motor" }, role: { ru: "музыка, саунд-дизайн, сведение", en: "music, sound design & mix" }, kinescope: "0VHYckipP1yFtUHgSroYtd", preview: "assets/video/projects/mgmotor.mp4", poster: "assets/img/projects/mgmotor.webp" },
+        { title: { ru: "Яндекс Доставка", en: "Yandex Deliverer" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "sXrhE1wZFMQPPaN81Epi2b", preview: "assets/video/projects/yandex.mp4", poster: "assets/img/projects/yandex.webp" },
       ],
     },
     {
