@@ -293,22 +293,15 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   padding: 8px 14px; border-radius: 999px; background: rgba(0, 0, 0, 0.7); color: #fff; font-size: 13px;
 }
 
-/* the brand strip as a band between the work and the text about Nata,
-   as wide as the work grid so the line can pass beside it */
-.marquee--band {
-  max-width: 1040px; margin: clamp(56px, 7vw, 96px) auto 0;
-  border-top: 1px solid var(--line);
-}
-@media (max-width: 1100px) { .marquee--band { margin-inline: var(--gutter); } }
+/* the brand strip, now after the contact button and before the footer:
+   louder – bigger white names, a little faster */
+.marquee--loud { border-top: 1px solid var(--line); padding: 26px 0; }
+.marquee--loud .marquee__track { height: clamp(20px, 2.2vw, 30px); animation-duration: 50s; }
+.marquee--loud .marquee__item { gap: 40px; padding-inline: 44px; }
+.marquee--loud .marquee__name { font-size: clamp(18px, 2.2vw, 30px); letter-spacing: 0.1em; color: #f2f2f2; }
+.marquee--loud .marquee__note { font-size: 12px; color: #8a8a8a; }
+.marquee--loud .marquee__sep { width: 16px; height: 16px; }
 
-/* services under the text about Nata */
-.about__services {
-  grid-area: services; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px;
-}
-.about__services li {
-  padding: 7px 14px; border: 1px solid #2c2c2c; border-radius: 999px;
-  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #bdbdbd;
-}
 /* ---------- About ---------- */
 .about { padding: clamp(80px, 10vw, 140px) 0; }
 .eyebrow {
@@ -317,7 +310,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 /* phone: small photo beside the name, text below */
 .about__inner {
   display: grid; grid-template-columns: 112px minmax(0, 1fr);
-  grid-template-areas: "photo head" "body body" "services services"; column-gap: 20px; row-gap: 28px; align-items: center;
+  grid-template-areas: "photo head" "body body"; column-gap: 20px; row-gap: 28px; align-items: center;
 }
 .about__photo {
   grid-area: photo; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover;
@@ -338,13 +331,12 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @media (min-width: 760px) {
   .about__inner {
     max-width: 1080px; grid-template-columns: 340px minmax(0, 1fr);
-    grid-template-areas: "photo head" "photo body" "photo services"; grid-template-rows: auto auto auto;
+    grid-template-areas: "photo head" "photo body"; grid-template-rows: auto auto;
     column-gap: clamp(48px, 6vw, 96px); row-gap: 24px; align-content: center;
   }
   .about__photo { border-radius: 14px; align-self: center; }
   .about__head { align-self: end; }
   .about__body { align-self: start; }
-  .about__services { align-self: start; }
   .eyebrow { font-size: 12px; margin-bottom: 14px; }
 }
 
@@ -373,8 +365,9 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 /* a yellow capsule with the arrow in a black disc at its end. Now and then
    a thin glint runs across it; on computers it is pulled toward a nearby
    pointer like a magnet (--mx/--my are set by main.js) */
+.contact__action { position: relative; }
 .cta {
-  --mx: 0px; --my: 0px;
+  --mx: 0px; --my: 0px; border: 0; font: inherit; cursor: var(--cursor-link);
   position: relative; display: inline-flex; align-items: center; gap: 16px; overflow: hidden;
   padding: 8px 8px 8px 26px; border-radius: 999px;
   background: var(--cta-bg); color: var(--cta-fg);
@@ -401,6 +394,31 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   .cta svg { width: 40px; height: 40px; padding: 10px; }
   .cta__text { font-size: 15px; }
 }
+/* the small card that opens above the button: mail, Telegram, WhatsApp */
+.contact-menu {
+  position: absolute; z-index: 35; left: 50%; bottom: calc(100% + 14px);
+  display: flex; gap: 6px; padding: 10px; border-radius: 22px;
+  background: rgba(18, 18, 18, 0.96); border: 1px solid #2a2a2a; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+  transform: translateX(-50%) translateY(8px) scale(0.96); transform-origin: 50% 100%;
+  opacity: 0; transition: opacity 0.25s var(--ease), transform 0.35s var(--ease);
+}
+.contact-menu[hidden] { display: flex; visibility: hidden; pointer-events: none; }
+.contact-menu.is-open { opacity: 1; transform: translateX(-50%); }
+.contact-menu::after { /* a little tail pointing at the button */
+  content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; margin-left: -6px;
+  background: inherit; border-right: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; transform: rotate(45deg);
+}
+.contact-menu a {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 84px; padding: 12px 10px 10px;
+  border-radius: 14px; font-size: 12px; letter-spacing: 0.06em; color: #d6d6d6; transition: background-color 0.2s, color 0.2s;
+}
+.contact-menu a:hover, .contact-menu a:focus-visible { background: #1f1f1f; color: #fff; }
+.contact-menu__icon {
+  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+  background: var(--tri); color: #000; transition: transform 0.3s var(--ease);
+}
+.contact-menu__icon svg { width: 22px; height: 22px; }
+.contact-menu a:hover .contact-menu__icon { transform: translateY(-2px) scale(1.06); }
 .cta__text {
   font-family: var(--font-display); font-weight: 400; white-space: nowrap;
   font-size: clamp(16px, 1.3vw, 19px); line-height: 1.15; letter-spacing: 0.01em;
@@ -414,7 +432,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 /* ---------- Footer ---------- */
 .footer { padding-bottom: 150px; }
 .footer__grid {
-  border-top: 1px solid var(--line); padding: 40px 0 56px;
+  padding: 40px 0 56px;
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 28px; font-size: 16px;
 }
 .footer__links { display: flex; flex-direction: column; gap: 4px; }

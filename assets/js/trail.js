@@ -263,9 +263,6 @@
     var tail = ctl[ctl.length - 1];
     if (tail.y >= lastRow.bottom) laneX = tail.x;
     else pt(laneX, lastRow.bottom + 24);
-    // run on beside the band of brands
-    var proof = boxOf(q(".marquee"));
-    if (proof) pt(laneX, proof.bottom + 18);
 
     // 4. a loop around Nata's photo and name (or the photo alone if the
     //    bigger loop would run into the text beside it)

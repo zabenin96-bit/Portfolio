@@ -379,6 +379,39 @@
   });
   document.getElementById("sheet-close").addEventListener("click", closeSheet);
 
+  // ---------- contact button: a small card with mail, Telegram, WhatsApp ----------
+  var ctaBtn = document.querySelector(".cta");
+  var contactMenu = document.getElementById("contact-menu");
+  var menuTimer = null;
+  function openContactMenu() {
+    if (!contactMenu || !contactMenu.hidden) return;
+    clearTimeout(menuTimer);
+    contactMenu.hidden = false;
+    requestAnimationFrame(function () { contactMenu.classList.add("is-open"); });
+    ctaBtn.setAttribute("aria-expanded", "true");
+  }
+  function closeContactMenu() {
+    if (!contactMenu || contactMenu.hidden) return;
+    contactMenu.classList.remove("is-open");
+    ctaBtn.setAttribute("aria-expanded", "false");
+    menuTimer = setTimeout(function () { contactMenu.hidden = true; }, 300);
+  }
+  if (ctaBtn && contactMenu) {
+    ctaBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (contactMenu.hidden) openContactMenu(); else closeContactMenu();
+    });
+    document.addEventListener("click", function (e) { if (!contactMenu.contains(e.target)) closeContactMenu(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeContactMenu(); });
+    // "Discuss a project" at the top: glide down to the button and open the card
+    document.querySelectorAll("[data-open-contact]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.stopPropagation();
+        setTimeout(openContactMenu, reduceMotion ? 0 : 950);
+      });
+    });
+  }
+
   // ---------- magnetic contact button (computers only) ----------
   var cta = document.querySelector(".cta");
   if (cta && !reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
