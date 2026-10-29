@@ -240,7 +240,6 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .card__btn:hover .card__play { transform: scale(1.06); }
 .card__btn.is-playing { cursor: auto; }
-.card__cover { position: absolute; inset: 0; z-index: 2; background: transparent; border: 0; padding: 0; }
 /* dark, not white, while the player is still loading: the frame waits
    hidden over a slow dark shimmer and fades in once it has loaded */
 .card__btn iframe { background: #111; color-scheme: dark; transition: opacity 0.5s var(--ease); }
@@ -413,7 +412,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 @media (hover: hover) and (pointer: fine) {
   html { cursor: var(--cursor); }
   a, button, label, summary, [role="button"] { cursor: var(--cursor-link); }
-  .cat__btn, .card__btn, .card__cover { cursor: var(--cursor-video); }
+  .cat__btn, .card__btn { cursor: var(--cursor-video); }
   .cta, .cta * { cursor: var(--cursor-cta); }
 }
 

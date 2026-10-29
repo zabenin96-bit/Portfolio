@@ -261,31 +261,6 @@
         caption = el("div", { class: "card__caption" }, [el("span", { class: "card__name" }, [bi(p.title.ru || p.title.en, p.title.en || p.title.ru)])]);
         if (p.role) caption.appendChild(el("span", { class: "card__role" }, [bi(p.role.ru, p.role.en)]));
       }
-      // Kinescope videos start playing on their own, muted and looping, as
-      // soon as the section opens. A see-through cover on top catches the
-      // click and restarts the video as usual, with sound.
-      if (p.kinescope && !p.preview) {
-        var frame = el("div", { class: "card__btn is-playing is-loading" });
-        var base = "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope);
-        var iframe = el("iframe", {
-          src: base + "?autoplay=1&muted=1&loop=1",
-          title: title,
-          allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
-          allowfullscreen: "",
-        });
-        watchPlayer(iframe, frame);
-        frame.appendChild(iframe);
-        var cover = el("button", { type: "button", class: "card__cover", "aria-label": t("watch") + ": " + title });
-        cover.addEventListener("click", function () {
-          cover.remove();
-          frame.classList.add("is-loading");
-          watchPlayer(iframe, frame);
-          iframe.src = base + "?autoplay=1";
-        });
-        frame.appendChild(cover);
-        cards.appendChild(el("div", { class: "card" }, caption ? [frame, caption] : [frame]));
-        return;
-      }
       // A quiet dark card (or our own cover) with the yellow play button.
       // The Kinescope player is only loaded on a click: its page starts
       // white, so it stays hidden over a dark shimmer until it is ready.
