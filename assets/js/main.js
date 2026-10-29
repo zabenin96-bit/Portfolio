@@ -414,13 +414,23 @@
     });
     document.addEventListener("click", function (e) { if (!contactMenu.contains(e.target)) closeContactMenu(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeContactMenu(); });
-    // "Discuss a project" at the top: glide down to the button and open the card
-    document.querySelectorAll("[data-open-contact]").forEach(function (a) {
-      a.addEventListener("click", function (e) {
-        e.stopPropagation();
-        setTimeout(openContactMenu, reduceMotion ? 0 : 950);
-      });
-    });
+  }
+
+  // ---------- "Discuss a project" at the top unfolds into three buttons ----------
+  var hero = document.querySelector(".hero-contact");
+  if (hero) {
+    var heroBtn = hero.querySelector(".masthead__cta");
+    var heroWays = hero.querySelectorAll(".hero-ways > *");
+    var setHero = function (open) {
+      hero.classList.toggle("is-open", open);
+      heroBtn.setAttribute("aria-expanded", String(open));
+      Array.prototype.forEach.call(heroWays, function (n) { n.tabIndex = open ? 0 : -1; });
+      if (open) heroWays[0].focus({ preventScroll: true }); else if (hero.contains(document.activeElement)) heroBtn.focus({ preventScroll: true });
+    };
+    heroBtn.addEventListener("click", function (e) { e.stopPropagation(); setHero(true); });
+    hero.querySelector(".hero-ways__close").addEventListener("click", function (e) { e.stopPropagation(); setHero(false); });
+    document.addEventListener("click", function (e) { if (hero.classList.contains("is-open") && !hero.contains(e.target)) setHero(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && hero.classList.contains("is-open")) setHero(false); });
   }
 
   // ---------- magnetic contact button (computers only) ----------
