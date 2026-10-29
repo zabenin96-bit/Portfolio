@@ -464,6 +464,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   .nav a { padding: 12px 10px; }
 }
 
+@media (min-width: 760px) {
+  .nav { transition: opacity 0.35s var(--ease), transform 0.35s var(--ease), background-color 0.4s var(--ease); }
+  .nav.is-away { opacity: 0; transform: translate(-50%, 16px); pointer-events: none; }
+}
+
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */
 .trail { position: absolute; top: 0; left: 0; z-index: 30; pointer-events: none; overflow: visible; }
 

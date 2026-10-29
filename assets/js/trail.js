@@ -6,9 +6,8 @@
  *   1. a loop around the studio name and "Sound design studio",
  *   2. down a side lane next to the work videos, crossing to the other side
  *      in the free gap below each row,
- *   3. a flat loop around one caption while crossing between rows,
- *   4. a loop around Nata's photo and name,
- *   5. a loop around the contact button, where it ends.
+ *   3. a loop around Nata's photo and name,
+ *   4. a loop around the contact button, where it ends.
  * Corners are rounded and loops are entered and left along their tangent, so
  * the path is one smooth curve. On straight parts the head keeps one height
  * on screen and goes down with the scroll; once an object reaches eye level
@@ -237,7 +236,7 @@
     pt(rows[0].lane, rows[0].top + 20);
 
     // 2–3. down the lanes, crossing between rows
-    var capRow = rows.length >= 4 ? 3 : 0;
+    var capRow = -1; // no loop round a caption: it ran off screen while you scrolled on
     rows.forEach(function (row, i) {
       var next = rows[i + 1];
       if (!next) return;
@@ -417,7 +416,9 @@
       // The head has a speed of its own: it wants to close the gap (slowing
       // down as it gets close) but may only change speed gradually, so it
       // starts off slowly, gathers pace and never jolts.
-      var maxV = SPEED / STEP;                          // route steps per ms
+      // its top speed grows with how far behind it is, so after a quick
+      // scroll it still catches up and stays on screen
+      var maxV = Math.max(SPEED, Math.abs(diff) * STEP / 700) / STEP; // route steps per ms
       var want = Math.max(-maxV, Math.min(maxV, diff / 420));
       var acc = maxV / RAMP_MS * dt;                    // speed change allowed this frame
       vHead += Math.max(-acc, Math.min(acc, want - vHead));

@@ -379,6 +379,17 @@
   });
   document.getElementById("sheet-close").addEventListener("click", closeSheet);
 
+  // ---------- bottom menu steps aside at the contact block ----------
+  // From the "Discuss a project" block down the menu is no longer needed and
+  // would sit on the button, so it fades away (on computers, see the CSS).
+  var navBar = document.querySelector(".nav"), contactSec = document.getElementById("contact");
+  function onScrollNav() {
+    if (!navBar || !contactSec) return;
+    navBar.classList.toggle("is-away", contactSec.getBoundingClientRect().top < window.innerHeight * 0.8);
+  }
+  window.addEventListener("scroll", onScrollNav, { passive: true });
+  onScrollNav();
+
   // ---------- contact button: a small card with mail, Telegram, WhatsApp ----------
   var ctaBtn = document.querySelector(".cta");
   var contactMenu = document.getElementById("contact-menu");
