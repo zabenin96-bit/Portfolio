@@ -101,6 +101,11 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .marquee__track { display: flex; align-items: center; width: max-content; height: 14px; animation: marquee 70s linear infinite; }
 .marquee:hover .marquee__track,
 .marquee.is-offscreen .marquee__track { animation-play-state: paused; }
+/* moved by script (it can be dragged): no CSS animation, horizontal drags
+   belong to the strip, vertical ones still scroll the page */
+.marquee.is-draggable { touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; }
+.marquee.is-draggable .marquee__track { animation: none; will-change: transform; }
+.marquee.is-dragging { cursor: grabbing; }
 .marquee__group { display: flex; align-items: center; flex-shrink: 0; }
 .marquee__item { display: flex; align-items: baseline; gap: 30px; padding-inline: 36px; white-space: nowrap; }
 /* a quiet strip, like credits: small grey names, darker notes, slow */

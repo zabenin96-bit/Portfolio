@@ -470,10 +470,74 @@
 
   var marquee = document.querySelector(".marquee");
 
-  // the brand strip stops animating while it is off screen
-  if ("IntersectionObserver" in window) {
+  // ---------- brand strip: runs on its own, and can be pushed with a finger ----------
+  // Moved by script instead of a CSS animation so it can be dragged: drag it
+  // either way, let go and it glides on with the flick's momentum, then
+  // settles back to its own slow pace. Vertical swipes still scroll the page.
+  var mqTrack = document.getElementById("marquee");
+  var mqOn = !!(marquee && mqTrack && window.requestAnimationFrame && !reduceMotion);
+  var mqVisible = true;
+  if (mqOn) {
+    marquee.classList.add("is-draggable");
+    var MQ_SECONDS = 66;             // one full loop at its own pace
+    var mqX = 0, mqV = 0, mqHalf = 1, mqLast = 0, mqRaf = null;
+    var drag = null;                  // {id, x, t, v}
+    var mqMeasure = function () { mqHalf = Math.max(1, mqTrack.scrollWidth / 2); };
+    var mqWrap = function () { mqX = ((mqX % mqHalf) - mqHalf) % mqHalf; };
+    var mqTick = function (now) {
+      var dt = Math.min(50, now - (mqLast || now)); mqLast = now;
+      var auto = -mqHalf / (MQ_SECONDS * 1000);   // px per ms, leftwards
+      if (!drag) {
+        mqV += (auto - mqV) * (1 - Math.exp(-dt / 900));   // momentum fades into its own pace
+        mqX += mqV * dt;
+      }
+      mqWrap();
+      mqTrack.style.transform = "translate3d(" + mqX.toFixed(2) + "px,0,0)";
+      mqRaf = mqVisible || drag ? requestAnimationFrame(mqTick) : null;
+      if (!mqRaf) mqLast = 0;
+    };
+    var mqStart = function () { if (!mqRaf) mqRaf = requestAnimationFrame(mqTick); };
+    mqMeasure();
+    mqV = -mqHalf / (MQ_SECONDS * 1000);
+    window.addEventListener("resize", mqMeasure);
+    // the strip is rebuilt on a language change and widens once fonts load
+    if ("ResizeObserver" in window) new ResizeObserver(mqMeasure).observe(mqTrack);
+    marquee.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), v: 0, axis: null };
+      mqStart();
+    });
+    window.addEventListener("pointermove", function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.axis) {
+        if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+        drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";   // a vertical swipe is a page scroll
+        if (drag.axis === "x") { marquee.classList.add("is-dragging"); try { marquee.setPointerCapture(e.pointerId); } catch (err) {} }
+      }
+      if (drag.axis !== "x") { drag = null; return; }
+      var now = performance.now(), dt = Math.max(1, now - drag.t);
+      mqX += dx;
+      drag.v = drag.v * 0.6 + (dx / dt) * 0.4;   // smoothed finger speed for the flick
+      drag.x = e.clientX; drag.y = e.clientY; drag.t = now;
+    });
+    var mqRelease = function (e) {
+      if (!drag || (e && e.pointerId !== drag.id)) return;
+      if (drag.axis === "x") mqV = Math.max(-3, Math.min(3, drag.v));
+      drag = null;
+      marquee.classList.remove("is-dragging");
+    };
+    window.addEventListener("pointerup", mqRelease);
+    window.addEventListener("pointercancel", mqRelease);
+    mqStart();
+  }
+
+  // the brand strip stops moving while it is off screen
+  if ("IntersectionObserver" in window && marquee) {
     new IntersectionObserver(function (entries) {
-      marquee.classList.toggle("is-offscreen", !entries[0].isIntersecting);
+      mqVisible = entries[0].isIntersecting;
+      marquee.classList.toggle("is-offscreen", !mqVisible);
+      if (mqOn && mqVisible && !mqRaf) mqStart();
     }).observe(marquee);
   }
 
