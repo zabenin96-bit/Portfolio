@@ -211,12 +211,12 @@
     if (Math.abs(ringLeftX - rows[0].lane) < 40) {
       // the lane runs right past the ring (narrow phones): go round the
       // other way and leave straight down its left side
-      loop(tg, tg.u.topStart, tg.u.leftStart - 2, [-H, -H]);
+      loop(tg, tg.u.leftStart, tg.u.leftStart - 1, [-H, -H]);   // exactly one lap
       // and ease over to the lane before the first video starts
       pt(ringLeftX, title.bottom + tR + 10);
       pt(rows[0].lane, Math.min(title.bottom + tR + 60, rows[0].top - 14));
     } else {
-      loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [-H, -H]);
+      loop(tg, tg.u.bottomEnd, tg.u.bottomEnd + 1, [-H, -H]);   // exactly one lap
       // a level line out to the lane, then down it beside the videos
       var subExitY = title.bottom + tR;
       pt(rows[0].lane, subExitY, Math.max(8, Math.min(FILLET, (rows[0].top - subExitY) * 0.8)));
@@ -303,9 +303,9 @@
       if (stepY > last.y + 10) last.y = stepY;
       if (Math.abs(last.x - sideX) < 60) pt(sideX, Math.min(kTop, last.y + 40)); // a slight slant
       else pt(sideX, last.y);                                                   // a level step
-      // down the outer end of the ring and round it once and a quarter
-      if (left) loop(cg, cg.u.leftStart, cg.u.leftStart - 1.25, keys);
-      else loop(cg, cg.u.rightStart, cg.u.rightStart + 1.25, keys);
+      // down the outer end of the ring and round it once
+      if (left) loop(cg, cg.u.leftStart, cg.u.leftStart - 1, keys);
+      else loop(cg, cg.u.rightStart, cg.u.rightStart + 1, keys);
     }
     return finish();
   }
