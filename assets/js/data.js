@@ -98,8 +98,8 @@ window.SITE = {
       title: { ru: "Постпродакшн кино", en: "Film postproduction" },
       preview: "assets/video/film.mp4", previewSmall: "assets/video/film-640.mp4", previewMedium: "assets/video/film-960.mp4", poster: "assets/img/film.webp", tint: "#221c10",
       projects: [
-        { title: { ru: "To the Light", en: "To the Light" }, role: { ru: "реж. Меген Тарба, 2024", en: "dir. Megen Tarba, 2024" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", poster: "" },
-        { title: { ru: "Walk a Meter in My Shoes", en: "Walk a Meter in My Shoes" }, role: { ru: "реж. Анн Маковски, 2026", en: "dir. Ann Makovsky, 2026" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", poster: "" },
+        { title: { ru: "To the Light", en: "To the Light" }, role: { ru: "реж. Меген Тарба, 2024", en: "dir. Megen Tarba, 2024" }, kinescope: "vCMDwcPHp7WzsmAkCkG2co", preview: "assets/video/projects/tothelight.mp4", poster: "assets/img/projects/tothelight.webp" },
+        { title: { ru: "Walk a Meter in My Shoes", en: "Walk a Meter in My Shoes" }, role: { ru: "реж. Анн Маковски, 2026", en: "dir. Ann Makovsky, 2026" }, kinescope: "dqsyCEEmsUZM3GDEyG14AZ", preview: "assets/video/projects/walkameter.mp4", poster: "assets/img/projects/walkameter.webp" },
       ],
     },
     {
