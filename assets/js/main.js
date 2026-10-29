@@ -72,7 +72,7 @@
   function initialLang() {
     var saved = store("lang");
     if (saved === "ru" || saved === "en") return saved;
-    return "ru"; // Russian first; English is one tap away
+    return "en"; // English first; Russian is one tap away
   }
 
   document.querySelectorAll("[data-lang]").forEach(function (b) {
