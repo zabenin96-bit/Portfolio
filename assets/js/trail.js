@@ -176,7 +176,11 @@
   function buildRoute() {
     ctl = [];
     var tiles = qa(".cat");
-    var title = union(textOf(q(".masthead__title")), textOf(q(".masthead__sub")));
+    // the whole opening block: name, "Sound design studio", the line of what
+    // the studio does and the small "Discuss a project" link
+    var title = [".masthead__sub", ".masthead__offer", ".masthead__cta"].reduce(function (acc, sel) {
+      var el = q(sel); return union(acc, el && (sel === ".masthead__cta" ? boxOf(el) : textOf(el)));
+    }, textOf(q(".masthead__title")));
     if (!tiles.length || !title) return null;
 
     // rows of tiles (a tile wrapper includes its caption)
@@ -201,13 +205,22 @@
     // 1. start on a loop around the studio name and "Sound design studio"
     //    under it, drawn right away when the page opens (it is due before
     //    any scrolling); leave it along its bottom edge
+    // On phones the name fills the width and a ring round it would leave
+    // the screen: there the opening loop goes round the small "Discuss a
+    // project" link under it instead.
+    var ctaTop = boxOf(q(".masthead__cta"));
+    if (ctaTop && (title.left < 24 || W - title.right < 24)) title = ctaTop;
     var tR = Math.max(10, Math.min(18, rows[0].top - title.bottom - 30));
     // keep clear of the RU / EN switch above it (close on phones)
     var langBox = boxOf(q(".lang"));
     if (langBox && langBox.left < title.right + 16 + tR) tR = Math.max(6, Math.min(tR, title.top - langBox.bottom - 8));
-    var tg = ringInfo({ left: title.left - 16, right: title.right + 16, top: title.top, bottom: title.bottom }, tR);
+    // side room: 16px beside the text, less on phones where the name fills
+    // the width, so the ring stays on screen
+    var tPad = Math.max(0, Math.min(16, title.left - tR - 4, W - title.right - tR - 4));
+    if (tPad + tR < 8) { tR = Math.max(4, Math.min(tR, Math.min(title.left, W - title.right) - 4)); tPad = Math.max(0, Math.min(title.left, W - title.right) - tR - 4); }
+    var tg = ringInfo({ left: title.left - tPad, right: title.right + tPad, top: title.top, bottom: title.bottom }, tR);
     // (keys below zero: already due at the very top of the page)
-    var ringLeftX = title.left - 16 - tR;
+    var ringLeftX = title.left - tPad - tR;
     if (Math.abs(ringLeftX - rows[0].lane) < 40) {
       // the lane runs right past the ring (narrow phones): go round the
       // other way and leave straight down its left side
@@ -250,6 +263,9 @@
     var tail = ctl[ctl.length - 1];
     if (tail.y >= lastRow.bottom) laneX = tail.x;
     else pt(laneX, lastRow.bottom + 24);
+    // run on beside the brands / festivals / streaming block
+    var proof = boxOf(q(".proof__grid"));
+    if (proof) pt(laneX, proof.bottom + 18);
 
     // 4. a loop around Nata's photo and name (or the photo alone if the
     //    bigger loop would run into the text beside it)
