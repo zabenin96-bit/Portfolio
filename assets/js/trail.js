@@ -49,6 +49,7 @@
   var EYE = 0.66;        // an accent starts when its object's centre is this high on screen
   var SPEED = 0.6;       // px/ms – the line's own pace along the route
   var DELAY = 500;       // ms the line waits before following the scroll
+  var RAMP_MS = 900;     // ms to speed up from standstill to full speed
   var IDLE_MS = 2100;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
@@ -207,10 +208,20 @@
     if (langBox && langBox.left < title.right + 16 + tR) tR = Math.max(6, Math.min(tR, title.top - langBox.bottom - 8));
     var tg = ringInfo({ left: title.left - 16, right: title.right + 16, top: title.top, bottom: title.bottom }, tR);
     // (keys below zero: already due at the very top of the page)
-    loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [-H, -H]);
-    // a level line out to the lane, then down it beside the videos
-    var subExitY = title.bottom + tR;
-    pt(rows[0].lane, subExitY, Math.max(8, Math.min(FILLET, (rows[0].top - subExitY) * 0.8)));
+    var ringLeftX = title.left - 16 - tR;
+    if (Math.abs(ringLeftX - rows[0].lane) < 40) {
+      // the lane runs right past the ring (narrow phones): go round the
+      // other way and leave straight down its left side
+      loop(tg, tg.u.topStart, tg.u.leftStart - 2, [-H, -H]);
+      // and ease over to the lane before the first video starts
+      pt(ringLeftX, title.bottom + tR + 10);
+      pt(rows[0].lane, Math.min(title.bottom + tR + 60, rows[0].top - 14));
+    } else {
+      loop(tg, tg.u.topStart, tg.u.bottomEnd + 1, [-H, -H]);
+      // a level line out to the lane, then down it beside the videos
+      var subExitY = title.bottom + tR;
+      pt(rows[0].lane, subExitY, Math.max(8, Math.min(FILLET, (rows[0].top - subExitY) * 0.8)));
+    }
     pt(rows[0].lane, rows[0].top + 20);
 
     // 2–4. down the lanes, crossing between rows
@@ -364,7 +375,7 @@
   }
 
   // ---------- following the route ----------
-  var scrollLog = [];
+  var scrollLog = [], vHead = 0;
   var route = null, sHead = 0, lastMove = 0, raf = null, last = 0, fade = 0;
 
   // the route point closest to p, looked for near the old place along the
@@ -403,16 +414,24 @@
     var diff = target - sHead;
     if (Math.abs(diff) * STEP > 2500) {
       sHead = target - Math.sign(diff) * 140 / STEP; // long jump: arrive from just behind
+      vHead = 0;
     } else {
-      // ease toward the target, never faster than SPEED along the route
-      var ds = diff * (1 - Math.exp(-dt / 420)), cap = SPEED * dt / STEP;
-      sHead += Math.max(-cap, Math.min(cap, ds));
+      // The head has a speed of its own: it wants to close the gap (slowing
+      // down as it gets close) but may only change speed gradually, so it
+      // starts off slowly, gathers pace and never jolts.
+      var maxV = SPEED / STEP;                          // route steps per ms
+      var want = Math.max(-maxV, Math.min(maxV, diff / 420));
+      var acc = maxV / RAMP_MS * dt;                    // speed change allowed this frame
+      vHead += Math.max(-acc, Math.min(acc, want - vHead));
+      var ds = vHead * dt;
+      if ((diff > 0 && ds > diff) || (diff < 0 && ds < diff)) { ds = diff; vHead = 0; }
+      sHead += ds;
     }
     var moving = Math.abs(target - sHead) > 0.05;
     if (moving) lastMove = now;
     fade = now - lastMove < IDLE_MS ? Math.min(1, fade + dt / 200) : Math.max(0, fade - dt / 700);
     draw();
-    if (fade <= 0 && !moving) { raf = null; last = 0; return; }
+    if (fade <= 0 && !moving) { raf = null; last = 0; vHead = 0; return; }
     raf = requestAnimationFrame(step);
   }
 
