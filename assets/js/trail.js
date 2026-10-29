@@ -6,10 +6,9 @@
  *   1. a loop around the studio name and "Sound design studio",
  *   2. down a side lane next to the work videos, crossing to the other side
  *      in the free gap below each row,
- *   3. a loop around one video,
- *   4. a flat loop around one caption while crossing between rows,
- *   5. a loop around Nata's photo and name,
- *   6. a loop around the contact button, where it ends.
+ *   3. a flat loop around one caption while crossing between rows,
+ *   4. a loop around Nata's photo and name,
+ *   5. a loop around the contact button, where it ends.
  * Corners are rounded and loops are entered and left along their tangent, so
  * the path is one smooth curve. On straight parts the head keeps one height
  * on screen and goes down with the scroll; once an object reaches eye level
@@ -224,23 +223,9 @@
     }
     pt(rows[0].lane, rows[0].top + 20);
 
-    // 2–4. down the lanes, crossing between rows
-    var ringRow = Math.min(1, rows.length - 1);
+    // 2–3. down the lanes, crossing between rows
     var capRow = rows.length >= 4 ? 3 : 0;
-    // the ring row's lane runs exactly along the side of its ring, so the
-    // crossing above leads straight into the loop without an extra bend
-    var rr = rows[ringRow];
-    var rdist = function (it) { return Math.min(Math.abs(rr.lane - it.left), Math.abs(rr.lane - it.right)); };
-    var near = rr.items.reduce(function (a, b) { return rdist(a) <= rdist(b) ? a : b; });
-    var side = rr.lane < (near.left + near.right) / 2 ? "L" : "R";
-    var r = Math.max(6, Math.min(rr.laneOffset, 18));
-    rr.lane = side === "L" ? near.left - r : near.right + r;
     rows.forEach(function (row, i) {
-      if (i === ringRow) {
-        // one loop around the video next to this row's lane
-        // (between rows the crossing right below rounds the exit itself)
-        ringOnLane(near, r, side, 1, row.lane, viewKeys(near), rows[i + 1] ? 0 : 24);
-      }
       var next = rows[i + 1];
       if (!next) return;
       var y = (row.bottom + next.top) / 2, cap = null;
@@ -266,7 +251,7 @@
     if (tail.y >= lastRow.bottom) laneX = tail.x;
     else pt(laneX, lastRow.bottom + 24);
 
-    // 5. a loop around Nata's photo and name (or the photo alone if the
+    // 4. a loop around Nata's photo and name (or the photo alone if the
     //    bigger loop would run into the text beside it)
     var photo = boxOf(q(".about__photo"));
     var name = union(textOf(q(".about__head .eyebrow")), textOf(q(".about__lead")));
@@ -292,7 +277,7 @@
       pt(laneX, after);
     }
 
-    // 6. around the contact button. It is joined at its outer end,
+    // 5. around the contact button. It is joined at its outer end,
     //    coming straight down beside it, so the line never crosses the small
     //    line of text above the button
     var cta = boxOf(q(".cta"));
