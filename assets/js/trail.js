@@ -50,6 +50,8 @@
   var RAMP_MS = 900;     // ms to speed up from standstill to full speed
   var OMEGA = 0.004;     // 1/ms – stiffness of the soft spring the head follows
   var LOOP_SPEED = 0.42; // px/ms – the calm pace round an accent (the loops)
+  var LEVEL_SPEED = 0.9; // px/ms – top speed across the page, half of that down it
+  var BRAKE = 0.006;     // px/ms² – how firmly it slows down to a limit ahead
   var IDLE_MS = 2100;    // after this long without movement the line fades out
   var W = 0, H = 0;
 
@@ -374,6 +376,12 @@
       var k0 = out[from].k, base = Math.min(k0, maxScroll - 1), span = lastK - k0 || 1;
       for (var z2 = from; z2 < out.length; z2++) out[z2].k = base + (out[z2].k - k0) / span * (maxScroll - base);
     }
+    // how level the route runs at each point (1 = straight across, 0 = down)
+    for (var hz = 0; hz < out.length; hz++) {
+      var pa = out[Math.max(0, hz - 2)], pb = out[Math.min(out.length - 1, hz + 2)];
+      var ddx = Math.abs(pb.x - pa.x), ddy = Math.abs(pb.y - pa.y);
+      out[hz].level = ddx + ddy > 0 ? ddx / (ddx + ddy) : 0;
+    }
     return out;
   }
 
@@ -405,6 +413,18 @@
     return { x: route[i].x + (route[j].x - route[i].x) * f, y: route[i].y + (route[j].y - route[i].y) * f };
   }
 
+  // the lowest speed limit over the next ~240px in the direction of travel
+  function capAhead(s, v) {
+    var dir = v >= 0 ? 1 : -1, cap = Infinity;
+    for (var i = 0; i <= 80; i += 4) {
+      var p = route[Math.max(0, Math.min(route.length - 1, Math.round(s) + dir * i))];
+      if (!p) continue;
+      if (p.loop) cap = Math.min(cap, LOOP_SPEED / STEP);
+      else if (p.level > 0.6) cap = Math.min(cap, LEVEL_SPEED / STEP);
+    }
+    return cap;
+  }
+
   function step(now) {
     var dt = Math.min(40, now - (last || now)); last = now;
     if (!route) { raf = null; return; }
@@ -428,12 +448,13 @@
       var lim = acc * vHead > 0 || vHead === 0 ? aMax : aMax * 3;
       acc = Math.max(-lim, Math.min(lim, acc));
       var newV = vHead + acc * h;
-      // round an accent (a loop) the line keeps a calm, even pace: it may
-      // not speed up past it, and if it arrives faster it eases down to it
-      var here = route[Math.max(0, Math.min(route.length - 1, Math.round(sHead)))];
-      var vLoop = LOOP_SPEED / STEP;
-      if (here && here.loop && Math.abs(newV) > vLoop) {
-        newV = Math.sign(newV) * Math.max(vLoop, Math.min(Math.abs(newV), Math.abs(vHead) - vLoop * h / 250));
+      // Speed limits along the way, looked up a little ahead so the line
+      // has already slowed down when it gets there: round an accent (a loop)
+      // a calm, even pace; across the page half its top speed down it.
+      // Above a limit it eases down at a steady rate – it never snaps.
+      var cap = capAhead(sHead, newV);
+      if (Math.abs(newV) > cap) {
+        newV = Math.sign(newV) * Math.max(cap, Math.min(Math.abs(newV), Math.abs(vHead) - BRAKE / STEP * h));
       }
       vHead = newV;
       sHead += vHead * h;
