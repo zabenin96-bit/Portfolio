@@ -325,6 +325,18 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   animation: card-shimmer 1.4s linear infinite;
 }
 @keyframes card-shimmer { to { background-position: -150% 0; } }
+/* our own quiet loader while the player gets ready: the preview dims and
+   a thin yellow arc turns where the play button was */
+.card__btn video { transition: filter 0.5s var(--ios); }
+.card__btn.is-loading video { filter: brightness(0.45) saturate(0.8); }
+.card__btn.is-loading::after {
+  content: ""; position: absolute; z-index: 3; left: 50%; top: 50%;
+  width: 42px; height: 42px; margin: -21px 0 0 -21px; border-radius: 50%;
+  border: 1.5px solid rgba(255, 212, 92, 0.18); border-top-color: var(--tri);
+  animation: card-spin 0.9s linear infinite, card-loader-in 0.4s var(--ios) both;
+}
+@keyframes card-spin { to { transform: rotate(360deg); } }
+@keyframes card-loader-in { from { opacity: 0; } }
 /* names under the videos: the same type as the section labels */
 .card__caption {
   font-family: var(--font-display); font-weight: 400; font-size: 13px; line-height: 1.4;
