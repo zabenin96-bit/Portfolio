@@ -317,14 +317,14 @@
     if (w.done) return;
     w.done = true;
     clearTimeout(w.timer);
-    setTimeout(function () { w.frame.classList.remove("is-loading"); }, 900);
+    setTimeout(function () { w.frame.classList.remove("is-loading"); }, 300);
   }
   function watchPlayer(iframe, frame) {
     var w = { iframe: iframe, frame: frame, done: false, timer: null };
     waiting.push(w);
     iframe.addEventListener("load", function () {
       clearTimeout(w.timer);
-      w.timer = setTimeout(function () { reveal(w); }, 2500);
+      w.timer = setTimeout(function () { reveal(w); }, 1200);
     });
   }
   window.addEventListener("message", function (e) {
