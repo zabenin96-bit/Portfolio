@@ -284,7 +284,10 @@
         var loopVid = el("video", { muted: "", loop: "", playsinline: "", preload: "metadata", "aria-hidden": "true" });
         loopVid.muted = true;
         if (p.poster) loopVid.poster = p.poster;
-        loopVid.src = p.preview;
+        // a phone-sized copy (name-m.mp4) for small cards: same look on a
+        // phone screen, 2–3 times lighter; the sharp one for computers
+        var cardPx = (window.innerWidth < 760 ? window.innerWidth : 640) * Math.min(window.devicePixelRatio || 1, 2);
+        loopVid.src = cardPx <= 900 ? p.preview.replace(/\.mp4(\?|$)/, "-m.mp4$1") : p.preview;
         btn.appendChild(loopVid);
         cardLoops.observe(loopVid);
       } else if (p.poster) btn.appendChild(el("img", { src: p.poster, alt: "", loading: "lazy", decoding: "async" }));
