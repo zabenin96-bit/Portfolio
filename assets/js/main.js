@@ -293,6 +293,11 @@
       play.appendChild(svg(PLAY));
       btn.appendChild(play);
       btn.addEventListener("click", function () { playProject(btn, p); });
+      // with a mouse, start loading the player already on press – the click
+      // comes a moment later (on touch a press may still turn into a scroll)
+      btn.addEventListener("pointerdown", function (e) {
+        if (e.pointerType === "mouse" && e.button === 0) playProject(btn, p);
+      });
       cards.appendChild(el("div", { class: "card" }, caption ? [btn, caption] : [btn]));
     });
   }
@@ -359,10 +364,33 @@
     if (loopVid) iframe.addEventListener("transitionend", function () { if (!btn.classList.contains("is-loading")) { loopVid.pause(); loopVid.remove(); } });
   }
 
+  // While the previews play, get the players ready in the background: open
+  // the connection to Kinescope and fetch each player page into the cache, so
+  // a Play starts without that wait. (The video stream itself only loads on
+  // Play – loading every film up front would cost far too much data.)
+  var warmed = {};
+  function hint(rel, href, as) {
+    if (warmed[rel + href]) return;
+    warmed[rel + href] = true;
+    var l = document.createElement("link");
+    l.rel = rel; l.href = href;
+    if (as) l.as = as;
+    if (rel === "preconnect") l.crossOrigin = "anonymous";
+    document.head.appendChild(l);
+  }
+  function warmPlayers(cat) {
+    if (saveData) return;
+    hint("preconnect", "https://kinescope.io");
+    cat.projects.forEach(function (p) {
+      if (p.kinescope) hint("prefetch", "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope) + "?autoplay=1", "document");
+    });
+  }
+
   function openSheet(cat) {
     openCat = cat;
     lastTrigger = document.activeElement;
     renderSheet(cat);
+    warmPlayers(cat);
     root.classList.add("html-locked");
     // nothing behind the sheet is visible – stop decoding those previews
     previewsPaused = true;
