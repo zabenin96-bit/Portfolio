@@ -201,7 +201,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .cat__btn, .card__btn {
   position: relative; width: 100%; border: 0; padding: 0; overflow: hidden;
-  border-radius: 14px; background: #141414; cursor: var(--cursor-link);
+  border-radius: 12px; background: #141414; cursor: var(--cursor-link);
   transition: box-shadow 0.5s var(--ios), transform 0.55s var(--spring);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -210,7 +210,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 }
 .cat__btn { aspect-ratio: 4 / 3; border-radius: 12px; }
 @media (min-width: 760px) {
-  .cat__btn { border-radius: 14px; }
+  .cat__btn { border-radius: 12px; }
   /* odd last tile spans the full row at the same height */
   .cat:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .cat:last-child:nth-child(odd) .cat__btn { aspect-ratio: 8 / 3; }
@@ -228,7 +228,18 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   .cat:first-child:nth-last-child(4), .cat:first-child:nth-last-child(4) ~ .cat { grid-column: span 3; }
   .cat:first-child:nth-last-child(4) .cat__btn, .cat:first-child:nth-last-child(4) ~ .cat .cat__btn { aspect-ratio: 16 / 9; }
 }
-.cat__btn:hover, .card__btn:hover { box-shadow: 0 0 48px var(--tile-glow); }
+/* YouTube-like cards: thumbnails with a soft 12px rounding, no glow; on
+   hover a quiet grey panel lights up behind the whole card (thumbnail
+   and title together) */
+.cat, .card { position: relative; isolation: isolate; }
+.cat::before, .card::before {
+  content: ""; position: absolute; inset: -8px; z-index: -1; border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07); opacity: 0; transform: scale(0.98);
+  transition: opacity 0.3s var(--ios), transform 0.45s var(--ios); pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cat:hover::before, .card:hover::before { opacity: 1; transform: none; }
+}
 .cat__btn video, .cat__btn img, .card__btn video, .card__btn img, .card__btn iframe {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0;
 }
