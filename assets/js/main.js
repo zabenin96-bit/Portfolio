@@ -357,7 +357,7 @@
       Array.prototype.forEach.call(btn.querySelectorAll(".card__play, .vignette"), function (n) { n.remove(); });
     } else btn.textContent = "";
     var iframe = el("iframe", {
-      src: "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope) + "?autoplay=1",
+      src: playerUrl(p.kinescope),
       title: p.title[lang] || t("watch"),
       allow: "autoplay; fullscreen; picture-in-picture; encrypted-media",
       allowfullscreen: "",
@@ -371,6 +371,12 @@
   // the connection to Kinescope and fetch each player page into the cache, so
   // a Play starts without that wait. (The video stream itself only loads on
   // Play – loading every film up front would cost far too much data.)
+  // the Kinescope player page: starts on its own, and asks for 720p as the
+  // starting quality (the player may still adapt to the connection)
+  var START_QUALITY = "720p";
+  function playerUrl(id) {
+    return "https://kinescope.io/embed/" + encodeURIComponent(id) + "?autoplay=1&quality=" + START_QUALITY;
+  }
   var warmed = {};
   function hint(rel, href, as) {
     if (warmed[rel + href]) return;
@@ -385,7 +391,7 @@
     if (saveData) return;
     hint("preconnect", "https://kinescope.io");
     cat.projects.forEach(function (p) {
-      if (p.kinescope) hint("prefetch", "https://kinescope.io/embed/" + encodeURIComponent(p.kinescope) + "?autoplay=1", "document");
+      if (p.kinescope) hint("prefetch", playerUrl(p.kinescope), "document");
     });
   }
 
