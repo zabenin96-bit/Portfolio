@@ -109,9 +109,9 @@ window.SITE = {
       title: { ru: "Анимация", en: "Animation" },
       preview: "assets/video/animation.mp4", previewSmall: "assets/video/animation-640.mp4", previewMedium: "assets/video/animation-960.mp4", poster: "assets/img/animation.webp", tint: "#14201a",
       projects: [
-        { title: { ru: "0,5 самурая", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", preview: "assets/video/projects/samurai-sd.mp4?v=2", poster: "assets/img/projects/samurai-sd.webp?v=2" },
-        { title: { ru: "0,5 самурая", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", preview: "assets/video/projects/samurai-ost.mp4?v=2", poster: "assets/img/projects/samurai-ost.webp?v=2" },
         { title: { ru: "Бег", en: "Run" }, role: { ru: "саунд-дизайн и сведение", en: "sound design & mix" }, kinescope: "uiCY7LroVH4LZ3vKCAdEym", preview: "assets/video/projects/run.mp4?v=2", poster: "assets/img/projects/run.webp?v=2" },
+        { title: { ru: "0,5 самурая", en: "Half of Samurai" }, role: { ru: "саундтрек", en: "soundtrack" }, kinescope: "tkVSX6gJRMffjH9YfzfSNN", preview: "assets/video/projects/samurai-ost.mp4?v=2", poster: "assets/img/projects/samurai-ost.webp?v=2" },
+        { title: { ru: "0,5 самурая", en: "Half of Samurai" }, role: { ru: "саунд-дизайн", en: "sound design" }, kinescope: "wk3Aik8kNa2XgryingxbaV", preview: "assets/video/projects/samurai-sd.mp4?v=2", poster: "assets/img/projects/samurai-sd.webp?v=2" },
       ],
     },
     {
