@@ -416,22 +416,47 @@
     var x = btn.querySelector(".card__unfull");
     if (x) x.remove();
   }
+  // leave every level of full screen (the player inside may have gone full
+  // screen on top of ours)
+  function leaveFullScreen() {
+    var d = document;
+    var cur = d.fullscreenElement || d.webkitFullscreenElement;
+    if (!cur) return;
+    var p = (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    var again = function () { setTimeout(leaveFullScreen, 60); };
+    if (p && p.then) p.then(again, function () {}); else again();
+  }
   function goFull(btn) {
+    // a clear way back, on top of the video, in either kind of full screen
+    var x = el("span", { class: "card__unfull", role: "button", tabindex: "0", "aria-label": t("close") });
+    x.appendChild(svg('<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'));
+    x.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (document.fullscreenElement || document.webkitFullscreenElement) leaveFullScreen();
+      exitFull(btn);
+    });
+    btn.appendChild(x);
     var req = btn.requestFullscreen || btn.webkitRequestFullscreen;
     if (req) {
       try {
         var r = req.call(btn);
-        if (r && r.catch) r.catch(function () {});
+        if (r && r.catch) r.catch(function () { pseudoFull(btn); });
         return;
       } catch (e) {}
     }
+    pseudoFull(btn);
+  }
+  function pseudoFull(btn) {
     btn.classList.add("is-full");
     root.classList.add("has-full");
-    var x = el("span", { class: "card__unfull", role: "button", tabindex: "0", "aria-label": t("close") });
-    x.appendChild(svg('<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'));
-    x.addEventListener("click", function (e) { e.stopPropagation(); exitFull(btn); });
-    btn.appendChild(x);
   }
+  // once out of full screen, the cross is no longer needed
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(function (ev) {
+    document.addEventListener(ev, function () {
+      if (document.fullscreenElement || document.webkitFullscreenElement) return;
+      Array.prototype.forEach.call(document.querySelectorAll(".card__btn:not(.is-full) .card__unfull"), function (x) { x.remove(); });
+    });
+  });
 
   function playProject(btn, p) {
     if (btn.classList.contains("is-playing")) return;
