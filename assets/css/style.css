@@ -571,6 +571,20 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .card__sound svg { width: 16px; height: 16px; }
 .card__btn.is-playing .card__sound { opacity: 0; }
 
+/* a playing video in full screen: the real one, or – where that isn't
+   possible (iPhone) – the card filling the window */
+.card__btn:fullscreen, .card__btn:-webkit-full-screen { border-radius: 0; background: #000; }
+.card__btn.is-full {
+  position: fixed; inset: 0; z-index: 200; width: 100vw; height: 100vh; height: 100dvh;
+  aspect-ratio: auto; border-radius: 0; background: #000; transform: none !important;
+}
+.has-full .card__share, .has-full .nav { visibility: hidden; }
+.card__unfull {
+  position: absolute; z-index: 5; top: max(12px, env(safe-area-inset-top)); right: 12px;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6); color: #fff; cursor: var(--cursor-link);
+}
+
 /* share button on the corner of each video, and the little note that
    confirms the link was copied */
 .card__share {

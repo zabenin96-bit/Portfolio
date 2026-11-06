@@ -338,7 +338,7 @@
     });
   }
 
-  var HEADPHONES = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><path d="M4 15a2 2 0 0 1 2-2h1v7H6a2 2 0 0 1-2-2zM20 15a2 2 0 0 0-2-2h-1v7h1a2 2 0 0 0 2-2z"/></svg>';
+  var HEADPHONES = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
   var LINK_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>';
   var toastTimer = null;
   function toast(text) {
@@ -395,6 +395,33 @@
     });
   });
 
+  // A started video goes full screen at once (it has to start from a tap or
+  // click: browsers allow full screen only then). Where a page element can't
+  // go full screen (iPhone), the card fills the window instead, with a cross
+  // to bring it back.
+  function exitFull(btn) {
+    btn.classList.remove("is-full");
+    root.classList.remove("has-full");
+    var x = btn.querySelector(".card__unfull");
+    if (x) x.remove();
+  }
+  function goFull(btn) {
+    var req = btn.requestFullscreen || btn.webkitRequestFullscreen;
+    if (req) {
+      try {
+        var r = req.call(btn);
+        if (r && r.catch) r.catch(function () {});
+        return;
+      } catch (e) {}
+    }
+    btn.classList.add("is-full");
+    root.classList.add("has-full");
+    var x = el("span", { class: "card__unfull", role: "button", tabindex: "0", "aria-label": t("close") });
+    x.appendChild(svg('<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'));
+    x.addEventListener("click", function (e) { e.stopPropagation(); exitFull(btn); });
+    btn.appendChild(x);
+  }
+
   function playProject(btn, p) {
     if (btn.classList.contains("is-playing")) return;
     if (!p.kinescope) {
@@ -406,6 +433,7 @@
       return;
     }
     btn.classList.add("is-playing", "is-loading");
+    goFull(btn);
     // with a preview loop, it keeps running underneath until the player is
     // ready, then the player fades in over it; otherwise a dark shimmer
     var loopVid = btn.querySelector("video");
@@ -476,7 +504,11 @@
     if (sheet.close) sheet.close(); else sheet.removeAttribute("open");
   }
   // Esc: animate out instead of the browser's instant close
-  sheet.addEventListener("cancel", function (e) { e.preventDefault(); closeSheet(); });
+  sheet.addEventListener("cancel", function (e) {
+    e.preventDefault();
+    var full = sheet.querySelector(".card__btn.is-full");
+    if (full) exitFull(full); else closeSheet();
+  });
   sheet.addEventListener("close", function () {
     if (openCat && history.replaceState && location.hash.split("/")[0] === "#" + openCat.id) history.replaceState(null, "", location.pathname + location.search);
     openCat = null;
