@@ -581,7 +581,12 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 
 /* a playing video in full screen: the real one, or – where that isn't
    possible (iPhone) – the card filling the window */
-.card__btn:fullscreen, .card__btn:-webkit-full-screen { border-radius: 0; background: #000; }
+/* (kept as separate rules: a browser that doesn't know one of the two
+   names would otherwise drop both) */
+.card__btn:fullscreen { border-radius: 0 !important; background: #000 !important; box-shadow: none !important; transform: none !important; }
+.card__btn:-webkit-full-screen { border-radius: 0 !important; background: #000 !important; box-shadow: none !important; transform: none !important; }
+.card__btn:fullscreen::backdrop { background: #000; }
+.card__btn:fullscreen iframe, .card__btn:fullscreen video { border-radius: 0; }
 .card__btn.is-full {
   position: fixed; inset: 0; z-index: 200; width: 100vw; height: 100vh; height: 100dvh;
   aspect-ratio: auto; border-radius: 0; background: #000; transform: none !important;
