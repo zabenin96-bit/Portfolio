@@ -557,7 +557,7 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 /* the work is the sound: a quiet hint under the section title and a small
    headphones mark on each video */
 .sheet__hint {
-  display: flex; align-items: center; gap: 10px; margin: -6px 0 28px;
+  display: flex; align-items: center; gap: 10px; margin: 6px 0 28px; line-height: 1.6;
   font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #9a9a9a;
 }
 .sheet__hint svg { width: 18px; height: 18px; flex: none; color: var(--tri); }
