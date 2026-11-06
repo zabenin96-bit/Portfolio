@@ -475,6 +475,10 @@
     previewsPaused = true;
     reconcilePreviews();
     if (sheet.showModal) sheet.showModal(); else sheet.setAttribute("open", "");
+    // the browser would put focus (and its outline) on the close button;
+    // start on the title instead, quietly
+    var heading = document.getElementById("sheet-title");
+    if (heading) heading.focus({ preventScroll: true });
     sheet.scrollTop = 0;
   }
   function closeSheet() {
