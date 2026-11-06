@@ -363,10 +363,21 @@
   }
 
   // preview loops on the cards play only while on screen
+  // while a video is being watched, the other previews in the section rest
+  var watching = false;
+  function setWatching(on) {
+    watching = on;
+    document.getElementById("cards").classList.toggle("is-watching", on);
+    Array.prototype.forEach.call(document.querySelectorAll("#cards .card__btn:not(.is-playing) video"), function (v) {
+      if (on) v.pause();
+      else if (v._inView && !reduceMotion && !saveData) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    });
+  }
   var cardLoops = "IntersectionObserver" in window ? new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
       var v = e.target;
-      if (e.isIntersecting && !reduceMotion && !saveData) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      v._inView = e.isIntersecting;
+      if (e.isIntersecting && !reduceMotion && !saveData && !watching) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
       else v.pause();
     });
   }, { threshold: 0.4 }) : { observe: function () {} };
@@ -433,6 +444,7 @@
       return;
     }
     btn.classList.add("is-playing", "is-loading");
+    setWatching(true);
     goFull(btn);
     // with a preview loop, it keeps running underneath until the player is
     // ready, then the player fades in over it; otherwise a dark shimmer
@@ -516,6 +528,7 @@
     previewsPaused = false;
     reconcilePreviews();
     document.getElementById("cards").textContent = ""; // stops any playing video
+    watching = false;
     if (lastTrigger && lastTrigger.focus) lastTrigger.focus({ preventScroll: true });
   });
   document.getElementById("sheet-close").addEventListener("click", closeSheet);

@@ -585,6 +585,10 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   background: rgba(0, 0, 0, 0.6); color: #fff; cursor: var(--cursor-link);
 }
 
+/* the other videos dim a little while one is being watched */
+#cards .card__btn video { transition: filter 0.5s var(--ios); }
+#cards.is-watching .card__btn:not(.is-playing) video { filter: brightness(0.55) saturate(0.7); }
+
 /* share button on the corner of each video, and the little note that
    confirms the link was copied */
 .card__share {
