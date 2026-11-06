@@ -562,6 +562,15 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   transition: opacity 0.3s var(--ios);
 }
 .card__sound svg { width: 16px; height: 16px; }
+/* its two sound waves pulse outwards from the speaker, one after the other */
+.card__sound .wave { transform-box: view-box; transform-origin: 11px 12px; animation: sound-wave 2.4s ease-out infinite; }
+.card__sound .wave--2 { animation-delay: 0.35s; }
+#cards.is-watching .card:not(.is-linked) .card__sound .wave { animation-play-state: paused; }
+@keyframes sound-wave {
+  0% { opacity: 0; transform: scale(0.7); }
+  30% { opacity: 1; }
+  70%, 100% { opacity: 0; transform: scale(1.15); }
+}
 .card__btn.is-playing .card__sound { opacity: 0; }
 
 /* the other videos dim a little while one is being watched */
