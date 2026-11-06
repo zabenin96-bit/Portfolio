@@ -243,6 +243,28 @@
     });
   }
 
+  // ---------- links to a single video ----------
+  // Every project gets a short name for its link (#commercials/mg-motor);
+  // two projects with the same title are told apart by their role.
+  function slugify(s) {
+    return String(s || "").toLowerCase().replace(/[’'.]/g, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  SITE.categories.forEach(function (cat) {
+    var seen = {};
+    cat.projects.forEach(function (p) {
+      var base = slugify(p.title.en || p.title.ru) || "video";
+      var dup = cat.projects.filter(function (q) { return slugify(q.title.en || q.title.ru) === base; }).length > 1;
+      var slug = dup && p.role ? base + "-" + slugify(p.role.en) : base;
+      while (seen[slug]) slug += "-2";
+      seen[slug] = true;
+      p.slug = slug;
+    });
+  });
+  function linkTo(cat, p) {
+    return location.origin + location.pathname + "#" + cat.id + (p ? "/" + p.slug : "");
+  }
+
   // ---------- first paint ----------
   // The work tiles and the language come first, before any of the extras
   // below, so a hiccup further down can never leave the page without its
@@ -301,8 +323,38 @@
       btn.addEventListener("pointerdown", function (e) {
         if (e.pointerType === "mouse" && e.button === 0) playProject(btn, p);
       });
-      cards.appendChild(el("div", { class: "card" }, caption ? [btn, caption] : [btn]));
+      var card = el("div", { class: "card", "data-slug": p.slug }, caption ? [btn, caption] : [btn]);
+      // a small "share" button on the corner of the video: copies (or, on a
+      // phone, shares) a link that opens this very video
+      var share = el("button", { type: "button", class: "card__share", "aria-label": t("share") + ": " + title, title: t("share") });
+      share.appendChild(svg(LINK_ICON));
+      share.addEventListener("click", function (e) { e.stopPropagation(); shareProject(cat, p, title); });
+      card.appendChild(share);
+      cards.appendChild(card);
     });
+  }
+
+  var LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>';
+  var toastTimer = null;
+  function toast(text) {
+    var box = document.getElementById("toast");
+    if (!box) { box = el("div", { id: "toast", class: "toast", role: "status" }); document.body.appendChild(box); }
+    if (sheet.open && box.parentNode !== sheet) sheet.appendChild(box); // above the dialog
+    box.textContent = text;
+    box.classList.add("is-on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { box.classList.remove("is-on"); }, 2200);
+  }
+  function shareProject(cat, p, title) {
+    var url = linkTo(cat, p);
+    var touch = window.matchMedia("(hover: none)").matches;
+    if (touch && navigator.share) {
+      navigator.share({ title: title + " – whereisyoursound", url: url }).catch(function () {});
+      return;
+    }
+    var done = function () { toast(t("copied")); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () { window.prompt(t("share"), url); });
+    else window.prompt(t("share"), url);
   }
 
   // preview loops on the cards play only while on screen
@@ -400,6 +452,7 @@
     lastTrigger = document.activeElement;
     renderSheet(cat);
     warmPlayers(cat);
+    if (history.replaceState && location.hash.split("/")[0] !== "#" + cat.id) history.replaceState(null, "", "#" + cat.id);
     root.classList.add("html-locked");
     // nothing behind the sheet is visible – stop decoding those previews
     previewsPaused = true;
@@ -420,6 +473,7 @@
   // Esc: animate out instead of the browser's instant close
   sheet.addEventListener("cancel", function (e) { e.preventDefault(); closeSheet(); });
   sheet.addEventListener("close", function () {
+    if (openCat && history.replaceState && location.hash.split("/")[0] === "#" + openCat.id) history.replaceState(null, "", location.pathname + location.search);
     openCat = null;
     root.classList.remove("html-locked");
     previewsPaused = false;
@@ -621,4 +675,25 @@
     target.focus({ preventScroll: true });
   });
 
+  // ---------- opening a link to a section or a single video ----------
+  // #commercials opens the section; #commercials/mg-motor also brings that
+  // video into view and marks it (playing with sound still needs a tap –
+  // browsers don't allow it on their own)
+  function openFromHash() {
+    var m = /^#([a-z0-9-]+)(?:\/([a-z0-9-]+))?$/.exec(location.hash);
+    if (!m) return;
+    var cat = SITE.categories.filter(function (c) { return c.id === m[1]; })[0];
+    if (!cat) return;
+    if (!sheet.open || openCat !== cat) openSheet(cat);
+    if (!m[2]) return;
+    var card = document.querySelector('.card[data-slug="' + m[2] + '"]');
+    if (!card) return;
+    setTimeout(function () {
+      card.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+      card.classList.add("is-linked");
+      setTimeout(function () { card.classList.remove("is-linked"); }, 3200);
+    }, reduceMotion ? 0 : 450);
+  }
+  openFromHash();
+  window.addEventListener("hashchange", openFromHash);
 })();

@@ -554,6 +554,31 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   .nav.is-away { opacity: 0; transform: translate(-50%, 16px); pointer-events: none; }
 }
 
+/* share button on the corner of each video, and the little note that
+   confirms the link was copied */
+.card__share {
+  position: absolute; z-index: 4; top: 10px; right: 10px; display: grid; place-items: center;
+  width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55); color: #fff; cursor: var(--cursor-link);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  opacity: 0.85; transition: opacity 0.25s, background-color 0.25s, transform 0.4s var(--spring);
+}
+.card__share svg { width: 17px; height: 17px; }
+.card__share:hover { opacity: 1; background: var(--tri); color: #000; }
+.card__share:active { transform: scale(0.9); transition-duration: 0.1s; }
+@media (hover: hover) and (pointer: fine) {
+  .card__share { opacity: 0; }
+  .card:hover .card__share, .card__share:focus-visible { opacity: 0.9; }
+}
+.card.is-linked .card__btn { box-shadow: 0 0 0 2px var(--tri), 0 0 40px rgba(255, 212, 92, 0.35); }
+.toast {
+  position: fixed; z-index: 120; left: 50%; bottom: 96px; transform: translate(-50%, 12px);
+  padding: 11px 18px; border-radius: 999px; background: rgba(28, 28, 28, 0.95); color: #fff;
+  font-size: 14px; letter-spacing: 0.02em; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s var(--ios), transform 0.45s var(--spring);
+}
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
 /* ---------- Scroll trail (drawn by assets/js/trail.js) ---------- */
 .trail { position: absolute; top: 0; left: 0; z-index: 30; pointer-events: none; overflow: visible; }
 
