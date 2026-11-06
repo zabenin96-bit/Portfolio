@@ -368,7 +368,7 @@
   function setWatching(on) {
     watching = on;
     document.getElementById("cards").classList.toggle("is-watching", on);
-    Array.prototype.forEach.call(document.querySelectorAll("#cards .card__btn:not(.is-playing) video"), function (v) {
+    Array.prototype.forEach.call(document.querySelectorAll("#cards .card:not(.is-linked) .card__btn:not(.is-playing) video"), function (v) {
       if (on) v.pause();
       else if (v._inView && !reduceMotion && !saveData) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
     });
@@ -377,7 +377,7 @@
     entries.forEach(function (e) {
       var v = e.target;
       v._inView = e.isIntersecting;
-      if (e.isIntersecting && !reduceMotion && !saveData && !watching) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      if (e.isIntersecting && !reduceMotion && !saveData && (!watching || v.closest(".card.is-linked"))) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
       else v.pause();
     });
   }, { threshold: 0.4 }) : { observe: function () {} };
@@ -406,58 +406,6 @@
     });
   });
 
-  // A started video goes full screen at once (it has to start from a tap or
-  // click: browsers allow full screen only then). Where a page element can't
-  // go full screen (iPhone), the card fills the window instead, with a cross
-  // to bring it back.
-  function exitFull(btn) {
-    btn.classList.remove("is-full");
-    root.classList.remove("has-full");
-    var x = btn.querySelector(".card__unfull");
-    if (x) x.remove();
-  }
-  // leave every level of full screen (the player inside may have gone full
-  // screen on top of ours)
-  function leaveFullScreen() {
-    var d = document;
-    var cur = d.fullscreenElement || d.webkitFullscreenElement;
-    if (!cur) return;
-    var p = (d.exitFullscreen || d.webkitExitFullscreen).call(d);
-    var again = function () { setTimeout(leaveFullScreen, 60); };
-    if (p && p.then) p.then(again, function () {}); else again();
-  }
-  function goFull(btn) {
-    // a clear way back, on top of the video, in either kind of full screen
-    var x = el("span", { class: "card__unfull", role: "button", tabindex: "0", "aria-label": t("close") });
-    x.appendChild(svg('<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'));
-    x.addEventListener("click", function (e) {
-      e.stopPropagation();
-      if (document.fullscreenElement || document.webkitFullscreenElement) leaveFullScreen();
-      exitFull(btn);
-    });
-    btn.appendChild(x);
-    var req = btn.requestFullscreen || btn.webkitRequestFullscreen;
-    if (req) {
-      try {
-        var r = req.call(btn);
-        if (r && r.catch) r.catch(function () { pseudoFull(btn); });
-        return;
-      } catch (e) {}
-    }
-    pseudoFull(btn);
-  }
-  function pseudoFull(btn) {
-    btn.classList.add("is-full");
-    root.classList.add("has-full");
-  }
-  // once out of full screen, the cross is no longer needed
-  ["fullscreenchange", "webkitfullscreenchange"].forEach(function (ev) {
-    document.addEventListener(ev, function () {
-      if (document.fullscreenElement || document.webkitFullscreenElement) return;
-      Array.prototype.forEach.call(document.querySelectorAll(".card__btn:not(.is-full) .card__unfull"), function (x) { x.remove(); });
-    });
-  });
-
   function playProject(btn, p) {
     if (btn.classList.contains("is-playing")) return;
     if (!p.kinescope) {
@@ -470,7 +418,6 @@
     }
     btn.classList.add("is-playing", "is-loading");
     setWatching(true);
-    goFull(btn);
     // with a preview loop, it keeps running underneath until the player is
     // ready, then the player fades in over it; otherwise a dark shimmer
     var loopVid = btn.querySelector("video");
@@ -541,11 +488,7 @@
     if (sheet.close) sheet.close(); else sheet.removeAttribute("open");
   }
   // Esc: animate out instead of the browser's instant close
-  sheet.addEventListener("cancel", function (e) {
-    e.preventDefault();
-    var full = sheet.querySelector(".card__btn.is-full");
-    if (full) exitFull(full); else closeSheet();
-  });
+  sheet.addEventListener("cancel", function (e) { e.preventDefault(); closeSheet(); });
   sheet.addEventListener("close", function () {
     if (openCat && history.replaceState && location.hash.split("/")[0] === "#" + openCat.id) history.replaceState(null, "", location.pathname + location.search);
     openCat = null;
@@ -763,10 +706,11 @@
     if (!m[2]) return;
     var card = document.querySelector('.card[data-slug="' + m[2] + '"]');
     if (!card) return;
+    // the linked video keeps a yellow frame and is the only one moving
+    card.classList.add("is-linked");
+    setWatching(true);
     setTimeout(function () {
       card.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
-      card.classList.add("is-linked");
-      setTimeout(function () { card.classList.remove("is-linked"); }, 3200);
     }, reduceMotion ? 0 : 450);
   }
   openFromHash();

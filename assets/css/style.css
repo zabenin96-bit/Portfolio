@@ -579,28 +579,9 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
 .card__sound svg { width: 16px; height: 16px; }
 .card__btn.is-playing .card__sound { opacity: 0; }
 
-/* a playing video in full screen: the real one, or – where that isn't
-   possible (iPhone) – the card filling the window */
-/* (kept as separate rules: a browser that doesn't know one of the two
-   names would otherwise drop both) */
-.card__btn:fullscreen { border-radius: 0 !important; background: #000 !important; box-shadow: none !important; transform: none !important; }
-.card__btn:-webkit-full-screen { border-radius: 0 !important; background: #000 !important; box-shadow: none !important; transform: none !important; }
-.card__btn:fullscreen::backdrop { background: #000; }
-.card__btn:fullscreen iframe, .card__btn:fullscreen video { border-radius: 0; }
-.card__btn.is-full {
-  position: fixed; inset: 0; z-index: 200; width: 100vw; height: 100vh; height: 100dvh;
-  aspect-ratio: auto; border-radius: 0; background: #000; transform: none !important;
-}
-.has-full .card__share, .has-full .nav { visibility: hidden; }
-.card__unfull {
-  position: absolute; z-index: 5; top: max(12px, env(safe-area-inset-top)); right: 12px;
-  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6); color: #fff; cursor: var(--cursor-link);
-}
-
 /* the other videos dim a little while one is being watched */
 #cards .card__btn video { transition: filter 0.5s var(--ios); }
-#cards.is-watching .card__btn:not(.is-playing) video { filter: brightness(0.55) saturate(0.7); }
+#cards.is-watching .card:not(.is-linked) .card__btn:not(.is-playing) video { filter: brightness(0.55) saturate(0.7); }
 
 /* share button on the corner of each video, and the little note that
    confirms the link was copied */
