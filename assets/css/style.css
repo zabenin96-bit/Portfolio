@@ -554,6 +554,23 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   .nav.is-away { opacity: 0; transform: translate(-50%, 16px); pointer-events: none; }
 }
 
+/* the work is the sound: a quiet hint under the section title and a small
+   headphones mark on each video */
+.sheet__hint {
+  display: flex; align-items: center; gap: 10px; margin: -6px 0 28px;
+  font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #9a9a9a;
+}
+.sheet__hint svg { width: 18px; height: 18px; flex: none; color: var(--tri); }
+@media (max-width: 480px) { .sheet__hint { font-size: 10px; letter-spacing: 0.14em; gap: 8px; } }
+.card__sound {
+  position: absolute; z-index: 3; left: 10px; bottom: 10px; display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); color: var(--tri);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); pointer-events: none;
+  transition: opacity 0.3s var(--ios);
+}
+.card__sound svg { width: 16px; height: 16px; }
+.card__btn.is-playing .card__sound { opacity: 0; }
+
 /* share button on the corner of each video, and the little note that
    confirms the link was copied */
 .card__share {
