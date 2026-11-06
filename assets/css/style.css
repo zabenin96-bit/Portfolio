@@ -561,6 +561,14 @@ main, footer, .marquee, .nav { transition: opacity 0.18s ease; }
   font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #9a9a9a;
 }
 .sheet__hint svg { width: 18px; height: 18px; flex: none; color: var(--tri); }
+/* the two sound waves pulse outwards from the speaker, one after the other */
+.sheet__hint .wave { transform-box: view-box; transform-origin: 11px 12px; animation: hint-wave 2.4s ease-out infinite; }
+.sheet__hint .wave--2 { animation-delay: 0.35s; }
+@keyframes hint-wave {
+  0% { opacity: 0; transform: scale(0.7); }
+  30% { opacity: 1; }
+  70%, 100% { opacity: 0; transform: scale(1.15); }
+}
 @media (max-width: 480px) { .sheet__hint { font-size: 10px; letter-spacing: 0.14em; gap: 8px; } }
 .card__sound {
   position: absolute; z-index: 3; left: 10px; bottom: 10px; display: grid; place-items: center;
